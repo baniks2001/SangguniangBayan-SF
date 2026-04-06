@@ -1,0 +1,62 @@
+{
+  "version": 2,
+  "name": "sb-public-site",
+  "builds": [
+    {
+      "src": "package.json",
+      "use": "@vercel/node"
+    },
+    {
+      "src": "package.json",
+      "use": "@vercel/static-build",
+      "config": {
+        "distDir": "build"
+      }
+    }
+  ],
+  "routes": [
+    {
+      "src": "/api/resolutions",
+      "dest": "/api/resolutions.ts"
+    },
+    {
+      "src": "/api/ordinances",
+      "dest": "/api/ordinances.ts"
+    },
+    {
+      "src": "/api/vacancies",
+      "dest": "/api/vacancies.ts"
+    },
+    {
+      "src": "/api/announcements",
+      "dest": "/api/announcements.ts"
+    },
+    {
+      "src": "/api/news",
+      "dest": "/api/news.ts"
+    },
+    {
+      "src": "/api/settings",
+      "dest": "/api/settings.ts"
+    },
+    {
+      "src": "/api/contact",
+      "dest": "/api/contact.ts"
+    },
+    {
+      "src": "/api/apply",
+      "dest": "/api/apply.ts"
+    },
+    {
+      "handle": "filesystem"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/index.html"
+    }
+  ],
+  "env": {
+    "MONGODB_URI": "@mongodb_uri",
+    "MONGODB_DB_NAME": "sangguniang_bayan"
+  }
+}

@@ -1,0 +1,68 @@
+// Serverless function to fetch published ordinances
+import type { VercelRequest, VercelResponse } from '@vercel/node';
+import { connectToDatabase } from './_lib/mongodb';
+
+export default async function handler(req: VercelRequest, res: VercelResponse) {
+  res.setHeader('Access-Control-Allow-Credentials', 'true');
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version');
+
+  if (req.method === 'OPTIONS') {
+    res.status(200).end();
+    return;
+  }
+
+  if (req.method !== 'GET') {
+    return res.status(405).json({ error: 'Method not allowed' });
+  }
+
+  try {
+    const { db } = await connectToDatabase();
+    const collection = db.collection('ordinances');
+
+    const { status, isPublic, series, search, page = 1, limit = 10 } = req.query;
+
+    const query: any = { isPublic: true };
+    
+    if (status) query.status = status;
+    if (series) query.series = series;
+    if (search) {
+      query.$or = [
+        { title: { $regex: search, $options: 'i' } },
+        { content: { $regex: search, $options: 'i' } },
+        { ordinanceNumber: { $regex: search, $options: 'i' } }
+      ];
+    }
+
+    const skip = (Number(page) - 1) * Number(limit);
+
+    const [ordinances, total] = await Promise.all([
+      collection
+        .find(query)
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(Number(limit))
+        .toArray(),
+      collection.countDocuments(query)
+    ]);
+
+    const transformedOrdinances = ordinances.map(ord => ({
+      ...ord,
+      id: ord._id.toString(),
+      _id: undefined
+    }));
+
+    res.status(200).json({
+      ordinances: transformedOrdinances,
+      pagination: {
+        current: Number(page),
+        total: Math.ceil(total / Number(limit)),
+        totalItems: total
+      }
+    });
+  } catch (error) {
+    console.error('Error fetching ordinances:', error);
+    res.status(500).json({ error: 'Failed to fetch ordinances' });
+  }
+}
