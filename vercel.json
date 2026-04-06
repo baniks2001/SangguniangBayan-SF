@@ -1,66 +1,75 @@
 {
   "version": 2,
   "name": "sb-public-site",
-  "builds": [
+  "buildCommand": "npm run build",
+  "outputDirectory": "build",
+  "framework": "create-react-app",
+  "rewrites": [
     {
-      "src": "package.json",
-      "use": "@vercel/node"
+      "source": "/api/resolutions",
+      "destination": "/api/resolutions.ts"
     },
     {
-      "src": "package.json",
-      "use": "@vercel/static-build",
-      "config": {
-        "distDir": "build"
-      }
-    }
-  ],
-  "routes": [
-    {
-      "src": "/api/resolutions",
-      "dest": "/api/resolutions.ts"
+      "source": "/api/ordinances",
+      "destination": "/api/ordinances.ts"
     },
     {
-      "src": "/api/ordinances",
-      "dest": "/api/ordinances.ts"
+      "source": "/api/vacancies",
+      "destination": "/api/vacancies.ts"
     },
     {
-      "src": "/api/vacancies",
-      "dest": "/api/vacancies.ts"
+      "source": "/api/announcements",
+      "destination": "/api/announcements.ts"
     },
     {
-      "src": "/api/announcements",
-      "dest": "/api/announcements.ts"
+      "source": "/api/news",
+      "destination": "/api/news.ts"
     },
     {
-      "src": "/api/news",
-      "dest": "/api/news.ts"
+      "source": "/api/settings",
+      "destination": "/api/settings.ts"
     },
     {
-      "src": "/api/settings",
-      "dest": "/api/settings.ts"
+      "source": "/api/contact",
+      "destination": "/api/contact.ts"
     },
     {
-      "src": "/api/contact",
-      "dest": "/api/contact.ts"
+      "source": "/api/apply",
+      "destination": "/api/apply.ts"
     },
     {
-      "src": "/api/apply",
-      "dest": "/api/apply.ts"
+      "source": "/api/resolution-pdf",
+      "destination": "/api/resolution-pdf.ts"
     },
     {
-      "src": "/api/resolution-pdf",
-      "dest": "/api/resolution-pdf.ts"
-    },
-    {
-      "src": "/api/ordinance-pdf",
-      "dest": "/api/ordinance-pdf.ts"
+      "source": "/api/ordinance-pdf",
+      "destination": "/api/ordinance-pdf.ts"
     },
     {
       "handle": "filesystem"
     },
     {
-      "src": "/(.*)",
-      "dest": "/index.html"
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
+  ],
+  "headers": [
+    {
+      "source": "/api/(.*)",
+      "headers": [
+        {
+          "key": "Access-Control-Allow-Origin",
+          "value": "*"
+        },
+        {
+          "key": "Access-Control-Allow-Methods",
+          "value": "GET, POST, PUT, DELETE, OPTIONS"
+        },
+        {
+          "key": "Access-Control-Allow-Headers",
+          "value": "Content-Type, Authorization"
+        }
+      ]
     }
   ]
 }
