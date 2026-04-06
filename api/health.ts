@@ -1,8 +1,28 @@
 // Health check endpoint to verify API and database connectivity
-import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { connectToDatabase } from './_lib/mongodb';
+import { MongoClient, Db } from 'mongodb';
 
-export default async function handler(req: VercelRequest, res: VercelResponse) {
+let cachedClient: MongoClient | null = null;
+let cachedDb: Db | null = null;
+
+const MONGODB_URI = process.env.MONGODB_URI;
+const MONGODB_DB_NAME = process.env.MONGODB_DB_NAME || 'sangguniang_bayan';
+
+async function connectToDatabase(): Promise<{ client: MongoClient; db: Db }> {
+  if (cachedClient && cachedDb) {
+    return { client: cachedClient, db: cachedDb };
+  }
+  if (!MONGODB_URI) {
+    throw new Error('MONGODB_URI not defined');
+  }
+  const client = new MongoClient(MONGODB_URI as string);
+  await client.connect();
+  const db = client.db(MONGODB_DB_NAME);
+  cachedClient = client;
+  cachedDb = db;
+  return { client, db };
+}
+
+export default async function handler(req: any, res: any) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   
   if (req.method !== 'GET') {
