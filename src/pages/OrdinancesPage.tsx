@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { ordinancesApi } from '../services/api';
-import { FileText, Search, ChevronLeft, ChevronRight, Calendar, Scroll } from 'lucide-react';
+import { FileText, Search, ChevronLeft, ChevronRight, Calendar, Scroll, Eye, Download } from 'lucide-react';
 
 interface Ordinance {
   id: string;
@@ -131,6 +131,24 @@ const OrdinancesPage: React.FC = () => {
               <div className="prose max-w-none mb-6 text-gray-700 whitespace-pre-wrap">
                 {selectedOrdinance.content}
               </div>
+
+              {/* PDF Actions */}
+              <div className="border-t pt-4 mt-4 flex gap-3">
+                <button
+                  onClick={() => ordinancesApi.viewPdf(selectedOrdinance.id)}
+                  className="flex items-center px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors"
+                >
+                  <Eye className="h-4 w-4 mr-2" />
+                  View PDF
+                </button>
+                <button
+                  onClick={() => ordinancesApi.downloadPdf(selectedOrdinance.id, selectedOrdinance.ordinanceNumber, selectedOrdinance.series)}
+                  className="flex items-center px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 transition-colors"
+                >
+                  <Download className="h-4 w-4 mr-2" />
+                  Download PDF
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -171,7 +189,29 @@ const OrdinancesPage: React.FC = () => {
                       {new Date(ordinance.createdAt).toLocaleDateString()}
                     </div>
                   </div>
-                  <FileText className="h-6 w-6 text-gray-400 ml-4" />
+                  <div className="flex items-center gap-2 ml-4">
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        ordinancesApi.viewPdf(ordinance.id);
+                      }}
+                      className="p-2 text-green-600 hover:bg-green-50 rounded-md transition-colors"
+                      title="View PDF"
+                    >
+                      <Eye className="h-5 w-5" />
+                    </button>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        ordinancesApi.downloadPdf(ordinance.id, ordinance.ordinanceNumber, ordinance.series);
+                      }}
+                      className="p-2 text-gray-600 hover:bg-gray-100 rounded-md transition-colors"
+                      title="Download PDF"
+                    >
+                      <Download className="h-5 w-5" />
+                    </button>
+                    <FileText className="h-6 w-6 text-gray-400" />
+                  </div>
                 </div>
               </div>
             ))}

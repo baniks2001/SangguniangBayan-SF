@@ -1,7 +1,7 @@
 // MongoDB Atlas connection utility for serverless functions
 import { MongoClient, Db } from 'mongodb';
 
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb+srv://SB-LGUSANFRANCISCO:MGhsRtZlSk8ryWq7@cluster0.nedhqhc.mongodb.net/sangguniang_bayan?retryWrites=true&w=majority&appName=Cluster0';
+const MONGODB_URI = process.env.MONGODB_URI || 'mongodb+srv://SB-LGUSANFRANCISCO:MGhsRtZlSk8ryWq7@cluster0.nedhqhc.mongodb.net/sangguniang_bayan?retryWrites=true&w=majority&appName=Cluster0&tls=true&tlsAllowInvalidCertificates=true';
 const MONGODB_DB_NAME = process.env.MONGODB_DB_NAME || 'sangguniang_bayan';
 
 let cachedClient: MongoClient | null = null;

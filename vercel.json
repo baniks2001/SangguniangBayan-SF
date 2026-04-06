@@ -48,6 +48,14 @@
       "dest": "/api/apply.ts"
     },
     {
+      "src": "/api/resolution-pdf",
+      "dest": "/api/resolution-pdf.ts"
+    },
+    {
+      "src": "/api/ordinance-pdf",
+      "dest": "/api/ordinance-pdf.ts"
+    },
+    {
       "handle": "filesystem"
     },
     {

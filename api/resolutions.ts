@@ -22,13 +22,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const { db } = await connectToDatabase();
     const collection = db.collection('resolutions');
 
-    const { status, isPublic, series, search, page = 1, limit = 10 } = req.query;
+    const { series, search, page = 1, limit = 10 } = req.query;
 
-    // Build query
-    const query: any = { isPublic: true };
+    // Build query - only approved and public
+    const query: any = { isPublic: true, status: 'Approved' };
     
-    if (status) query.status = status;
     if (series) query.series = series;
+    // Note: status is always 'Approved' for public view
     if (search) {
       query.$or = [
         { title: { $regex: search, $options: 'i' } },

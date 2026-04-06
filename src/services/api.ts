@@ -27,6 +27,23 @@ export const resolutionsApi = {
     
     const response = await fetch(`${API_BASE_URL}/resolutions?${queryParams}`);
     return handleResponse(response);
+  },
+  getPdfUrl: (id: string, download?: boolean) => {
+    const queryParams = new URLSearchParams();
+    queryParams.append('id', id);
+    if (download) queryParams.append('download', 'true');
+    return `${API_BASE_URL}/resolution-pdf?${queryParams}`;
+  },
+  viewPdf: (id: string) => {
+    window.open(resolutionsApi.getPdfUrl(id), '_blank');
+  },
+  downloadPdf: (id: string, resolutionNumber: string, series: string) => {
+    const link = document.createElement('a');
+    link.href = resolutionsApi.getPdfUrl(id, true);
+    link.download = `Resolution-${resolutionNumber}-${series}.pdf`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   }
 };
 
@@ -41,6 +58,23 @@ export const ordinancesApi = {
     
     const response = await fetch(`${API_BASE_URL}/ordinances?${queryParams}`);
     return handleResponse(response);
+  },
+  getPdfUrl: (id: string, download?: boolean) => {
+    const queryParams = new URLSearchParams();
+    queryParams.append('id', id);
+    if (download) queryParams.append('download', 'true');
+    return `${API_BASE_URL}/ordinance-pdf?${queryParams}`;
+  },
+  viewPdf: (id: string) => {
+    window.open(ordinancesApi.getPdfUrl(id), '_blank');
+  },
+  downloadPdf: (id: string, ordinanceNumber: string, series: string) => {
+    const link = document.createElement('a');
+    link.href = ordinancesApi.getPdfUrl(id, true);
+    link.download = `Ordinance-${ordinanceNumber}-${series}.pdf`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   }
 };
 
@@ -97,7 +131,7 @@ export const calendarApi = {
 // Public API for Settings
 export const settingsApi = {
   getPublicConfig: async () => {
-    const response = await fetch(`${API_BASE_URL}/settings/public/config`);
+    const response = await fetch(`${API_BASE_URL}/settings`);
     return handleResponse(response);
   }
 };

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { resolutionsApi } from '../services/api';
-import { Scale, Search, ChevronLeft, ChevronRight, FileText, Calendar } from 'lucide-react';
+import { Scale, Search, ChevronLeft, ChevronRight, FileText, Calendar, Eye, Download } from 'lucide-react';
 
 interface Resolution {
   id: string;
@@ -143,6 +143,24 @@ const ResolutionsPage: React.FC = () => {
                   </div>
                 </div>
               )}
+
+              {/* PDF Actions */}
+              <div className="border-t pt-4 mt-4 flex gap-3">
+                <button
+                  onClick={() => resolutionsApi.viewPdf(selectedResolution.id)}
+                  className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+                >
+                  <Eye className="h-4 w-4 mr-2" />
+                  View PDF
+                </button>
+                <button
+                  onClick={() => resolutionsApi.downloadPdf(selectedResolution.id, selectedResolution.resolutionNumber, selectedResolution.series)}
+                  className="flex items-center px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 transition-colors"
+                >
+                  <Download className="h-4 w-4 mr-2" />
+                  Download PDF
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -183,7 +201,29 @@ const ResolutionsPage: React.FC = () => {
                       {new Date(resolution.createdAt).toLocaleDateString()}
                     </div>
                   </div>
-                  <FileText className="h-6 w-6 text-gray-400 ml-4" />
+                  <div className="flex items-center gap-2 ml-4">
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        resolutionsApi.viewPdf(resolution.id);
+                      }}
+                      className="p-2 text-blue-600 hover:bg-blue-50 rounded-md transition-colors"
+                      title="View PDF"
+                    >
+                      <Eye className="h-5 w-5" />
+                    </button>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        resolutionsApi.downloadPdf(resolution.id, resolution.resolutionNumber, resolution.series);
+                      }}
+                      className="p-2 text-gray-600 hover:bg-gray-100 rounded-md transition-colors"
+                      title="Download PDF"
+                    >
+                      <Download className="h-5 w-5" />
+                    </button>
+                    <FileText className="h-6 w-6 text-gray-400" />
+                  </div>
                 </div>
               </div>
             ))}
