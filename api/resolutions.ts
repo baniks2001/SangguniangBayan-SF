@@ -25,10 +25,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const { series, search, page = 1, limit = 10 } = req.query;
 
     // Build query - only approved and public
-    const query: any = { isPublic: true, status: 'Approved' };
+    const query: Record<string, unknown> = { isPublic: true, status: 'Approved' };
     
     if (series) query.series = series;
-    // Note: status is always 'Approved' for public view
     if (search) {
       query.$or = [
         { title: { $regex: search, $options: 'i' } },
@@ -66,6 +65,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     });
   } catch (error) {
     console.error('Error fetching resolutions:', error);
-    res.status(500).json({ error: 'Failed to fetch resolutions' });
+    res.status(500).json({ error: 'Failed to fetch resolutions', details: error instanceof Error ? error.message : 'Unknown error' });
   }
 }
