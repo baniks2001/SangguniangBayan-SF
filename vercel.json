@@ -46,9 +46,6 @@
       "destination": "/api/ordinance-pdf.ts"
     },
     {
-      "handle": "filesystem"
-    },
-    {
       "source": "/(.*)",
       "destination": "/index.html"
     }
