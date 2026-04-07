@@ -31,12 +31,13 @@ const ResolutionsPage: React.FC = () => {
   const loadResolutions = async () => {
     try {
       setLoading(true);
-      console.log('Fetching all resolutions (no status filter)');
+      // Call API like admin-site does, with status and isPublic filters
       const response = await resolutionsApi.getAll({
         search: searchTerm,
         page: currentPage,
-        limit: 10
-        // status filter removed for testing
+        limit: 10,
+        status: 'Approved',
+        isPublic: true
       });
       console.log('Resolutions API response:', response);
       setResolutions(response.resolutions || []);

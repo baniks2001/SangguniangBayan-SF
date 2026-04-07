@@ -30,11 +30,13 @@ const OrdinancesPage: React.FC = () => {
   const loadOrdinances = async () => {
     try {
       setLoading(true);
+      // Call API like admin-site does, with status and isPublic filters
       const response = await ordinancesApi.getAll({
         search: searchTerm,
         page: currentPage,
-        limit: 10
-        // status: 'Approved' - temporarily removed for testing
+        limit: 10,
+        status: 'Approved',
+        isPublic: true
       });
       setOrdinances(response.ordinances || []);
       setTotalPages(response.pagination?.total || 1);

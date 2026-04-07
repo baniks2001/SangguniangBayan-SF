@@ -19,7 +19,7 @@ async function handleResponse(response: Response) {
   return response.json();
 }
 
-// Public API for Resolutions - connects to admin backend
+// Public API for Resolutions - uses local serverless function
 export const resolutionsApi = {
   getAll: async (params?: { search?: string; series?: string; page?: number; limit?: number; status?: string; isPublic?: boolean }) => {
     const queryParams = new URLSearchParams();
@@ -30,8 +30,8 @@ export const resolutionsApi = {
     if (params?.status) queryParams.append('status', params.status);
     if (params?.isPublic !== undefined) queryParams.append('isPublic', params.isPublic.toString());
     
-    // Call admin backend directly like admin-site does
-    const response = await fetch(`${API_BASE_URL}/resolutions?${queryParams}`);
+    // Use local serverless endpoint
+    const response = await fetch(`/api/resolutions?${queryParams}`);
     return handleResponse(response);
   },
   // Get full URL for PDF file
@@ -66,7 +66,7 @@ export const resolutionsApi = {
   }
 };
 
-// Public API for Ordinances - connects to admin backend
+// Public API for Ordinances - uses local serverless function
 export const ordinancesApi = {
   getAll: async (params?: { search?: string; series?: string; page?: number; limit?: number; status?: string; isPublic?: boolean }) => {
     const queryParams = new URLSearchParams();
@@ -77,8 +77,8 @@ export const ordinancesApi = {
     if (params?.status) queryParams.append('status', params.status);
     if (params?.isPublic !== undefined) queryParams.append('isPublic', params.isPublic.toString());
     
-    // Call admin backend directly like admin-site does
-    const response = await fetch(`${API_BASE_URL}/ordinances?${queryParams}`);
+    // Use local serverless endpoint
+    const response = await fetch(`/api/ordinances?${queryParams}`);
     return handleResponse(response);
   },
   // Get full URL for PDF file
