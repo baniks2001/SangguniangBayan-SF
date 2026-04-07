@@ -32,6 +32,8 @@ interface ProcurementItem {
   description: string;
   documents: ProcurementDocument[];
   isPublic: boolean;
+  winningBidder?: string;
+  winningAmount?: number;
 }
 
 // API Base URL for static files
