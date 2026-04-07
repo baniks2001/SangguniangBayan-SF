@@ -119,12 +119,6 @@ const ResolutionsPage: React.FC = () => {
               </div>
             </div>
             <div className="p-6">
-              <div className="text-center mb-6">
-                <p className="text-sm text-gray-600">Republic of the Philippines</p>
-                <p className="text-sm text-gray-600">Province of Southern Leyte</p>
-                <p className="text-sm text-gray-600">Municipality of San Francisco</p>
-                <p className="font-semibold text-gray-900 mt-2">SANGGUNIANG BAYAN</p>
-              </div>
               <div className="mb-4">
                 <span className="inline-block px-3 py-1 text-sm font-medium bg-blue-100 text-blue-800 rounded">
                   Resolution No. {selectedResolution.resolutionNumber}, Series {selectedResolution.series}
