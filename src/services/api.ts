@@ -1,9 +1,7 @@
-// API service for Public Site - connects to serverless functions
-const API_BASE_URL = process.env.REACT_APP_API_URL || '/api';
-// Static files base URL (without /api suffix) for images
-export const STATIC_BASE_URL = typeof window !== 'undefined' 
-  ? `${window.location.protocol}//${window.location.host}`
-  : '';
+// API service for Public Site - connects to admin backend
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+// Static files base URL (without /api suffix)
+export const STATIC_BASE_URL = API_BASE_URL.replace('/api', '');
 
 class ApiError extends Error {
   constructor(message: string, public status?: number) {
