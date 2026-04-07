@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { 
   ShoppingCart, 
@@ -87,19 +87,6 @@ const viewFile = (fileUrl: string | undefined) => {
   }
 };
 
-// Budget summary data (can be fetched from API later)
-const BUDGET_SUMMARY = {
-  totalBudget: 2500000,
-  utilizedBudget: 1850000,
-  remainingBudget: 650000,
-  procurementCount: {
-    open: 2,
-    awarded: 2,
-    closed: 1,
-    total: 5
-  }
-};
-
 const ProcurementsBudgetsPage: React.FC = () => {
   const [procurements, setProcurements] = useState<ProcurementItem[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
@@ -125,6 +112,23 @@ const ProcurementsBudgetsPage: React.FC = () => {
       setLoading(false);
     }
   };
+
+  // Calculate budget summary from procurement data
+  const budgetSummary = useMemo(() => {
+    const totalBudget = procurements.reduce((sum, p) => sum + (p.budget || 0), 0);
+    const utilizedBudget = procurements
+      .filter(p => p.status === 'Awarded')
+      .reduce((sum, p) => sum + (p.winningAmount || p.budget || 0), 0);
+    const remainingBudget = totalBudget - utilizedBudget;
+    const openCount = procurements.filter(p => p.status === 'Open').length;
+    
+    return {
+      totalBudget,
+      utilizedBudget,
+      remainingBudget,
+      openCount
+    };
+  }, [procurements]);
 
   // Filter procurements
   const filteredProcurements = procurements.filter(item => {
@@ -185,7 +189,7 @@ const ProcurementsBudgetsPage: React.FC = () => {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-gray-600">Total Budget</p>
-                <p className="text-2xl font-bold text-blue-900">{formatCurrency(BUDGET_SUMMARY.totalBudget)}</p>
+                <p className="text-2xl font-bold text-blue-900">{formatCurrency(budgetSummary.totalBudget)}</p>
               </div>
               <DollarSign className="h-10 w-10 text-blue-500" />
             </div>
@@ -194,7 +198,7 @@ const ProcurementsBudgetsPage: React.FC = () => {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-gray-600">Utilized</p>
-                <p className="text-2xl font-bold text-green-700">{formatCurrency(BUDGET_SUMMARY.utilizedBudget)}</p>
+                <p className="text-2xl font-bold text-green-700">{formatCurrency(budgetSummary.utilizedBudget)}</p>
               </div>
               <FileText className="h-10 w-10 text-green-500" />
             </div>
@@ -203,7 +207,7 @@ const ProcurementsBudgetsPage: React.FC = () => {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-gray-600">Remaining</p>
-                <p className="text-2xl font-bold text-yellow-700">{formatCurrency(BUDGET_SUMMARY.remainingBudget)}</p>
+                <p className="text-2xl font-bold text-yellow-700">{formatCurrency(budgetSummary.remainingBudget)}</p>
               </div>
               <Calendar className="h-10 w-10 text-yellow-500" />
             </div>
@@ -212,7 +216,7 @@ const ProcurementsBudgetsPage: React.FC = () => {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-gray-600">Active Biddings</p>
-                <p className="text-2xl font-bold text-purple-700">{BUDGET_SUMMARY.procurementCount.open}</p>
+                <p className="text-2xl font-bold text-purple-700">{budgetSummary.openCount}</p>
               </div>
               <ShoppingCart className="h-10 w-10 text-purple-500" />
             </div>
