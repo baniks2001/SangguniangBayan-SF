@@ -37,20 +37,26 @@ code {
   }
 }
 
-/* Resolution/Ordinance content styles for document builder output */
+/* Resolution/Ordinance/News/Announcement content styles for document builder output */
 .resolution-content,
-.ordinance-content {
+.ordinance-content,
+.news-content,
+.announcement-content {
   font-family: 'Times New Roman', Times, serif;
   line-height: 1.6;
 }
 
 .resolution-content p,
-.ordinance-content p {
+.ordinance-content p,
+.news-content p,
+.announcement-content p {
   margin-bottom: 0.75rem;
 }
 
 .resolution-content table,
-.ordinance-content table {
+.ordinance-content table,
+.news-content table,
+.announcement-content table {
   width: 100%;
   border-collapse: collapse;
   margin: 1rem 0;
@@ -58,14 +64,20 @@ code {
 
 .resolution-content td,
 .ordinance-content td,
+.news-content td,
+.announcement-content td,
 .resolution-content th,
-.ordinance-content th {
+.ordinance-content th,
+.news-content th,
+.announcement-content th {
   border: 1px solid #000;
   padding: 8px;
 }
 
 .resolution-content img,
-.ordinance-content img {
+.ordinance-content img,
+.news-content img,
+.announcement-content img {
   max-width: 100%;
   height: auto;
   display: block;
@@ -73,6 +85,8 @@ code {
 }
 
 .resolution-content span[style*="font-size"],
-.ordinance-content span[style*="font-size"] {
+.ordinance-content span[style*="font-size"],
+.news-content span[style*="font-size"],
+.announcement-content span[style*="font-size"] {
   display: inline;
 }

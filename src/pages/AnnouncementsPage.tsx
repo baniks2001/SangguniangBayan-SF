@@ -111,9 +111,15 @@ const AnnouncementsPage: React.FC = () => {
                     </span>
                   </div>
                   <h3 className="text-lg font-semibold text-gray-900 mb-2">{announcement.title}</h3>
-                  <div className="prose max-w-none text-gray-700 whitespace-pre-wrap">
-                    {announcement.content}
-                  </div>
+                  <div 
+                    className="prose max-w-none text-gray-700 announcement-content"
+                    dangerouslySetInnerHTML={{ 
+                      __html: announcement.content?.replace(
+                        /src="\/uploads\//g, 
+                        `src="${window.location.protocol}//${window.location.host}/uploads/`
+                      ) || '' 
+                    }}
+                  />
                   {announcement.expiryDate && (
                     <p className="text-sm text-gray-500 mt-4">
                       Valid until: {new Date(announcement.expiryDate).toLocaleDateString()}

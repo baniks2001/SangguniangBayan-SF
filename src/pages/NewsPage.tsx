@@ -126,9 +126,15 @@ const NewsPage: React.FC = () => {
                 <Calendar className="h-4 w-4 mr-1" />
                 {new Date(selectedNews.publishedAt).toLocaleDateString()}
               </p>
-              <div className="prose max-w-none text-gray-700 whitespace-pre-wrap">
-                {selectedNews.content}
-              </div>
+              <div 
+                className="prose max-w-none text-gray-700 news-content"
+                dangerouslySetInnerHTML={{ 
+                  __html: selectedNews.content?.replace(
+                    /src="\/uploads\//g, 
+                    `src="${window.location.protocol}//${window.location.host}/uploads/`
+                  ) || '' 
+                }}
+              />
             </div>
           </div>
         </div>
@@ -160,7 +166,9 @@ const NewsPage: React.FC = () => {
                     {item.category}
                   </span>
                   <h3 className="mt-2 text-lg font-semibold text-gray-900 line-clamp-2">{item.title}</h3>
-                  <p className="mt-1 text-sm text-gray-600 line-clamp-2">{item.content}</p>
+                  <p className="mt-1 text-sm text-gray-600 line-clamp-2" dangerouslySetInnerHTML={{ 
+                    __html: item.content?.replace(/<[^>]*>/g, '').substring(0, 100) + '...' 
+                  }} />
                   <p className="mt-2 text-xs text-gray-400 flex items-center">
                     <Calendar className="h-3 w-3 mr-1" />
                     {new Date(item.publishedAt).toLocaleDateString()}

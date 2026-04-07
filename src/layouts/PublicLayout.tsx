@@ -26,6 +26,7 @@ interface Settings {
 }
 
 const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+const STATIC_BASE_URL = API_BASE_URL.replace('/api', '');
 
 const PublicLayout: React.FC = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -67,7 +68,7 @@ const PublicLayout: React.FC = () => {
             <Link to="/" className="flex items-center space-x-3">
               {settings.site_logo ? (
                 <img 
-                  src={`${API_BASE_URL}${settings.site_logo}`}
+                  src={`${STATIC_BASE_URL}${settings.site_logo}`}
                   alt="Logo"
                   className="h-10 w-10 object-contain rounded"
                 />
