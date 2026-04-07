@@ -116,8 +116,8 @@ const HomePage: React.FC = () => {
       setLoading(true);
       const [settingsRes, resolutionsRes, ordinancesRes, vacanciesRes, announcementsRes, newsRes, orgRes, calendarRes] = await Promise.all([
         settingsApi.getPublicConfig().catch(() => ({ config: {} })),
-        resolutionsApi.getAll({ limit: 5 }).catch(() => ({ resolutions: [] })),
-        ordinancesApi.getAll({ limit: 5 }).catch(() => ({ ordinances: [] })),
+        resolutionsApi.getAll({ limit: 5, status: 'Approved', isPublic: true }).catch(() => ({ resolutions: [] })),
+        ordinancesApi.getAll({ limit: 5, status: 'Approved', isPublic: true }).catch(() => ({ ordinances: [] })),
         vacanciesApi.getAll().catch(() => ({ vacancies: [] })),
         announcementsApi.getAll().catch(() => ({ announcements: [] })),
         newsApi.getAll({ limit: 3 }).catch(() => ({ news: [] })),
