@@ -1,28 +1,14 @@
-// Health check endpoint
-// Inline MongoDB connection - no shared imports for Vercel compatibility
-import { MongoClient, Db } from 'mongodb';
+/**
+ * Health API - Public endpoint
+ * Based on admin-site server.js health check pattern
+ * 
+ * GET /api/health - Check API and database status
+ */
 
-const MONGODB_URI = process.env.MONGODB_URI;
-const MONGODB_DB_NAME = process.env.MONGODB_DB_NAME || 'sangguniang_bayan';
+const { connectDB, getDB } = require('./database');
 
-let client: MongoClient | null = null;
-let db: Db | null = null;
-
-async function connectDB(): Promise<{ client: MongoClient; db: Db }> {
-  if (client && db) return { client, db };
-  if (!MONGODB_URI) throw new Error('MONGODB_URI not defined');
-  client = new MongoClient(MONGODB_URI);
-  await client.connect();
-  db = client.db(MONGODB_DB_NAME);
-  return { client, db };
-}
-
-function getDB(): Db {
-  if (!db) throw new Error('Database not connected');
-  return db;
-}
-
-export default async function handler(req: any, res: any) {
+module.exports = async (req, res) => {
+  // CORS headers
   res.setHeader('Access-Control-Allow-Credentials', 'true');
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS');
@@ -38,8 +24,8 @@ export default async function handler(req: any, res: any) {
   }
 
   try {
-    // Check if environment variable is set
-    const hasMongoUri = !!MONGODB_URI;
+    // Check environment variable
+    const hasMongoUri = !!process.env.MONGODB_URI;
     
     if (!hasMongoUri) {
       return res.status(500).json({
@@ -50,7 +36,7 @@ export default async function handler(req: any, res: any) {
       });
     }
 
-    // Test database connection
+    // Test database connection (admin-site pattern)
     await connectDB();
     const db = getDB();
     await db.admin().ping();
@@ -68,8 +54,8 @@ export default async function handler(req: any, res: any) {
       status: 'ERROR',
       timestamp: new Date().toISOString(),
       error: 'Database connection failed',
-      details: error instanceof Error ? error.message : 'Unknown error',
-      hasEnvVars: !!MONGODB_URI
+      details: error.message,
+      hasEnvVars: !!process.env.MONGODB_URI
     });
   }
-}
+};

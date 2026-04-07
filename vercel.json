@@ -7,47 +7,47 @@
   "rewrites": [
     {
       "source": "/api/health",
-      "destination": "/api/health.ts"
+      "destination": "/api/health.js"
     },
     {
       "source": "/api/resolutions",
-      "destination": "/api/resolutions.ts"
+      "destination": "/api/resolutions.js"
     },
     {
       "source": "/api/ordinances",
-      "destination": "/api/ordinances.ts"
+      "destination": "/api/ordinances.js"
     },
     {
       "source": "/api/vacancies",
-      "destination": "/api/vacancies.ts"
+      "destination": "/api/vacancies.js"
     },
     {
       "source": "/api/announcements",
-      "destination": "/api/announcements.ts"
+      "destination": "/api/announcements.js"
     },
     {
       "source": "/api/news",
-      "destination": "/api/news.ts"
+      "destination": "/api/news.js"
     },
     {
       "source": "/api/settings",
-      "destination": "/api/settings.ts"
+      "destination": "/api/settings.js"
     },
     {
       "source": "/api/contact",
-      "destination": "/api/contact.ts"
+      "destination": "/api/contact.js"
     },
     {
       "source": "/api/apply",
-      "destination": "/api/apply.ts"
+      "destination": "/api/apply.js"
     },
     {
       "source": "/api/organization",
-      "destination": "/api/organization.ts"
+      "destination": "/api/organization.js"
     },
     {
       "source": "/api/calendar",
-      "destination": "/api/calendar.ts"
+      "destination": "/api/calendar.js"
     },
     {
       "source": "/(.*)",

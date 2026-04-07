@@ -1,31 +1,18 @@
-// Serverless function for ordinances (list + PDF)
-// Inline MongoDB connection - no shared imports for Vercel compatibility
-import { MongoClient, Db, ObjectId } from 'mongodb';
-import https from 'https';
-import http from 'http';
+/**
+ * Ordinances API - Public endpoint
+ * Based on admin-site routes/ordinances.js pattern
+ * 
+ * GET /api/ordinances - List published ordinances
+ * GET /api/ordinances?id=xxx&download=true - Download PDF
+ */
 
-const MONGODB_URI = process.env.MONGODB_URI;
-const MONGODB_DB_NAME = process.env.MONGODB_DB_NAME || 'sangguniang_bayan';
+const { connectDB, getDB } = require('./database');
+const { ObjectId } = require('mongodb');
+const https = require('https');
+const http = require('http');
 
-let client: MongoClient | null = null;
-let db: Db | null = null;
-
-async function connectDB(): Promise<{ client: MongoClient; db: Db }> {
-  if (client && db) return { client, db };
-  if (!MONGODB_URI) throw new Error('MONGODB_URI not defined');
-  client = new MongoClient(MONGODB_URI);
-  await client.connect();
-  db = client.db(MONGODB_DB_NAME);
-  return { client, db };
-}
-
-function getDB(): Db {
-  if (!db) throw new Error('Database not connected');
-  return db;
-}
-
-// Helper function to fetch and stream PDF
-const streamPdf = (url: string, res: any, filename: string): Promise<void> => {
+// Helper to stream PDF
+const streamPdf = (url, res, filename) => {
   return new Promise((resolve, reject) => {
     const client = url.startsWith('https') ? https : http;
     client.get(url, (response) => {
@@ -39,12 +26,13 @@ const streamPdf = (url: string, res: any, filename: string): Promise<void> => {
       }
       response.pipe(res);
       response.on('end', () => resolve());
-      response.on('error', (err) => reject(err));
-    }).on('error', (err) => reject(err));
+      response.on('error', reject);
+    }).on('error', reject);
   });
 };
 
-export default async function handler(req: any, res: any) {
+module.exports = async (req, res) => {
+  // CORS headers
   res.setHeader('Access-Control-Allow-Credentials', 'true');
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS');
@@ -60,17 +48,17 @@ export default async function handler(req: any, res: any) {
   }
 
   try {
-    const { id, download, series, search, page = '1', limit = '10' } = req.query;
-
-    // Connect to database (admin-site pattern)
+    // Admin-site pattern: connect first, then getDB
     await connectDB();
     const db = getDB();
     const collection = db.collection('ordinances');
 
-    // If ID provided, serve PDF
+    const { id, download, series, search, page = '1', limit = '10' } = req.query;
+
+    // If ID provided, serve PDF (consolidated endpoint)
     if (id) {
       const ordinance = await collection.findOne({
-        _id: new ObjectId(id as string),
+        _id: new ObjectId(id),
         isPublic: true,
         status: 'Approved'
       });
@@ -80,7 +68,7 @@ export default async function handler(req: any, res: any) {
       }
 
       if (!ordinance.pdfUrl) {
-        return res.status(404).json({ error: 'PDF not available for this ordinance' });
+        return res.status(404).json({ error: 'PDF not available' });
       }
 
       const filename = download 
@@ -91,8 +79,8 @@ export default async function handler(req: any, res: any) {
       return;
     }
 
-    // Otherwise, list ordinances
-    const query: Record<string, unknown> = { isPublic: true, status: 'Approved' };
+    // List ordinances (admin-site pattern)
+    const query = { isPublic: true, status: 'Approved' };
     
     if (series) query.series = series;
     if (search) {
@@ -103,8 +91,8 @@ export default async function handler(req: any, res: any) {
       ];
     }
 
-    const pageNum = parseInt(page as string, 10);
-    const limitNum = parseInt(limit as string, 10);
+    const pageNum = parseInt(page, 10);
+    const limitNum = parseInt(limit, 10);
     const skip = (pageNum - 1) * limitNum;
 
     const [ordinances, total] = await Promise.all([
@@ -117,14 +105,15 @@ export default async function handler(req: any, res: any) {
       collection.countDocuments(query)
     ]);
 
-    const transformedOrdinances = ordinances.map(ord => ({
+    // Transform _id to id (admin-site pattern)
+    const transformed = ordinances.map(ord => ({
       ...ord,
       id: ord._id.toString(),
       _id: undefined
     }));
 
     res.status(200).json({
-      ordinances: transformedOrdinances,
+      ordinances: transformed,
       pagination: {
         current: pageNum,
         total: Math.ceil(total / limitNum),
@@ -134,8 +123,8 @@ export default async function handler(req: any, res: any) {
   } catch (error) {
     console.error('Error:', error);
     res.status(500).json({ 
-      error: 'Failed to process request', 
-      details: error instanceof Error ? error.message : 'Unknown error'
+      error: 'Failed to process request',
+      details: error.message
     });
   }
-}
+};

@@ -1,28 +1,14 @@
-// Serverless function to submit contact form
-// Inline MongoDB connection - no shared imports for Vercel compatibility
-import { MongoClient, Db } from 'mongodb';
+/**
+ * Contact API - Public endpoint
+ * Based on admin-site routes/contact.js pattern
+ * 
+ * POST /api/contact - Submit contact form
+ */
 
-const MONGODB_URI = process.env.MONGODB_URI;
-const MONGODB_DB_NAME = process.env.MONGODB_DB_NAME || 'sangguniang_bayan';
+const { connectDB, getDB } = require('./database');
 
-let client: MongoClient | null = null;
-let db: Db | null = null;
-
-async function connectDB(): Promise<{ client: MongoClient; db: Db }> {
-  if (client && db) return { client, db };
-  if (!MONGODB_URI) throw new Error('MONGODB_URI not defined');
-  client = new MongoClient(MONGODB_URI);
-  await client.connect();
-  db = client.db(MONGODB_DB_NAME);
-  return { client, db };
-}
-
-function getDB(): Db {
-  if (!db) throw new Error('Database not connected');
-  return db;
-}
-
-export default async function handler(req: any, res: any) {
+module.exports = async (req, res) => {
+  // CORS headers
   res.setHeader('Access-Control-Allow-Credentials', 'true');
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST,OPTIONS');
@@ -40,7 +26,7 @@ export default async function handler(req: any, res: any) {
   try {
     const { name, email, subject, message, phone } = req.body;
 
-    // Validate required fields
+    // Validation
     if (!name || !email || !subject || !message) {
       return res.status(400).json({ 
         error: 'Missing required fields',
@@ -48,12 +34,12 @@ export default async function handler(req: any, res: any) {
       });
     }
 
-    // Connect to database first (admin-site pattern)
+    // Admin-site pattern: connect first, then getDB
     await connectDB();
     const db = getDB();
     const collection = db.collection('contacts');
 
-    // Insert contact submission (admin-site pattern)
+    // Insert (admin-site pattern)
     const result = await collection.insertOne({
       name,
       email,
@@ -70,10 +56,10 @@ export default async function handler(req: any, res: any) {
       id: result.insertedId.toString()
     });
   } catch (error) {
-    console.error('Error submitting contact form:', error);
+    console.error('Error:', error);
     res.status(500).json({ 
-      error: 'Failed to submit contact form', 
-      details: error instanceof Error ? error.message : 'Unknown error'
+      error: 'Failed to submit contact form',
+      details: error.message
     });
   }
-}
+};
