@@ -1,5 +1,6 @@
 // Serverless function to submit job application
-import { connectToDatabase } from './_lib/mongodb';
+// Based on admin-site routes/applications.js pattern
+import { connectDB, getDB } from './_lib/mongodb';
 import { ObjectId } from 'mongodb';
 
 export default async function handler(req: any, res: any) {
@@ -41,11 +42,13 @@ export default async function handler(req: any, res: any) {
       });
     }
 
-    const { db } = await connectToDatabase();
+    // Connect to database first (admin-site pattern)
+    await connectDB();
+    const db = getDB();
     const collection = db.collection('applications');
     const vacanciesCollection = db.collection('vacancies');
 
-    // Verify vacancy exists and is active
+    // Verify vacancy exists and is active (admin-site pattern)
     const vacancy = await vacanciesCollection.findOne({ 
       _id: new ObjectId(vacancyId),
       status: 'Active'
@@ -55,7 +58,7 @@ export default async function handler(req: any, res: any) {
       return res.status(404).json({ error: 'Vacancy not found or no longer active' });
     }
 
-    // Insert application
+    // Insert application (admin-site pattern)
     const result = await collection.insertOne({
       vacancyId,
       vacancyTitle: vacancy.jobTitle || vacancy.position,

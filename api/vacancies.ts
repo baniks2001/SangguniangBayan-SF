@@ -1,5 +1,6 @@
 // Serverless function to fetch active vacancies
-import { connectToDatabase } from './_lib/mongodb';
+// Based on admin-site routes/vacancies.js pattern
+import { connectDB, getDB } from './_lib/mongodb';
 
 export default async function handler(req: any, res: any) {
   res.setHeader('Access-Control-Allow-Credentials', 'true');
@@ -17,10 +18,12 @@ export default async function handler(req: any, res: any) {
   }
 
   try {
-    const { db } = await connectToDatabase();
+    // Connect to database first (admin-site pattern)
+    await connectDB();
+    const db = getDB();
     const collection = db.collection('vacancies');
 
-    // Only return active vacancies to public
+    // Only return active vacancies to public (public filter)
     const query = { status: 'Active' };
 
     const vacancies = await collection
@@ -28,7 +31,8 @@ export default async function handler(req: any, res: any) {
       .sort({ createdAt: -1 })
       .toArray();
 
-    const transformedVacancies = vacancies.map((vac: any) => ({
+    // Transform _id to id for frontend compatibility (admin-site pattern)
+    const transformedVacancies = vacancies.map(vac => ({
       ...vac,
       id: vac._id.toString(),
       _id: undefined

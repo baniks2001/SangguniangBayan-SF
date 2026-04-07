@@ -1,5 +1,6 @@
 // Serverless function to view/download resolution PDF
-import { connectToDatabase } from './_lib/mongodb';
+// Based on admin-site pattern
+import { connectDB, getDB } from './_lib/mongodb';
 import { ObjectId } from 'mongodb';
 import https from 'https';
 import http from 'http';
@@ -15,9 +16,13 @@ const streamPdf = (url: string, res: any, filename: string): Promise<void> => {
       }
       
       res.setHeader('Content-Type', 'application/pdf');
-      res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+      if (filename) {
+        res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+      }
+      
       response.pipe(res);
       response.on('end', () => resolve());
+      response.on('error', (err) => reject(err));
     }).on('error', (err) => reject(err));
   });
 };
@@ -40,16 +45,18 @@ export default async function handler(req: any, res: any) {
   try {
     const { id, download } = req.query;
 
-    if (!id || typeof id !== 'string') {
+    if (!id) {
       return res.status(400).json({ error: 'Resolution ID is required' });
     }
 
-    const { db } = await connectToDatabase();
+    // Connect to database first (admin-site pattern)
+    await connectDB();
+    const db = getDB();
     const collection = db.collection('resolutions');
 
-    // Fetch resolution - only approved and public
+    // Find resolution by ID (admin-site pattern)
     const resolution = await collection.findOne({
-      _id: new ObjectId(id),
+      _id: new ObjectId(id as string),
       isPublic: true,
       status: 'Approved'
     });
@@ -62,30 +69,13 @@ export default async function handler(req: any, res: any) {
       return res.status(404).json({ error: 'PDF not available for this resolution' });
     }
 
-    // Determine if it's an external URL or local path
-    const pdfUrl = resolution.pdfUrl;
-    const filename = `Resolution-${resolution.resolutionNumber}-${resolution.series}.pdf`;
-    
-    if (pdfUrl.startsWith('http')) {
-      // External URL
-      if (download === 'true') {
-        await streamPdf(pdfUrl, res, filename);
-        return;
-      } else {
-        return res.redirect(pdfUrl);
-      }
-    } else {
-      // Local path - construct full URL from admin site
-      const adminBaseUrl = process.env.ADMIN_SITE_URL || '';
-      const fullUrl = pdfUrl.startsWith('/') ? `${adminBaseUrl}${pdfUrl}` : `${adminBaseUrl}/${pdfUrl}`;
-      
-      if (download === 'true') {
-        await streamPdf(fullUrl, res, filename);
-        return;
-      } else {
-        return res.redirect(fullUrl);
-      }
-    }
+    // Construct filename for download
+    const filename = download 
+      ? `Resolution-${resolution.resolutionNumber}-${resolution.series}.pdf`
+      : '';
+
+    // Stream the PDF
+    await streamPdf(resolution.pdfUrl, res, filename);
   } catch (error) {
     console.error('Error fetching resolution PDF:', error);
     res.status(500).json({ 

@@ -42,6 +42,14 @@
       "destination": "/api/apply.ts"
     },
     {
+      "source": "/api/organization",
+      "destination": "/api/organization.ts"
+    },
+    {
+      "source": "/api/calendar",
+      "destination": "/api/calendar.ts"
+    },
+    {
       "source": "/api/resolution-pdf",
       "destination": "/api/resolution-pdf.ts"
     },

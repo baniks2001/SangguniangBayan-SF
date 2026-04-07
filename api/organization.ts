@@ -1,5 +1,5 @@
-// Serverless function to fetch active announcements
-// Based on admin-site routes/announcements.js pattern
+// Serverless function to fetch organization members
+// Based on admin-site routes/organization.js pattern
 import { connectDB, getDB } from './_lib/mongodb';
 
 export default async function handler(req: any, res: any) {
@@ -21,37 +21,31 @@ export default async function handler(req: any, res: any) {
     // Connect to database first (admin-site pattern)
     await connectDB();
     const db = getDB();
-    const collection = db.collection('announcements');
+    const collection = db.collection('organization_members');
 
-    // Only return active announcements to public (public filter)
-    const query = { 
-      isActive: true,
-      $or: [
-        { expiryDate: { $exists: false } },
-        { expiryDate: { $gte: new Date() } }
-      ]
-    };
+    const { category } = req.query;
 
-    const announcements = await collection
+    // Build query
+    const query: Record<string, unknown> = {};
+    if (category) query.category = category;
+
+    const members = await collection
       .find(query)
-      .sort({ priority: -1, createdAt: -1 })
+      .sort({ displayOrder: 1, createdAt: -1 })
       .toArray();
 
     // Transform _id to id for frontend compatibility (admin-site pattern)
-    const transformedAnnouncements = announcements.map(ann => ({
-      ...ann,
-      id: ann._id.toString(),
+    const transformed = members.map(m => ({
+      ...m,
+      id: m._id.toString(),
       _id: undefined
     }));
 
-    res.status(200).json({
-      announcements: transformedAnnouncements,
-      count: transformedAnnouncements.length
-    });
+    res.status(200).json({ members: transformed });
   } catch (error) {
-    console.error('Error fetching announcements:', error);
+    console.error('Error fetching organization members:', error);
     res.status(500).json({ 
-      error: 'Failed to fetch announcements', 
+      error: 'Failed to fetch members', 
       details: error instanceof Error ? error.message : 'Unknown error'
     });
   }

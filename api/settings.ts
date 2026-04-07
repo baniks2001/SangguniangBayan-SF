@@ -1,8 +1,8 @@
-// Serverless function to fetch system settings
-import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { connectToDatabase } from './_lib/mongodb';
+// Serverless function to fetch public settings
+// Based on admin-site routes/settings.js pattern
+import { connectDB, getDB } from './_lib/mongodb';
 
-export default async function handler(req: VercelRequest, res: VercelResponse) {
+export default async function handler(req: any, res: any) {
   res.setHeader('Access-Control-Allow-Credentials', 'true');
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS');
@@ -18,14 +18,16 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   try {
-    const { db } = await connectToDatabase();
+    // Connect to database first (admin-site pattern)
+    await connectDB();
+    const db = getDB();
     const collection = db.collection('settings');
 
     // Get all public settings
     const settings = await collection.find({}).toArray();
     
-    // Convert to key-value object
-    const settingsMap: any = {};
+    // Convert to key-value object (admin-site pattern)
+    const settingsMap: Record<string, any> = {};
     settings.forEach((setting: any) => {
       settingsMap[setting.key] = setting.value;
     });
@@ -45,6 +47,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     res.status(200).json({ settings: defaultSettings });
   } catch (error) {
     console.error('Error fetching settings:', error);
-    res.status(500).json({ error: 'Failed to fetch settings' });
+    res.status(500).json({ 
+      error: 'Failed to fetch settings', 
+      details: error instanceof Error ? error.message : 'Unknown error'
+    });
   }
 }

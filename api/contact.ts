@@ -1,5 +1,6 @@
 // Serverless function to submit contact form
-import { connectToDatabase } from './_lib/mongodb';
+// Based on admin-site routes/contact.js pattern
+import { connectDB, getDB } from './_lib/mongodb';
 
 export default async function handler(req: any, res: any) {
   res.setHeader('Access-Control-Allow-Credentials', 'true');
@@ -27,10 +28,12 @@ export default async function handler(req: any, res: any) {
       });
     }
 
-    const { db } = await connectToDatabase();
+    // Connect to database first (admin-site pattern)
+    await connectDB();
+    const db = getDB();
     const collection = db.collection('contacts');
 
-    // Insert contact submission
+    // Insert contact submission (admin-site pattern)
     const result = await collection.insertOne({
       name,
       email,

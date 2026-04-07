@@ -1,5 +1,6 @@
 // Serverless function to fetch published resolutions
-import { connectToDatabase } from './_lib/mongodb';
+// Based on admin-site routes/resolutions.js pattern
+import { connectDB, getDB } from './_lib/mongodb';
 
 export default async function handler(req: any, res: any) {
   res.setHeader('Access-Control-Allow-Credentials', 'true');
@@ -17,12 +18,14 @@ export default async function handler(req: any, res: any) {
   }
 
   try {
-    const { db } = await connectToDatabase();
+    // Connect to database first (admin-site pattern)
+    await connectDB();
+    const db = getDB();
     const collection = db.collection('resolutions');
 
     const { series, search, page = '1', limit = '10' } = req.query;
 
-    // Build query - only approved and public
+    // Build query - only approved and public (public filter)
     const query: Record<string, unknown> = { isPublic: true, status: 'Approved' };
     
     if (series) query.series = series;
@@ -48,7 +51,7 @@ export default async function handler(req: any, res: any) {
       collection.countDocuments(query)
     ]);
 
-    // Transform _id to id for frontend compatibility
+    // Transform _id to id for frontend compatibility (admin-site pattern)
     const transformedResolutions = resolutions.map(res => ({
       ...res,
       id: res._id.toString(),
