@@ -19,25 +19,25 @@ async function handleResponse(response: Response) {
   return response.json();
 }
 
-// Public API for Resolutions - uses local serverless function
+// Public API for Resolutions - connects to admin backend
 export const resolutionsApi = {
-  getAll: async (params?: { search?: string; series?: string; page?: number; limit?: number; status?: string }) => {
+  getAll: async (params?: { search?: string; series?: string; page?: number; limit?: number; status?: string; isPublic?: boolean }) => {
     const queryParams = new URLSearchParams();
     if (params?.search) queryParams.append('search', params.search);
     if (params?.series) queryParams.append('series', params.series);
     if (params?.page) queryParams.append('page', params.page.toString());
     if (params?.limit) queryParams.append('limit', params.limit.toString());
     if (params?.status) queryParams.append('status', params.status);
+    if (params?.isPublic !== undefined) queryParams.append('isPublic', params.isPublic.toString());
     
-    const response = await fetch(`/api/resolutions?${queryParams}`);
+    // Call admin backend directly like admin-site does
+    const response = await fetch(`${API_BASE_URL}/resolutions?${queryParams}`);
     return handleResponse(response);
   },
   // Get full URL for PDF file
   getPdfUrl: (pdfUrl: string | undefined) => {
     if (!pdfUrl) return null;
-    // If already a full URL, return as-is
     if (pdfUrl.startsWith('http')) return pdfUrl;
-    // Otherwise prepend the static base URL (admin backend for file serving)
     return `${STATIC_BASE_URL}${pdfUrl}`;
   },
   // View PDF in new tab
@@ -66,25 +66,25 @@ export const resolutionsApi = {
   }
 };
 
-// Public API for Ordinances - uses local serverless function
+// Public API for Ordinances - connects to admin backend
 export const ordinancesApi = {
-  getAll: async (params?: { search?: string; series?: string; page?: number; limit?: number; status?: string }) => {
+  getAll: async (params?: { search?: string; series?: string; page?: number; limit?: number; status?: string; isPublic?: boolean }) => {
     const queryParams = new URLSearchParams();
     if (params?.search) queryParams.append('search', params.search);
     if (params?.series) queryParams.append('series', params.series);
     if (params?.page) queryParams.append('page', params.page.toString());
     if (params?.limit) queryParams.append('limit', params.limit.toString());
     if (params?.status) queryParams.append('status', params.status);
+    if (params?.isPublic !== undefined) queryParams.append('isPublic', params.isPublic.toString());
     
-    const response = await fetch(`/api/ordinances?${queryParams}`);
+    // Call admin backend directly like admin-site does
+    const response = await fetch(`${API_BASE_URL}/ordinances?${queryParams}`);
     return handleResponse(response);
   },
   // Get full URL for PDF file
   getPdfUrl: (pdfUrl: string | undefined) => {
     if (!pdfUrl) return null;
-    // If already a full URL, return as-is
     if (pdfUrl.startsWith('http')) return pdfUrl;
-    // Otherwise prepend the static base URL (admin backend for file serving)
     return `${STATIC_BASE_URL}${pdfUrl}`;
   },
   // View PDF in new tab
