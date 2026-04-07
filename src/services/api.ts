@@ -1,6 +1,6 @@
-// API service for Public Site - connects to admin backend
+// API service for Public Site - uses local serverless API endpoints
 const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
-// Static files base URL (without /api suffix)
+// Static files base URL (for PDFs from admin backend)
 export const STATIC_BASE_URL = API_BASE_URL.replace('/api', '');
 
 class ApiError extends Error {
@@ -19,7 +19,7 @@ async function handleResponse(response: Response) {
   return response.json();
 }
 
-// Public API for Resolutions
+// Public API for Resolutions - uses local serverless function
 export const resolutionsApi = {
   getAll: async (params?: { search?: string; series?: string; page?: number; limit?: number; status?: string }) => {
     const queryParams = new URLSearchParams();
@@ -29,7 +29,7 @@ export const resolutionsApi = {
     if (params?.limit) queryParams.append('limit', params.limit.toString());
     if (params?.status) queryParams.append('status', params.status);
     
-    const response = await fetch(`${API_BASE_URL}/resolutions?${queryParams}`);
+    const response = await fetch(`/api/resolutions?${queryParams}`);
     return handleResponse(response);
   },
   // Get full URL for PDF file
@@ -37,7 +37,7 @@ export const resolutionsApi = {
     if (!pdfUrl) return null;
     // If already a full URL, return as-is
     if (pdfUrl.startsWith('http')) return pdfUrl;
-    // Otherwise prepend the static base URL
+    // Otherwise prepend the static base URL (admin backend for file serving)
     return `${STATIC_BASE_URL}${pdfUrl}`;
   },
   // View PDF in new tab
@@ -66,7 +66,7 @@ export const resolutionsApi = {
   }
 };
 
-// Public API for Ordinances
+// Public API for Ordinances - uses local serverless function
 export const ordinancesApi = {
   getAll: async (params?: { search?: string; series?: string; page?: number; limit?: number; status?: string }) => {
     const queryParams = new URLSearchParams();
@@ -76,7 +76,7 @@ export const ordinancesApi = {
     if (params?.limit) queryParams.append('limit', params.limit.toString());
     if (params?.status) queryParams.append('status', params.status);
     
-    const response = await fetch(`${API_BASE_URL}/ordinances?${queryParams}`);
+    const response = await fetch(`/api/ordinances?${queryParams}`);
     return handleResponse(response);
   },
   // Get full URL for PDF file
@@ -84,7 +84,7 @@ export const ordinancesApi = {
     if (!pdfUrl) return null;
     // If already a full URL, return as-is
     if (pdfUrl.startsWith('http')) return pdfUrl;
-    // Otherwise prepend the static base URL
+    // Otherwise prepend the static base URL (admin backend for file serving)
     return `${STATIC_BASE_URL}${pdfUrl}`;
   },
   // View PDF in new tab
@@ -113,23 +113,23 @@ export const ordinancesApi = {
   }
 };
 
-// Public API for Vacancies
+// Public API for Vacancies - uses local serverless function
 export const vacanciesApi = {
   getAll: async () => {
-    const response = await fetch(`${API_BASE_URL}/vacancies`);
+    const response = await fetch('/api/vacancies');
     return handleResponse(response);
   }
 };
 
-// Public API for Announcements
+// Public API for Announcements - uses local serverless function
 export const announcementsApi = {
   getAll: async () => {
-    const response = await fetch(`${API_BASE_URL}/announcements`);
+    const response = await fetch('/api/announcements');
     return handleResponse(response);
   }
 };
 
-// Public API for News
+// Public API for News - uses local serverless function
 export const newsApi = {
   getAll: async (params?: { category?: string; page?: number; limit?: number }) => {
     const queryParams = new URLSearchParams();
@@ -137,44 +137,44 @@ export const newsApi = {
     if (params?.page) queryParams.append('page', params.page.toString());
     if (params?.limit) queryParams.append('limit', params.limit.toString());
     
-    const response = await fetch(`${API_BASE_URL}/news?${queryParams}`);
+    const response = await fetch(`/api/news?${queryParams}`);
     return handleResponse(response);
   }
 };
 
-// Public API for Organization Members
+// Public API for Organization Members - uses local serverless function
 export const organizationApi = {
   getPublic: async (params?: { category?: string }) => {
     const queryParams = new URLSearchParams();
     if (params?.category) queryParams.append('category', params.category);
-    const response = await fetch(`${API_BASE_URL}/organization?${queryParams}`);
+    const response = await fetch(`/api/organization?${queryParams}`);
     return handleResponse(response);
   }
 };
 
-// Public API for Calendar Events
+// Public API for Calendar Events - uses local serverless function
 export const calendarApi = {
   getPublic: async (params?: { upcoming?: boolean; limit?: number }) => {
     const queryParams = new URLSearchParams();
     if (params?.upcoming) queryParams.append('upcoming', 'true');
     if (params?.limit) queryParams.append('limit', params.limit.toString());
-    const response = await fetch(`${API_BASE_URL}/calendar?${queryParams}`);
+    const response = await fetch(`/api/calendar?${queryParams}`);
     return handleResponse(response);
   }
 };
 
-// Public API for Settings
+// Public API for Settings - uses local serverless function
 export const settingsApi = {
   getPublicConfig: async () => {
-    const response = await fetch(`${API_BASE_URL}/settings`);
+    const response = await fetch('/api/settings');
     return handleResponse(response);
   }
 };
 
-// Public API for Contact
+// Public API for Contact - uses local serverless function
 export const contactApi = {
   submit: async (data: { name: string; email: string; phone?: string; subject: string; message: string }) => {
-    const response = await fetch(`${API_BASE_URL}/contact`, {
+    const response = await fetch('/api/contact', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data)
@@ -183,10 +183,10 @@ export const contactApi = {
   }
 };
 
-// Public API for Applications
+// Public API for Applications - uses local serverless function
 export const applicationsApi = {
   submit: async (data: any) => {
-    const response = await fetch(`${API_BASE_URL}/apply`, {
+    const response = await fetch('/api/apply', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data)
@@ -194,7 +194,7 @@ export const applicationsApi = {
     return handleResponse(response);
   },
   submitWithFile: async (formData: FormData) => {
-    const response = await fetch(`${API_BASE_URL}/apply`, {
+    const response = await fetch('/api/apply', {
       method: 'POST',
       body: formData
     });
