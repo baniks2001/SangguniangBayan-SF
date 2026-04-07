@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Outlet, Link, useLocation } from 'react-router-dom';
 import { 
   Scale, 
@@ -10,41 +10,25 @@ import {
   Menu,
   X,
   Home,
-  Building2
+  Building2,
+  ShoppingCart
 } from 'lucide-react';
-import { settingsApi } from '../services/api';
 
-interface Settings {
-  municipality_name?: string;
-  province?: string;
-  site_name?: string;
-  office_address?: string;
-  contact_email?: string;
-  contact_phone?: string;
-  site_logo?: string;
-  facebook_url?: string;
-}
+// Hardcoded system information
+const SYSTEM_NAME_SHORT = 'Sangguniang Bayan';
+const SYSTEM_NAME_FULL = 'Office Of The Sangguniang Bayan';
+const MUNICIPALITY = 'Municipality of San Francisco';
+const PROVINCE = 'Southern Leyte';
 
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
-const STATIC_BASE_URL = API_BASE_URL.replace('/api', '');
+// Hardcoded contact information
+const OFFICE_ADDRESS = 'Municipal Compound, San Francisco, Southern Leyte, Philippines';
+const CONTACT_EMAIL = 'sb.sanfrancisco@gmail.com';
+const CONTACT_PHONE = '0926-905-3859';
+const FACEBOOK_URL = 'https://web.facebook.com/profile.php?id=61578350702689';
 
 const PublicLayout: React.FC = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [settings, setSettings] = useState<Settings>({});
   const location = useLocation();
-
-  useEffect(() => {
-    loadSettings();
-  }, []);
-
-  const loadSettings = async () => {
-    try {
-      const response = await settingsApi.getPublicConfig();
-      setSettings(response.config || {});
-    } catch (error) {
-      console.error('Failed to load settings:', error);
-    }
-  };
 
   const isActive = (path: string) => location.pathname === path;
 
@@ -52,6 +36,7 @@ const PublicLayout: React.FC = () => {
     { path: '/', label: 'Home', icon: Home },
     { path: '/resolutions', label: 'Resolutions', icon: Scale },
     { path: '/ordinances', label: 'Ordinances', icon: FileText },
+    { path: '/procurements', label: 'Procurements', icon: ShoppingCart },
     { path: '/vacancies', label: 'Vacancies', icon: Briefcase },
     { path: '/announcements', label: 'Announcements', icon: Bell },
     { path: '/news', label: 'News', icon: Newspaper },
@@ -63,26 +48,20 @@ const PublicLayout: React.FC = () => {
       {/* Header */}
       <header className="bg-white shadow-md sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            {/* Logo */}
-            <Link to="/" className="flex items-center space-x-3">
-              {settings.site_logo ? (
-                <img 
-                  src={`${STATIC_BASE_URL}${settings.site_logo}`}
-                  alt="Logo"
-                  className="h-10 w-10 object-contain rounded"
-                />
-              ) : (
-                <div className="bg-blue-600 p-2 rounded-lg">
-                  <Building2 className="h-6 w-6 text-white" />
-                </div>
-              )}
-              <div className="hidden sm:block">
-                <h1 className="text-lg font-bold text-gray-900 leading-tight">
-                  {settings.site_name || 'Sangguniang Bayan'}
+          <div className="flex justify-between items-center h-20">
+            {/* Logo and System Name - Hardcoded */}
+            <Link to="/" className="flex items-center space-x-4">
+              <img 
+                src="/homepage-images/logo.png"
+                alt="Sangguniang Bayan Logo"
+                className="h-14 w-14 object-contain"
+              />
+              <div className="hidden sm:block min-w-0">
+                <h1 className="text-base font-bold text-blue-900 whitespace-nowrap">
+                  {SYSTEM_NAME_FULL}
                 </h1>
-                <p className="text-xs text-gray-600">
-                  {settings.municipality_name || 'San Francisco'}, {settings.province || 'Southern Leyte'}
+                <p className="text-xs text-gray-600 font-medium whitespace-nowrap">
+                  {MUNICIPALITY}, {PROVINCE}
                 </p>
               </div>
             </Link>
@@ -91,17 +70,18 @@ const PublicLayout: React.FC = () => {
             <nav className="hidden lg:flex items-center space-x-1">
               {navItems.map((item) => {
                 const Icon = item.icon;
+                const active = isActive(item.path);
                 return (
                   <Link
                     key={item.path}
                     to={item.path}
-                    className={`flex items-center space-x-1 px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-                      isActive(item.path)
-                        ? 'bg-blue-100 text-blue-700'
-                        : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'
+                    className={`flex items-center space-x-1.5 px-3 py-2 rounded-md text-sm font-medium transition-all duration-200 ${
+                      active
+                        ? 'bg-blue-600 text-white shadow-md'
+                        : 'text-gray-700 hover:bg-blue-50 hover:text-blue-700'
                     }`}
                   >
-                    <Icon className="h-4 w-4" />
+                    <Icon className={`h-4 w-4 ${active ? 'text-white' : 'text-blue-600'}`} />
                     <span className="whitespace-nowrap">{item.label}</span>
                   </Link>
                 );
@@ -120,22 +100,23 @@ const PublicLayout: React.FC = () => {
 
         {/* Mobile Navigation */}
         {isMobileMenuOpen && (
-          <div className="lg:hidden border-t border-gray-200">
-            <div className="px-2 pt-2 pb-3 space-y-1">
+          <div className="lg:hidden border-t border-gray-200 bg-white shadow-lg">
+            <div className="px-4 pt-3 pb-4 space-y-2">
               {navItems.map((item) => {
                 const Icon = item.icon;
+                const active = isActive(item.path);
                 return (
                   <Link
                     key={item.path}
                     to={item.path}
                     onClick={() => setIsMobileMenuOpen(false)}
-                    className={`flex items-center space-x-2 px-3 py-2 rounded-md text-base font-medium ${
-                      isActive(item.path)
-                        ? 'bg-blue-100 text-blue-700'
-                        : 'text-gray-700 hover:bg-gray-100'
+                    className={`flex items-center space-x-3 px-4 py-3 rounded-lg text-base font-semibold transition-colors ${
+                      active
+                        ? 'bg-blue-600 text-white'
+                        : 'text-gray-700 hover:bg-blue-50 hover:text-blue-700'
                     }`}
                   >
-                    <Icon className="h-5 w-5" />
+                    <Icon className={`h-5 w-5 ${active ? 'text-white' : 'text-blue-600'}`} />
                     <span>{item.label}</span>
                   </Link>
                 );
@@ -150,57 +131,89 @@ const PublicLayout: React.FC = () => {
         <Outlet />
       </main>
 
-      {/* Footer */}
-      <footer className="bg-gray-900 text-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+      {/* Hardcoded Footer */}
+      <footer className="bg-blue-900 text-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             {/* About */}
-            <div>
-              <h3 className="text-lg font-semibold mb-4">
-                {settings.site_name || 'Sangguniang Bayan'}
-              </h3>
-              <p className="text-gray-400 text-sm">
-                {settings.municipality_name || 'San Francisco'}, {settings.province || 'Southern Leyte'}
-              </p>
-              <p className="text-gray-400 text-sm mt-2">
-                Local legislative body dedicated to transparency and public service.
+            <div className="md:col-span-1">
+              <div className="flex items-center space-x-3 mb-4">
+                <img 
+                  src="/homepage-images/logo.png" 
+                  alt="Logo" 
+                  className="h-12 w-auto object-contain" 
+                />
+                <div>
+                  <h3 className="text-lg font-bold">{SYSTEM_NAME_SHORT}</h3>
+                  <p className="text-xs text-blue-200">{MUNICIPALITY}, {PROVINCE}</p>
+                </div>
+              </div>
+              <p className="text-blue-100 text-sm leading-relaxed">
+                The local legislative body dedicated to transparency, accountability, 
+                and excellent public service for the people of San Francisco.
               </p>
             </div>
 
             {/* Quick Links */}
             <div>
-              <h3 className="text-lg font-semibold mb-4">Quick Links</h3>
-              <ul className="space-y-2 text-sm">
-                <li><Link to="/resolutions" className="text-gray-400 hover:text-white">Resolutions</Link></li>
-                <li><Link to="/ordinances" className="text-gray-400 hover:text-white">Ordinances</Link></li>
-                <li><Link to="/vacancies" className="text-gray-400 hover:text-white">Job Vacancies</Link></li>
-                <li><Link to="/announcements" className="text-gray-400 hover:text-white">Announcements</Link></li>
+              <h3 className="text-lg font-semibold mb-4 border-b border-blue-700 pb-2">Quick Links</h3>
+              <ul className="space-y-3 text-sm">
+                <li><Link to="/resolutions" className="text-blue-100 hover:text-white hover:underline transition">Resolutions</Link></li>
+                <li><Link to="/ordinances" className="text-blue-100 hover:text-white hover:underline transition">Ordinances</Link></li>
+                <li><Link to="/vacancies" className="text-blue-100 hover:text-white hover:underline transition">Job Vacancies</Link></li>
+                <li><Link to="/announcements" className="text-blue-100 hover:text-white hover:underline transition">Announcements</Link></li>
+                <li><Link to="/news" className="text-blue-100 hover:text-white hover:underline transition">News & Updates</Link></li>
+              </ul>
+            </div>
+
+            {/* Services */}
+            <div>
+              <h3 className="text-lg font-semibold mb-4 border-b border-blue-700 pb-2">Services</h3>
+              <ul className="space-y-3 text-sm">
+                <li><Link to="/contact" className="text-blue-100 hover:text-white hover:underline transition">Contact Us</Link></li>
+                <li><span className="text-blue-100">Public Assistance</span></li>
+                <li><span className="text-blue-100">Legislative Support</span></li>
+                <li><span className="text-blue-100">Document Request</span></li>
+                <li><span className="text-blue-100">Schedule of Sessions</span></li>
               </ul>
             </div>
 
             {/* Contact */}
             <div>
-              <h3 className="text-lg font-semibold mb-4">Contact Us</h3>
-              <ul className="space-y-2 text-sm text-gray-400">
-                <li>{settings.office_address || 'Municipal Hall, San Francisco, Southern Leyte'}</li>
-                <li>Email: {settings.contact_email || 'sb.sanfrancisco@gmail.com'}</li>
-                <li>Phone: {settings.contact_phone || '(053) 514-1234'}</li>
+              <h3 className="text-lg font-semibold mb-4 border-b border-blue-700 pb-2">Contact Us</h3>
+              <ul className="space-y-3 text-sm text-blue-100">
+                <li className="flex items-start">
+                  <Building2 className="h-5 w-5 mr-2 mt-0.5 flex-shrink-0" />
+                  <span>{OFFICE_ADDRESS}</span>
+                </li>
+                <li className="flex items-center">
+                  <Mail className="h-5 w-5 mr-2 flex-shrink-0" />
+                  <span>{CONTACT_EMAIL}</span>
+                </li>
+                <li className="flex items-center">
+                  <span className="h-5 w-5 mr-2 flex-shrink-0 text-center">📞</span>
+                  <span>{CONTACT_PHONE}</span>
+                </li>
               </ul>
-              {settings.facebook_url && (
-                <a 
-                  href={settings.facebook_url} 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="inline-block mt-3 text-blue-400 hover:text-blue-300"
-                >
-                  Follow us on Facebook
-                </a>
-              )}
+              <a 
+                href={FACEBOOK_URL}
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="inline-flex items-center mt-4 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-500 transition"
+              >
+                <span className="mr-2">Facebook</span>
+                <span>→</span>
+              </a>
             </div>
           </div>
 
-          <div className="border-t border-gray-800 mt-8 pt-8 text-center text-sm text-gray-400">
-            <p>&copy; {new Date().getFullYear()} {settings.site_name || 'Sangguniang Bayan'} - {settings.municipality_name || 'San Francisco'}, {settings.province || 'Southern Leyte'}. All rights reserved.</p>
+          <div className="border-t border-blue-800 mt-10 pt-8 text-center">
+            <p className="text-blue-200 text-sm">
+              © {new Date().getFullYear()} {SYSTEM_NAME_SHORT} - {MUNICIPALITY}, {PROVINCE}. All rights reserved.
+            </p>
+            <p className="text-blue-300 text-xs mt-2">
+              Official Website of the Sangguniang Bayan of San Francisco, Southern Leyte
+            </p>
           </div>
         </div>
       </footer>

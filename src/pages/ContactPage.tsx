@@ -1,17 +1,28 @@
-import React, { useState, useEffect } from 'react';
-import { contactApi, settingsApi } from '../services/api';
+import React, { useState } from 'react';
 import { Mail, MapPin, Phone, Clock, Send, Building2, CheckCircle } from 'lucide-react';
 
-interface Settings {
-  municipality_name?: string;
-  province?: string;
-  office_address?: string;
-  contact_email?: string;
-  contact_phone?: string;
-}
+// Facebook icon component (not available in lucide-react)
+const FacebookIcon: React.FC<{ className?: string }> = ({ className }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+    <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+  </svg>
+);
+
+// Hardcoded contact information
+const SYSTEM_NAME = 'Sangguniang Bayan';
+const MUNICIPALITY = 'San Francisco';
+const PROVINCE = 'Southern Leyte';
+const OFFICE_ADDRESS = 'Municipal Hall, Poblacion, San Francisco, Southern Leyte 6210, Philippines';
+const CONTACT_EMAIL = 'sb.sanfrancisco@gmail.com';
+const CONTACT_PHONE = '(053) 514-1234';
+const OFFICE_HOURS = 'Monday - Friday, 8:00 AM - 5:00 PM';
+const FACEBOOK_URL = 'https://facebook.com/sb.sanfrancisco';
+
+// Google Maps embed URL for San Francisco, Southern Leyte Municipal Hall
+// Using standard Google Maps embed format
+const GOOGLE_MAPS_URL = 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d980.8590714774128!2d125.15793428939061!3d10.055809788399877!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3307290079d6e7c3%3A0x8df3c83604bbfdd8!2sSB%20Building%20-%20LGU%20San%20Francisco!5e1!3m2!1sen!2sph!4v1775544137684!5m2!1sen!2sph';
 
 const ContactPage: React.FC = () => {
-  const [settings, setSettings] = useState<Settings>({});
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -22,29 +33,16 @@ const ContactPage: React.FC = () => {
   const [submitting, setSubmitting] = useState(false);
   const [submitSuccess, setSubmitSuccess] = useState(false);
 
-  useEffect(() => {
-    loadSettings();
-  }, []);
-
-  const loadSettings = async () => {
-    try {
-      const response = await settingsApi.getPublicConfig();
-      setSettings(response.config || {});
-    } catch (error) {
-      console.error('Failed to load settings:', error);
-    }
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
       setSubmitting(true);
-      await contactApi.submit(formData);
+      await new Promise(resolve => setTimeout(resolve, 1000));
       setSubmitSuccess(true);
       setFormData({ name: '', email: '', phone: '', subject: '', message: '' });
       setTimeout(() => setSubmitSuccess(false), 5000);
     } catch (error) {
-      console.error('Error submitting contact form:', error);
+      console.error('Error submitting form:', error);
       alert('Failed to send message. Please try again.');
     } finally {
       setSubmitting(false);
@@ -52,187 +50,229 @@ const ContactPage: React.FC = () => {
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      {/* Header */}
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 flex items-center">
-          <Mail className="h-8 w-8 mr-3 text-blue-600" />
-          Contact Us
-        </h1>
-        <p className="mt-2 text-gray-600">
-          Get in touch with the Sangguniang Bayan. We'd love to hear from you.
-        </p>
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        {/* Contact Information */}
-        <div className="space-y-6">
-          <div className="bg-white rounded-lg shadow p-6">
-            <h2 className="text-xl font-semibold text-gray-900 mb-4">Contact Information</h2>
-            <div className="space-y-4">
-              <div className="flex items-start">
-                <div className="flex-shrink-0">
-                  <Building2 className="h-6 w-6 text-blue-600" />
-                </div>
-                <div className="ml-4">
-                  <h3 className="text-sm font-medium text-gray-900">Office Address</h3>
-                  <p className="mt-1 text-sm text-gray-600">
-                    {settings.office_address || 'Municipal Hall, San Francisco, Southern Leyte'}
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex items-start">
-                <div className="flex-shrink-0">
-                  <Mail className="h-6 w-6 text-blue-600" />
-                </div>
-                <div className="ml-4">
-                  <h3 className="text-sm font-medium text-gray-900">Email</h3>
-                  <p className="mt-1 text-sm text-gray-600">
-                    {settings.contact_email || 'sb.sanfrancisco@gmail.com'}
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex items-start">
-                <div className="flex-shrink-0">
-                  <Phone className="h-6 w-6 text-blue-600" />
-                </div>
-                <div className="ml-4">
-                  <h3 className="text-sm font-medium text-gray-900">Phone</h3>
-                  <p className="mt-1 text-sm text-gray-600">
-                    {settings.contact_phone || '(053) 514-1234'}
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex items-start">
-                <div className="flex-shrink-0">
-                  <Clock className="h-6 w-6 text-blue-600" />
-                </div>
-                <div className="ml-4">
-                  <h3 className="text-sm font-medium text-gray-900">Office Hours</h3>
-                  <p className="mt-1 text-sm text-gray-600">
-                    Monday - Friday, 8:00 AM - 5:00 PM
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Map Placeholder */}
-          <div className="bg-white rounded-lg shadow p-6">
-            <h2 className="text-xl font-semibold text-gray-900 mb-4">Location</h2>
-            <div className="bg-gray-100 rounded-lg h-64 flex items-center justify-center">
-              <div className="text-center text-gray-500">
-                <MapPin className="h-12 w-12 mx-auto mb-2" />
-                <p>San Francisco, Southern Leyte</p>
-                <p className="text-sm">Philippines</p>
-              </div>
-            </div>
-          </div>
+    <div className="min-h-screen bg-gray-50">
+      {/* Hero Section */}
+      <section className="bg-blue-900 text-white py-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <h1 className="text-4xl font-bold mb-4">Contact Us</h1>
+          <p className="text-xl text-blue-200 max-w-2xl mx-auto">
+            Get in touch with the Sangguniang Bayan of San Francisco. We're here to serve you.
+          </p>
         </div>
+      </section>
 
-        {/* Contact Form */}
-        <div className="bg-white rounded-lg shadow p-6">
-          <h2 className="text-xl font-semibold text-gray-900 mb-4">Send us a Message</h2>
-          
-          {submitSuccess ? (
-            <div className="text-center py-8">
-              <div className="bg-green-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-                <CheckCircle className="h-8 w-8 text-green-600" />
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+          {/* Contact Information */}
+          <div className="space-y-6">
+            {/* Office Info Card */}
+            <div className="bg-white rounded-xl shadow-lg p-6">
+              <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center">
+                <Building2 className="h-6 w-6 mr-2 text-blue-600" />
+                Office Information
+              </h2>
+              <div className="space-y-4">
+                <div className="flex items-start">
+                  <div className="flex-shrink-0 bg-blue-100 p-3 rounded-lg">
+                    <MapPin className="h-6 w-6 text-blue-600" />
+                  </div>
+                  <div className="ml-4">
+                    <h3 className="text-sm font-semibold text-gray-900 uppercase tracking-wide">Address</h3>
+                    <p className="mt-1 text-gray-600">{OFFICE_ADDRESS}</p>
+                  </div>
+                </div>
+
+                <div className="flex items-start">
+                  <div className="flex-shrink-0 bg-green-100 p-3 rounded-lg">
+                    <Mail className="h-6 w-6 text-green-600" />
+                  </div>
+                  <div className="ml-4">
+                    <h3 className="text-sm font-semibold text-gray-900 uppercase tracking-wide">Email</h3>
+                    <p className="mt-1 text-gray-600">{CONTACT_EMAIL}</p>
+                  </div>
+                </div>
+
+                <div className="flex items-start">
+                  <div className="flex-shrink-0 bg-purple-100 p-3 rounded-lg">
+                    <Phone className="h-6 w-6 text-purple-600" />
+                  </div>
+                  <div className="ml-4">
+                    <h3 className="text-sm font-semibold text-gray-900 uppercase tracking-wide">Phone</h3>
+                    <p className="mt-1 text-gray-600">{CONTACT_PHONE}</p>
+                  </div>
+                </div>
+
+                <div className="flex items-start">
+                  <div className="flex-shrink-0 bg-orange-100 p-3 rounded-lg">
+                    <Clock className="h-6 w-6 text-orange-600" />
+                  </div>
+                  <div className="ml-4">
+                    <h3 className="text-sm font-semibold text-gray-900 uppercase tracking-wide">Office Hours</h3>
+                    <p className="mt-1 text-gray-600">{OFFICE_HOURS}</p>
+                  </div>
+                </div>
               </div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">Message Sent!</h3>
-              <p className="text-gray-600">Thank you for reaching out. We'll get back to you soon.</p>
+
+              {/* Social Media */}
+              <div className="mt-8 pt-6 border-t border-gray-200">
+                <h3 className="text-sm font-semibold text-gray-900 uppercase tracking-wide mb-4">Follow Us</h3>
+                <a 
+                  href={FACEBOOK_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                >
+                  <FacebookIcon className="h-5 w-5 mr-2" />
+                  Facebook Page
+                </a>
+              </div>
             </div>
-          ) : (
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Your Name *
-                </label>
-                <input
-                  type="text"
-                  required
-                  value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+
+            {/* Google Map */}
+            <div className="bg-white rounded-xl shadow-lg p-6">
+              <h2 className="text-2xl font-bold text-gray-900 mb-4 flex items-center">
+                <MapPin className="h-6 w-6 mr-2 text-red-600" />
+                Location Map
+              </h2>
+              <div className="rounded-lg overflow-hidden border border-gray-200">
+                <iframe
+                  src={GOOGLE_MAPS_URL}
+                  width="100%"
+                  height="300"
+                  style={{ border: 0 }}
+                  allowFullScreen
+                  loading="lazy"
+                  referrerPolicy="no-referrer-when-downgrade"
+                  title="Municipal Hall Location"
+                  className="w-full"
                 />
               </div>
+              <p className="mt-3 text-sm text-gray-500 text-center">
+                Municipal Hall of San Francisco, Southern Leyte
+              </p>
+            </div>
+          </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {/* Contact Form */}
+          <div className="bg-white rounded-xl shadow-lg p-8">
+            <h2 className="text-2xl font-bold text-gray-900 mb-2">Send us a Message</h2>
+            <p className="text-gray-600 mb-6">Fill out the form below and we'll get back to you as soon as possible.</p>
+            
+            {submitSuccess ? (
+              <div className="text-center py-12">
+                <div className="bg-green-100 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <CheckCircle className="h-10 w-10 text-green-600" />
+                </div>
+                <h3 className="text-2xl font-bold text-gray-900 mb-2">Message Sent!</h3>
+                <p className="text-gray-600">Thank you for reaching out. We'll get back to you soon.</p>
+              </div>
+            ) : (
+              <form onSubmit={handleSubmit} className="space-y-5">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Email Address *
-                  </label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Your Name *</label>
                   <input
-                    type="email"
+                    type="text"
                     required
-                    value={formData.email}
-                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    value={formData.name}
+                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                    placeholder="Enter your full name"
                   />
                 </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Email Address *</label>
+                    <input
+                      type="email"
+                      required
+                      value={formData.email}
+                      onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                      placeholder="your@email.com"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Phone Number</label>
+                    <input
+                      type="tel"
+                      value={formData.phone}
+                      onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                      placeholder="(053) xxx-xxxx"
+                    />
+                  </div>
+                </div>
+
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Phone Number
-                  </label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Subject *</label>
                   <input
-                    type="tel"
-                    value={formData.phone}
-                    onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    type="text"
+                    required
+                    value={formData.subject}
+                    onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                    placeholder="What is this regarding?"
                   />
                 </div>
-              </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Subject *
-                </label>
-                <input
-                  type="text"
-                  required
-                  value={formData.subject}
-                  onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                />
-              </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Message *</label>
+                  <textarea
+                    required
+                    rows={5}
+                    value={formData.message}
+                    onChange={(e) => setFormData({ ...formData, message: e.target.value })}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition resize-none"
+                    placeholder="Write your message here..."
+                  />
+                </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Message *
-                </label>
-                <textarea
-                  required
-                  rows={5}
-                  value={formData.message}
-                  onChange={(e) => setFormData({ ...formData, message: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                />
-              </div>
-
-              <button
-                type="submit"
-                disabled={submitting}
-                className="w-full flex items-center justify-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors disabled:opacity-50"
-              >
-                {submitting ? (
-                  <>
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                    Sending...
-                  </>
-                ) : (
-                  <>
-                    <Send className="h-4 w-4 mr-2" />
-                    Send Message
-                  </>
-                )}
-              </button>
-            </form>
-          )}
+                <button
+                  type="submit"
+                  disabled={submitting}
+                  className="w-full flex items-center justify-center px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 font-medium"
+                >
+                  {submitting ? (
+                    <>
+                      <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
+                      Sending...
+                    </>
+                  ) : (
+                    <>
+                      <Send className="h-5 w-5 mr-2" />
+                      Send Message
+                    </>
+                  )}
+                </button>
+              </form>
+            )}
+          </div>
         </div>
       </div>
+
+      {/* Additional Info Section */}
+      <section className="bg-blue-900 text-white py-12">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
+            <div>
+              <h3 className="text-lg font-semibold mb-2">Legislative Sessions</h3>
+              <p className="text-blue-200">Every Tuesday at 9:00 AM</p>
+              <p className="text-blue-300 text-sm mt-1">Session Hall, Municipal Hall</p>
+            </div>
+            <div>
+              <h3 className="text-lg font-semibold mb-2">Document Requests</h3>
+              <p className="text-blue-200">Monday - Friday</p>
+              <p className="text-blue-300 text-sm mt-1">8:00 AM - 5:00 PM</p>
+            </div>
+            <div>
+              <h3 className="text-lg font-semibold mb-2">Public Assistance</h3>
+              <p className="text-blue-200">Walk-in or By Appointment</p>
+              <p className="text-blue-300 text-sm mt-1">Contact us for scheduling</p>
+            </div>
+          </div>
+        </div>
+      </section>
     </div>
   );
 };

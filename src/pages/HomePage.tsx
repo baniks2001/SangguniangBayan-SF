@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { 
   Scale, 
@@ -7,105 +7,84 @@ import {
   Bell, 
   Newspaper, 
   ChevronRight,
-  Building2,
-  Users,
-  Gavel,
-  Heart,
-  Target,
   ChevronLeft,
-  User,
-  Calendar
+  Target,
+  Heart,
+  Gavel,
+  Clock,
+  Users,
+  Building2,
+  MapPin,
+  Phone,
+  Mail
 } from 'lucide-react';
 import { 
   resolutionsApi, 
   ordinancesApi, 
   vacanciesApi, 
   announcementsApi, 
-  newsApi, 
-  settingsApi, 
-  organizationApi, 
-  calendarApi 
+  newsApi 
 } from '../services/api';
 
-interface Settings {
-  municipalityName?: string;
-  provinceName?: string;
-  sbTitle?: string;
-  welcomeTitle?: string;
-  welcomeMessage?: string;
-  heroImage?: string;
-  hero_title?: string;
-  hero_subtitle?: string;
-  site_name?: string;
-}
+// Hardcoded system information
+const WELCOME_TITLE = 'Welcome to Sangguniang Bayan Transparency Website';
+const WELCOME_SUBTITLE = 'San Francisco, Southern Leyte';
+const WELCOME_MESSAGE = 'Transparency in Governance, Service to the People';
 
-interface Resolution {
-  id: string;
-  resolutionNumber: string;
-  series: string;
-  title: string;
-  status: string;
-}
+// Hero carousel images from homepage-images folder
+const HERO_IMAGES = [
+  '/homepage-images/hero-bg.jpg',
+  '/homepage-images/hero-bg2.jpg',
+  '/homepage-images/hero-bg3.jpg'
+];
 
-interface Ordinance {
-  id: string;
-  ordinanceNumber: string;
-  series: string;
-  title: string;
-  status: string;
-}
+// Organization categories with descriptive image names
+const ORGANIZATION_CATEGORIES = [
+  {
+    id: 'vice_mayor',
+    name: 'Vice Mayor',
+    description: 'Presiding Officer',
+    images: ['/homepage-images/vice-mayor.jpg']
+  },
+  {
+    id: 'sb_members',
+    name: 'SB Members',
+    description: 'Sangguniang Bayan Members',
+    images: ['/homepage-images/sb-member-1.jpg', '/homepage-images/sb-member-2.jpg']
+  },
+  {
+    id: 'sb_secretary',
+    name: 'SB Secretary',
+    description: 'Secretary to the SB',
+    images: ['/homepage-images/sb-secretary.jpg']
+  },
+  {
+    id: 'legislative_staff',
+    name: 'Legislative Staff',
+    description: 'Support Staff',
+    images: ['/homepage-images/staff-1.jpg', '/homepage-images/staff-2.jpg']
+  }
+];
 
-interface Vacancy {
-  id: string;
-  jobTitle: string;
-  position: string;
-  department: string;
-}
-
-interface Announcement {
-  id: string;
-  title: string;
-  content: string;
-  priority: string;
-}
-
-interface NewsItem {
-  id: string;
-  title: string;
-  content: string;
-  category: string;
-  imageUrl?: string;
-  publishedAt: string;
-}
-
-interface OrgMember {
-  id: string;
-  name: string;
-  position: string;
-  category: 'vice_mayor' | 'sb_members' | 'legislative_staff';
-  description?: string;
-  imageUrl?: string;
-}
-
-interface CalendarEvent {
-  id: string;
-  title: string;
-  description?: string;
-  eventDate: string;
-  eventType: string;
-  location?: string;
-}
+// Hardcoded statistics - default values
+const DEFAULT_STATS = { resolutions: 0, ordinances: 0, yearsServing: 35, population: '13,000+' };
 
 const HomePage: React.FC = () => {
-  const [settings, setSettings] = useState<Settings>({});
-  const [resolutions, setResolutions] = useState<Resolution[]>([]);
-  const [ordinances, setOrdinances] = useState<Ordinance[]>([]);
-  const [vacancies, setVacancies] = useState<Vacancy[]>([]);
-  const [announcements, setAnnouncements] = useState<Announcement[]>([]);
-  const [news, setNews] = useState<NewsItem[]>([]);
-  const [orgMembers, setOrgMembers] = useState<OrgMember[]>([]);
-  const [calendarEvents, setCalendarEvents] = useState<CalendarEvent[]>([]);
+  const [currentSlide, setCurrentSlide] = useState(0);
+  const [resolutions, setResolutions] = useState<any[]>([]);
+  const [ordinances, setOrdinances] = useState<any[]>([]);
+  const [vacancies, setVacancies] = useState<any[]>([]);
+  const [announcements, setAnnouncements] = useState<any[]>([]);
+  const [news, setNews] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [stats, setStats] = useState(DEFAULT_STATS);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentSlide((prev) => (prev + 1) % HERO_IMAGES.length);
+    }, 5000);
+    return () => clearInterval(timer);
+  }, []);
 
   useEffect(() => {
     loadData();
@@ -114,423 +93,253 @@ const HomePage: React.FC = () => {
   const loadData = async () => {
     try {
       setLoading(true);
-      const [settingsRes, resolutionsRes, ordinancesRes, vacanciesRes, announcementsRes, newsRes, orgRes, calendarRes] = await Promise.all([
-        settingsApi.getPublicConfig().catch(() => ({ config: {} })),
-        resolutionsApi.getAll({ limit: 5, status: 'Approved', isPublic: true }).catch(() => ({ resolutions: [] })),
-        ordinancesApi.getAll({ limit: 5, status: 'Approved', isPublic: true }).catch(() => ({ ordinances: [] })),
+      const [resolutionsRes, ordinancesRes, vacanciesRes, announcementsRes, newsRes, allResolutions, allOrdinances] = await Promise.all([
+        resolutionsApi.getAll({ limit: 3, status: 'Approved', isPublic: true }).catch(() => ({ resolutions: [], pagination: { totalItems: 0 } })),
+        ordinancesApi.getAll({ limit: 3, status: 'Approved', isPublic: true }).catch(() => ({ ordinances: [], pagination: { totalItems: 0 } })),
         vacanciesApi.getAll().catch(() => ({ vacancies: [] })),
         announcementsApi.getAll().catch(() => ({ announcements: [] })),
         newsApi.getAll({ limit: 3 }).catch(() => ({ news: [] })),
-        organizationApi.getPublic().catch(() => ({ members: [] })),
-        calendarApi.getPublic({ upcoming: true, limit: 5 }).catch(() => ({ events: [] }))
+        resolutionsApi.getAll({ status: 'Approved', isPublic: true, limit: 1 }).catch(() => ({ pagination: { totalItems: 0 } })),
+        ordinancesApi.getAll({ status: 'Approved', isPublic: true, limit: 1 }).catch(() => ({ pagination: { totalItems: 0 } }))
       ]);
-
-      setSettings(settingsRes.config || {});
       setResolutions(resolutionsRes.resolutions || []);
       setOrdinances(ordinancesRes.ordinances || []);
       setVacancies(vacanciesRes.vacancies || []);
       setAnnouncements(announcementsRes.announcements || []);
       setNews(newsRes.news || []);
-      setOrgMembers(orgRes.members || []);
-      setCalendarEvents(calendarRes.events || []);
+      // Update stats with actual counts from database
+      setStats(prev => ({
+        ...prev,
+        resolutions: allResolutions.pagination?.totalItems || 0,
+        ordinances: allOrdinances.pagination?.totalItems || 0
+      }));
     } catch (error) {
-      console.error('Error loading home page data:', error);
+      console.error('Error loading data:', error);
     } finally {
       setLoading(false);
     }
   };
 
-  if (loading) {
+  const nextSlide = useCallback(() => setCurrentSlide((prev) => (prev + 1) % HERO_IMAGES.length), []);
+  const prevSlide = useCallback(() => setCurrentSlide((prev) => (prev - 1 + HERO_IMAGES.length) % HERO_IMAGES.length), []);
+
+  // Organization Image Carousel Component
+  const OrganizationCarousel = ({ category }: { category: typeof ORGANIZATION_CATEGORIES[0] }) => {
+    const [currentImage, setCurrentImage] = useState(0);
+    const images = category.images;
+
+    useEffect(() => {
+      if (images.length > 1) {
+        const timer = setInterval(() => setCurrentImage((prev) => (prev + 1) % images.length), 3000);
+        return () => clearInterval(timer);
+      }
+    }, [images.length]);
+
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      <div className="bg-white rounded-xl shadow-lg overflow-hidden">
+        <div className="relative aspect-[4/5] w-full bg-gray-100">
+          {images.map((src, index) => (
+            <img key={index} src={src} alt={`${category.name} - ${index + 1}`}
+              className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-500 ${index === currentImage ? 'opacity-100' : 'opacity-0'}`}
+            />
+          ))}
+          {images.length > 1 && (
+            <>
+              <button onClick={() => setCurrentImage((prev) => (prev - 1 + images.length) % images.length)} className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/50 text-white p-2 rounded-full hover:bg-black/70 transition">
+                <ChevronLeft className="h-4 w-4" />
+              </button>
+              <button onClick={() => setCurrentImage((prev) => (prev + 1) % images.length)} className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/50 text-white p-2 rounded-full hover:bg-black/70 transition">
+                <ChevronRight className="h-4 w-4" />
+              </button>
+              <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex space-x-1">
+                {images.map((_, index) => (
+                  <button key={index} onClick={() => setCurrentImage(index)} className={`w-2 h-2 rounded-full transition ${index === currentImage ? 'bg-white' : 'bg-white/50'}`} />
+                ))}
+              </div>
+            </>
+          )}
+        </div>
+        <div className="p-4 text-center bg-gradient-to-b from-white to-gray-50">
+          <h4 className="font-bold text-gray-900 text-lg">{category.name}</h4>
+          <p className="text-blue-600 font-medium text-sm">{category.description}</p>
+        </div>
       </div>
     );
-  }
+  };
+
+  if (loading) return <div className="min-h-screen flex items-center justify-center bg-gray-50"><div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div></div>;
 
   return (
-    <div className="space-y-12">
-      {/* Hero Section */}
-      <section className="relative bg-gradient-to-br from-blue-900 via-blue-800 to-blue-700 text-white">
-        <div className="absolute inset-0 bg-black/20"></div>
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24">
-          <div className="text-center">
-            <div className="flex justify-center mb-6">
-              <Building2 className="h-16 w-16 text-blue-300" />
-            </div>
-            <h1 className="text-3xl md:text-5xl font-bold mb-4">
-              {settings.hero_title || settings.welcomeTitle || 'Welcome to Sangguniang Bayan'}
-            </h1>
-            <p className="text-xl md:text-2xl text-blue-100 mb-2">
-              {settings.hero_subtitle || settings.municipalityName || 'San Francisco'}, {settings.provinceName || 'Southern Leyte'}
-            </p>
-            <p className="text-lg text-blue-200 max-w-2xl mx-auto">
-              {settings.welcomeMessage || 'Transparency in Governance, Service to the People'}
-            </p>
+    <div className="space-y-0">
+      {/* Hero Section with Image Carousel */}
+      <section className="relative h-[600px] overflow-hidden">
+        {HERO_IMAGES.map((src, index) => (
+          <div key={index} className={`absolute inset-0 transition-opacity duration-1000 ${index === currentSlide ? 'opacity-100' : 'opacity-0'}`}>
+            <img src={src} alt={`Hero ${index + 1}`} className="w-full h-full object-cover" />
+            <div className="absolute inset-0 bg-gradient-to-b from-blue-900/80 via-blue-800/70 to-blue-900/80"></div>
           </div>
+        ))}
+        <div className="relative z-10 h-full flex flex-col items-center justify-center px-4">
+          <div className="mb-6 bg-white/10 backdrop-blur-sm p-4 rounded-full animate-fade-in-up">
+            <img src="/homepage-images/logo.png" alt="Logo" className="h-32 w-32 md:h-48 md:w-48 object-contain animate-pulse-slow" />
+          </div>
+          <h1 className="text-4xl md:text-6xl font-bold text-white mb-4 text-center drop-shadow-lg animate-fade-in-up delay-200">{WELCOME_TITLE}</h1>
+          <p className="text-xl md:text-3xl text-blue-100 mb-2 text-center drop-shadow-md animate-fade-in-up delay-400">{WELCOME_SUBTITLE}</p>
+          <p className="text-lg md:text-xl text-blue-200 text-center max-w-2xl drop-shadow-sm animate-fade-in-up delay-600">{WELCOME_MESSAGE}</p>
+        </div>
+        <button onClick={prevSlide} className="absolute left-4 top-1/2 -translate-y-1/2 z-20 bg-white/20 hover:bg-white/30 text-white p-3 rounded-full backdrop-blur-sm transition"><ChevronLeft className="h-8 w-8" /></button>
+        <button onClick={nextSlide} className="absolute right-4 top-1/2 -translate-y-1/2 z-20 bg-white/20 hover:bg-white/30 text-white p-3 rounded-full backdrop-blur-sm transition"><ChevronRight className="h-8 w-8" /></button>
+        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-20 flex space-x-2">
+          {HERO_IMAGES.map((_, index) => (
+            <button key={index} onClick={() => setCurrentSlide(index)} className={`w-3 h-3 rounded-full transition ${index === currentSlide ? 'bg-white' : 'bg-white/50'}`} />
+          ))}
         </div>
       </section>
 
-      {/* Quick Stats */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <div className="bg-white rounded-lg shadow p-6 text-center">
-            <Scale className="h-8 w-8 mx-auto text-blue-600 mb-2" />
-            <p className="text-2xl font-bold text-gray-900">{resolutions.length}+</p>
-            <p className="text-sm text-gray-600">Resolutions</p>
-          </div>
-          <div className="bg-white rounded-lg shadow p-6 text-center">
-            <FileText className="h-8 w-8 mx-auto text-green-600 mb-2" />
-            <p className="text-2xl font-bold text-gray-900">{ordinances.length}+</p>
-            <p className="text-sm text-gray-600">Ordinances</p>
-          </div>
-          <div className="bg-white rounded-lg shadow p-6 text-center">
-            <Briefcase className="h-8 w-8 mx-auto text-orange-600 mb-2" />
-            <p className="text-2xl font-bold text-gray-900">{vacancies.length}</p>
-            <p className="text-sm text-gray-600">Job Openings</p>
-          </div>
-          <div className="bg-white rounded-lg shadow p-6 text-center">
-            <Newspaper className="h-8 w-8 mx-auto text-purple-600 mb-2" />
-            <p className="text-2xl font-bold text-gray-900">{news.length}+</p>
-            <p className="text-sm text-gray-600">News Articles</p>
+      {/* Stats Section */}
+      <section className="bg-blue-900 py-12">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+            <div className="text-center text-white animate-fade-in-up"><Scale className="h-10 w-10 mx-auto text-blue-300 mb-3 animate-bounce-slow" /><p className="text-4xl font-bold animate-count-up">{stats.resolutions}+</p><p className="text-blue-200 mt-1">Resolutions</p></div>
+            <div className="text-center text-white animate-fade-in-up delay-100"><FileText className="h-10 w-10 mx-auto text-green-300 mb-3 animate-bounce-slow" /><p className="text-4xl font-bold animate-count-up">{stats.ordinances}+</p><p className="text-blue-200 mt-1">Ordinances</p></div>
+            <div className="text-center text-white animate-fade-in-up delay-200"><Clock className="h-10 w-10 mx-auto text-yellow-300 mb-3 animate-bounce-slow" /><p className="text-4xl font-bold">{stats.yearsServing}</p><p className="text-blue-200 mt-1">Years Serving</p></div>
+            <div className="text-center text-white animate-fade-in-up delay-300"><Users className="h-10 w-10 mx-auto text-purple-300 mb-3 animate-bounce-slow" /><p className="text-4xl font-bold">{stats.population}</p><p className="text-blue-200 mt-1">Population Served</p></div>
           </div>
         </div>
       </section>
 
       {/* About Section */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="bg-white rounded-lg shadow-lg p-8">
-          <h2 className="text-2xl font-bold text-gray-900 mb-6 text-center">About Sangguniang Bayan</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="text-center">
-              <div className="bg-blue-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Target className="h-8 w-8 text-blue-600" />
-              </div>
-              <h3 className="text-lg font-semibold mb-2">Mission</h3>
-              <p className="text-gray-600 text-sm">
-                To enact ordinances, approve resolutions, and ensure the delivery of basic services to the community.
-              </p>
-            </div>
-            <div className="text-center">
-              <div className="bg-green-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Heart className="h-8 w-8 text-green-600" />
-              </div>
-              <h3 className="text-lg font-semibold mb-2">Vision</h3>
-              <p className="text-gray-600 text-sm">
-                A progressive and transparent local legislative body serving the people with integrity and excellence.
-              </p>
-            </div>
-            <div className="text-center">
-              <div className="bg-purple-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Gavel className="h-8 w-8 text-purple-600" />
-              </div>
-              <h3 className="text-lg font-semibold mb-2">Mandate</h3>
-              <p className="text-gray-600 text-sm">
-                To legislate for the welfare of the municipality and exercise oversight functions over the executive branch.
-              </p>
-            </div>
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+        <div className="text-center mb-12">
+          <h2 className="text-3xl font-bold text-gray-900 mb-4">About Sangguniang Bayan</h2>
+          <div className="w-24 h-1 bg-blue-600 mx-auto"></div>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="bg-white rounded-xl shadow-lg p-8 hover:shadow-xl transition-shadow">
+            <div className="bg-blue-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4"><Target className="h-8 w-8 text-blue-600" /></div>
+            <h3 className="text-xl font-bold text-center mb-3">Our Mission</h3>
+            <p className="text-gray-600 text-center leading-relaxed">To enact ordinances and approve resolutions that promote the general welfare, ensure efficient delivery of basic services, and foster sustainable development.</p>
+          </div>
+          <div className="bg-white rounded-xl shadow-lg p-8 hover:shadow-xl transition-shadow">
+            <div className="bg-green-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4"><Heart className="h-8 w-8 text-green-600" /></div>
+            <h3 className="text-xl font-bold text-center mb-3">Our Vision</h3>
+            <p className="text-gray-600 text-center leading-relaxed">A transparent, accountable, and progressive local legislative body that serves as a model of good governance and excellence in public service.</p>
+          </div>
+          <div className="bg-white rounded-xl shadow-lg p-8 hover:shadow-xl transition-shadow">
+            <div className="bg-purple-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4"><Gavel className="h-8 w-8 text-purple-600" /></div>
+            <h3 className="text-xl font-bold text-center mb-3">Our Mandate</h3>
+            <p className="text-gray-600 text-center leading-relaxed">To exercise legislative powers, approve local budgets, conduct oversight functions, and represent the interests of our constituents.</p>
           </div>
         </div>
       </section>
 
-      {/* Recent Resolutions */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="bg-white rounded-lg shadow p-6">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-bold text-gray-900 flex items-center">
-              <Scale className="h-6 w-6 mr-2 text-blue-600" />
-              Recent Resolutions
-            </h2>
-            <Link to="/resolutions" className="text-blue-600 hover:text-blue-800 flex items-center text-sm font-medium">
-              View All <ChevronRight className="h-4 w-4 ml-1" />
-            </Link>
+      {/* Organization Chart Section */}
+      <section className="bg-gray-100 py-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold text-gray-900 mb-4">Legislative Organization</h2>
+            <p className="text-gray-600 max-w-2xl mx-auto">Meet the dedicated officials serving the people of San Francisco</p>
+            <div className="w-24 h-1 bg-blue-600 mx-auto mt-4"></div>
           </div>
-          <div className="space-y-3">
-            {resolutions.slice(0, 3).map((resolution) => (
-              <div key={resolution.id} className="border-l-4 border-blue-500 pl-4 py-2 hover:bg-gray-50">
-                <p className="text-sm text-gray-500">Resolution No. {resolution.resolutionNumber}, Series {resolution.series}</p>
-                <p className="font-medium text-gray-900 line-clamp-1">{resolution.title}</p>
-              </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+            {ORGANIZATION_CATEGORIES.map((category) => (
+              <OrganizationCarousel key={category.id} category={category} />
             ))}
-            {resolutions.length === 0 && (
-              <p className="text-gray-500 text-center py-4">No resolutions available</p>
-            )}
           </div>
         </div>
       </section>
 
-      {/* Recent Ordinances */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="bg-white rounded-lg shadow p-6">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-bold text-gray-900 flex items-center">
-              <FileText className="h-6 w-6 mr-2 text-green-600" />
-              Recent Ordinances
-            </h2>
-            <Link to="/ordinances" className="text-green-600 hover:text-green-800 flex items-center text-sm font-medium">
-              View All <ChevronRight className="h-4 w-4 ml-1" />
-            </Link>
+      {/* Recent Documents Section */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <div className="bg-white rounded-xl shadow-lg p-6">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-xl font-bold text-gray-900 flex items-center"><Scale className="h-6 w-6 mr-2 text-blue-600" />Recent Resolutions</h3>
+              <Link to="/resolutions" className="text-blue-600 hover:text-blue-800 flex items-center text-sm font-medium">View All <ChevronRight className="h-4 w-4 ml-1" /></Link>
+            </div>
+            <div className="space-y-4">
+              {resolutions.length > 0 ? resolutions.map((res) => (
+                <div key={res.id} className="border-l-4 border-blue-500 pl-4 py-3 bg-gray-50 rounded-r-lg hover:bg-blue-50 transition-colors">
+                  <p className="text-sm text-blue-600 font-medium">Resolution No. {res.resolutionNumber}, Series {res.series}</p>
+                  <p className="font-medium text-gray-900 line-clamp-2">{res.title}</p>
+                </div>
+              )) : <p className="text-gray-500 text-center py-8">No resolutions available.</p>}
+            </div>
           </div>
-          <div className="space-y-3">
-            {ordinances.slice(0, 3).map((ordinance) => (
-              <div key={ordinance.id} className="border-l-4 border-green-500 pl-4 py-2 hover:bg-gray-50">
-                <p className="text-sm text-gray-500">Ordinance No. {ordinance.ordinanceNumber}, Series {ordinance.series}</p>
-                <p className="font-medium text-gray-900 line-clamp-1">{ordinance.title}</p>
-              </div>
-            ))}
-            {ordinances.length === 0 && (
-              <p className="text-gray-500 text-center py-4">No ordinances available</p>
-            )}
+          <div className="bg-white rounded-xl shadow-lg p-6">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-xl font-bold text-gray-900 flex items-center"><FileText className="h-6 w-6 mr-2 text-green-600" />Recent Ordinances</h3>
+              <Link to="/ordinances" className="text-green-600 hover:text-green-800 flex items-center text-sm font-medium">View All <ChevronRight className="h-4 w-4 ml-1" /></Link>
+            </div>
+            <div className="space-y-4">
+              {ordinances.length > 0 ? ordinances.map((ord) => (
+                <div key={ord.id} className="border-l-4 border-green-500 pl-4 py-3 bg-gray-50 rounded-r-lg hover:bg-green-50 transition-colors">
+                  <p className="text-sm text-green-600 font-medium">Ordinance No. {ord.ordinanceNumber}, Series {ord.series}</p>
+                  <p className="font-medium text-gray-900 line-clamp-2">{ord.title}</p>
+                </div>
+              )) : <p className="text-gray-500 text-center py-8">No ordinances available.</p>}
+            </div>
           </div>
         </div>
       </section>
 
       {/* Job Vacancies */}
       {vacancies.length > 0 && (
-        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="bg-gradient-to-r from-orange-500 to-red-500 rounded-lg shadow p-6 text-white">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-bold flex items-center">
-                <Briefcase className="h-6 w-6 mr-2" />
-                Job Vacancies
-              </h2>
-              <Link to="/vacancies" className="text-white/90 hover:text-white flex items-center text-sm font-medium">
-                View All <ChevronRight className="h-4 w-4 ml-1" />
-              </Link>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              {vacancies.slice(0, 3).map((vacancy) => (
-                <div key={vacancy.id} className="bg-white/10 backdrop-blur rounded-lg p-4 hover:bg-white/20 transition-colors">
-                  <p className="font-semibold">{vacancy.jobTitle}</p>
-                  <p className="text-sm text-white/80">{vacancy.position}</p>
-                  <p className="text-xs text-white/60 mt-1">{vacancy.department}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-      )}
-
-      {/* Latest News */}
-      {news.length > 0 && (
-        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="bg-white rounded-lg shadow p-6">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-bold text-gray-900 flex items-center">
-                <Newspaper className="h-6 w-6 mr-2 text-purple-600" />
-                Latest News
-              </h2>
-              <Link to="/news" className="text-purple-600 hover:text-purple-800 flex items-center text-sm font-medium">
-                View All <ChevronRight className="h-4 w-4 ml-1" />
-              </Link>
+        <section className="bg-gradient-to-r from-orange-500 to-red-500 py-16">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex items-center justify-between mb-8">
+              <h2 className="text-2xl font-bold text-white flex items-center"><Briefcase className="h-7 w-7 mr-3" />Job Opportunities</h2>
+              <Link to="/vacancies" className="text-white/90 hover:text-white flex items-center text-sm font-medium bg-white/20 px-4 py-2 rounded-lg">View All <ChevronRight className="h-4 w-4 ml-1" /></Link>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {news.slice(0, 3).map((item) => (
-                <div key={item.id} className="border rounded-lg overflow-hidden hover:shadow-md transition-shadow">
-                  {item.imageUrl && (
-                    <img src={item.imageUrl} alt={item.title} className="w-full h-32 object-cover" />
-                  )}
-                  <div className="p-4">
-                    <span className="inline-block px-2 py-1 text-xs font-medium bg-blue-100 text-blue-800 rounded mb-2">
-                      {item.category}
-                    </span>
-                    <h3 className="font-semibold text-gray-900 line-clamp-2 mb-2">{item.title}</h3>
+              {vacancies.slice(0, 3).map((vac) => (
+                <div key={vac.id} className="bg-white/10 backdrop-blur rounded-xl p-6 hover:bg-white/20 transition-colors border border-white/20">
+                  <p className="font-bold text-white text-lg">{vac.jobTitle}</p>
+                  <p className="text-orange-100 mt-1">{vac.position}</p>
+                  <p className="text-sm text-orange-200/80 mt-2">{vac.department}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* News & Announcements */}
+      <section className="bg-gray-50 py-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+            <div>
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-2xl font-bold text-gray-900 flex items-center"><Newspaper className="h-7 w-7 mr-3 text-purple-600" />Latest News</h2>
+                <Link to="/news" className="text-purple-600 hover:text-purple-800 flex items-center text-sm font-medium">View All <ChevronRight className="h-4 w-4 ml-1" /></Link>
+              </div>
+              <div className="space-y-4">
+                {news.length > 0 ? news.map((item) => (
+                  <div key={item.id} className="bg-white rounded-lg shadow p-5 hover:shadow-md transition-shadow border-l-4 border-purple-500">
+                    <span className="inline-block px-3 py-1 text-xs font-medium bg-purple-100 text-purple-800 rounded-full mb-2">{item.category}</span>
+                    <h3 className="font-bold text-gray-900 mb-2">{item.title}</h3>
                     <p className="text-sm text-gray-600 line-clamp-2">{item.content}</p>
-                    <p className="text-xs text-gray-400 mt-2">
-                      {new Date(item.publishedAt).toLocaleDateString()}
-                    </p>
                   </div>
-                </div>
-              ))}
+                )) : <p className="text-gray-500 text-center py-8">No news available.</p>}
+              </div>
             </div>
-          </div>
-        </section>
-      )}
-
-      {/* Announcements */}
-      {announcements.length > 0 && (
-        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="bg-white rounded-lg shadow p-6">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-bold text-gray-900 flex items-center">
-                <Bell className="h-6 w-6 mr-2 text-red-600" />
-                Announcements
-              </h2>
-              <Link to="/announcements" className="text-red-600 hover:text-red-800 flex items-center text-sm font-medium">
-                View All <ChevronRight className="h-4 w-4 ml-1" />
-              </Link>
-            </div>
-            <div className="space-y-3">
-              {announcements.slice(0, 3).map((announcement) => (
-                <div key={announcement.id} className={`border-l-4 pl-4 py-2 ${
-                  announcement.priority === 'Urgent' ? 'border-red-500 bg-red-50' :
-                  announcement.priority === 'High' ? 'border-orange-500 bg-orange-50' :
-                  'border-blue-500'
-                }`}>
-                  <span className={`inline-block px-2 py-0.5 text-xs rounded mb-1 ${
-                    announcement.priority === 'Urgent' ? 'bg-red-100 text-red-800' :
-                    announcement.priority === 'High' ? 'bg-orange-100 text-orange-800' :
-                    'bg-blue-100 text-blue-800'
-                  }`}>
-                    {announcement.priority}
-                  </span>
-                  <p className="font-medium text-gray-900">{announcement.title}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-      )}
-
-      {/* Calendar of Activities */}
-      {calendarEvents.length > 0 && (
-        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="bg-white rounded-lg shadow p-6">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-bold text-gray-900 flex items-center">
-                <Calendar className="h-6 w-6 mr-2 text-blue-600" />
-                Upcoming Activities
-              </h2>
-              <Link to="/calendar" className="text-blue-600 hover:text-blue-800 flex items-center text-sm font-medium">
-                View All <ChevronRight className="h-4 w-4 ml-1" />
-              </Link>
-            </div>
-            <div className="space-y-3">
-              {calendarEvents.slice(0, 5).map((event) => (
-                <div key={event.id} className="flex items-start space-x-4 p-3 hover:bg-gray-50 rounded-lg border-l-4 border-blue-500">
-                  <div className="flex-shrink-0 w-16 text-center">
-                    <p className="text-lg font-bold text-blue-600">
-                      {new Date(event.eventDate).getDate()}
-                    </p>
-                    <p className="text-xs text-gray-500 uppercase">
-                      {new Date(event.eventDate).toLocaleDateString('en-US', { month: 'short' })}
-                    </p>
+            <div>
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-2xl font-bold text-gray-900 flex items-center"><Bell className="h-7 w-7 mr-3 text-red-600" />Announcements</h2>
+                <Link to="/announcements" className="text-red-600 hover:text-red-800 flex items-center text-sm font-medium">View All <ChevronRight className="h-4 w-4 ml-1" /></Link>
+              </div>
+              <div className="space-y-4">
+                {announcements.length > 0 ? announcements.slice(0, 3).map((ann) => (
+                  <div key={ann.id} className={`rounded-lg p-5 border-l-4 ${ann.priority === 'Urgent' ? 'bg-red-50 border-red-500' : ann.priority === 'High' ? 'bg-orange-50 border-orange-500' : 'bg-blue-50 border-blue-500'}`}>
+                    <span className={`inline-block px-2 py-1 text-xs rounded mb-1 ${ann.priority === 'Urgent' ? 'bg-red-100 text-red-800' : ann.priority === 'High' ? 'bg-orange-100 text-orange-800' : 'bg-blue-100 text-blue-800'}`}>{ann.priority}</span>
+                    <h3 className="font-bold text-gray-900">{ann.title}</h3>
                   </div>
-                  <div className="flex-1">
-                    <p className="font-medium text-gray-900">{event.title}</p>
-                    <div className="flex items-center text-sm text-gray-500 mt-1">
-                      <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800 mr-2">
-                        {event.eventType === 'session' ? 'Regular Session' : 
-                         event.eventType === 'hearing' ? 'Public Hearing' :
-                         event.eventType === 'special' ? 'Special Session' :
-                         event.eventType === 'holiday' ? 'Holiday' : 'Other'}
-                      </span>
-                      {event.location && (
-                        <span>📍 {event.location}</span>
-                      )}
-                    </div>
-                    {event.description && (
-                      <p className="text-sm text-gray-600 mt-1 line-clamp-1">{event.description}</p>
-                    )}
-                  </div>
-                </div>
-              ))}
+                )) : <p className="text-gray-500 text-center py-8">No announcements available.</p>}
+              </div>
             </div>
           </div>
-        </section>
-      )}
-
-      {/* Legislative Organization */}
-      {orgMembers.length > 0 && (
-        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="bg-white rounded-lg shadow-lg p-8">
-            <h2 className="text-2xl font-bold text-gray-900 mb-8 text-center">Legislative Organization</h2>
-            
-            {/* Vice Mayor */}
-            {orgMembers.filter(m => m.category === 'vice_mayor').length > 0 && (
-              <div className="mb-12">
-                <h3 className="text-lg font-semibold text-gray-700 mb-4 text-center">Presiding Officer</h3>
-                <div className="flex justify-center">
-                  {orgMembers.filter(m => m.category === 'vice_mayor').map(member => (
-                    <div key={member.id} className="bg-gradient-to-br from-red-50 to-red-100 rounded-xl overflow-hidden shadow-lg max-w-xs">
-                      <div className="aspect-[3/4] w-full bg-gray-200">
-                        {member.imageUrl ? (
-                          <img 
-                            src={`http://localhost:5000${member.imageUrl}`}
-                            alt={member.name}
-                            className="w-full h-full object-cover"
-                          />
-                        ) : (
-                          <div className="flex items-center justify-center h-full">
-                            <User className="h-20 w-20 text-gray-400" />
-                          </div>
-                        )}
-                      </div>
-                      <div className="p-4 text-center">
-                        <p className="font-bold text-gray-900 text-lg">{member.name}</p>
-                        <p className="text-red-700 font-medium">{member.position}</p>
-                        {member.description && (
-                          <p className="text-sm text-gray-600 mt-2 line-clamp-2">{member.description}</p>
-                        )}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* SB Members */}
-            {orgMembers.filter(m => m.category === 'sb_members').length > 0 && (
-              <div className="mb-12">
-                <h3 className="text-lg font-semibold text-gray-700 mb-6 text-center">Sangguniang Bayan Members</h3>
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                  {orgMembers.filter(m => m.category === 'sb_members').map(member => (
-                    <div key={member.id} className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl overflow-hidden shadow-lg">
-                      <div className="aspect-[3/4] w-full bg-gray-200">
-                        {member.imageUrl ? (
-                          <img 
-                            src={`http://localhost:5000${member.imageUrl}`}
-                            alt={member.name}
-                            className="w-full h-full object-cover"
-                          />
-                        ) : (
-                          <div className="flex items-center justify-center h-full">
-                            <User className="h-16 w-16 text-gray-400" />
-                          </div>
-                        )}
-                      </div>
-                      <div className="p-4 text-center">
-                        <p className="font-bold text-gray-900">{member.name}</p>
-                        <p className="text-blue-700 font-medium text-sm">{member.position}</p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Legislative Staff */}
-            {orgMembers.filter(m => m.category === 'legislative_staff').length > 0 && (
-              <div className="mb-12">
-                <h3 className="text-lg font-semibold text-gray-700 mb-6 text-center">Legislative Staff</h3>
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                  {orgMembers.filter(m => m.category === 'legislative_staff').map(member => (
-                    <div key={member.id} className="bg-gradient-to-br from-green-50 to-green-100 rounded-xl overflow-hidden shadow-lg">
-                      <div className="aspect-[3/4] w-full bg-gray-200">
-                        {member.imageUrl ? (
-                          <img 
-                            src={`http://localhost:5000${member.imageUrl}`}
-                            alt={member.name}
-                            className="w-full h-full object-cover"
-                          />
-                        ) : (
-                          <div className="flex items-center justify-center h-full">
-                            <User className="h-16 w-16 text-gray-400" />
-                          </div>
-                        )}
-                      </div>
-                      <div className="p-4 text-center">
-                        <p className="font-bold text-gray-900">{member.name}</p>
-                        <p className="text-green-700 font-medium text-sm">{member.position}</p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
-        </section>
-      )}
+        </div>
+      </section>
     </div>
   );
 };
