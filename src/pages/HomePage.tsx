@@ -50,7 +50,7 @@ const ORGANIZATION_CATEGORIES = [
     id: 'sb_members',
     name: 'SB Members',
     description: 'Sangguniang Bayan Members',
-    images: ['/homepage-images/sb-member-1.jpg', '/homepage-images/sb-member-2.jpg']
+    images: ['/homepage-images/sb-member-1.jpg', '/homepage-images/sb-member-2.jpg', '/homepage-images/sb-member-3.jpg','/homepage-images/sb-member-4.jpg', '/homepage-images/sb-member-5.jpg', '/homepage-images/sb-member-7.jpg', '/homepage-images/sb-member-8.jpg']
   },
   {
     id: 'sb_secretary',
@@ -62,7 +62,7 @@ const ORGANIZATION_CATEGORIES = [
     id: 'legislative_staff',
     name: 'Legislative Staff',
     description: 'Support Staff',
-    images: ['/homepage-images/staff-1.jpg', '/homepage-images/staff-2.jpg']
+    images: ['/homepage-images/staff-1.jpg', '/homepage-images/staff-2.jpg', '/homepage-images/staff-3.jpg', '/homepage-images/staff-4.jpg', '/homepage-images/staff-5.jpg', '/homepage-images/staff-6.jpg', '/homepage-images/staff-7.jpg', '/homepage-images/staff-8.jpg', '/homepage-images/staff-9.jpg', '/homepage-images/staff-10.jpg']
   }
 ];
 

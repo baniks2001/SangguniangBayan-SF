@@ -113,6 +113,50 @@ export const ordinancesApi = {
   }
 };
 
+// Public API for Documents - uses local serverless function
+export const documentsApi = {
+  getAll: async (params?: { search?: string; category?: string; page?: number; limit?: number }) => {
+    const queryParams = new URLSearchParams();
+    if (params?.search) queryParams.append('search', params.search);
+    if (params?.category) queryParams.append('category', params.category);
+    if (params?.page) queryParams.append('page', params.page.toString());
+    if (params?.limit) queryParams.append('limit', params.limit.toString());
+    
+    const response = await fetch(`/api/documents?${queryParams}`);
+    return handleResponse(response);
+  },
+  // Get full URL for document file
+  getFileUrl: (fileUrl: string | undefined) => {
+    if (!fileUrl) return null;
+    if (fileUrl.startsWith('http')) return fileUrl;
+    return `${STATIC_BASE_URL}${fileUrl}`;
+  },
+  // View document in new tab
+  viewFile: (fileUrl: string | undefined) => {
+    const fullUrl = documentsApi.getFileUrl(fileUrl);
+    if (fullUrl) {
+      window.open(fullUrl, '_blank');
+    } else {
+      console.error('No file URL available');
+    }
+  },
+  // Download document
+  downloadFile: (fileUrl: string | undefined, fileName: string) => {
+    const fullUrl = documentsApi.getFileUrl(fileUrl);
+    if (!fullUrl) {
+      console.error('No file URL available');
+      return;
+    }
+    const link = document.createElement('a');
+    link.href = fullUrl;
+    link.download = fileName;
+    link.target = '_blank';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  }
+};
+
 // Public API for Vacancies - uses local serverless function
 export const vacanciesApi = {
   getAll: async () => {

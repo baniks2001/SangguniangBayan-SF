@@ -50,6 +50,10 @@
       "destination": "/api/calendar.js"
     },
     {
+      "source": "/api/documents",
+      "destination": "/api/documents.js"
+    },
+    {
       "source": "/(.*)",
       "destination": "/index.html"
     }

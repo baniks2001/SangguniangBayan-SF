@@ -11,7 +11,8 @@ import {
   X,
   Home,
   Building2,
-  ShoppingCart
+  ShoppingCart,
+  FileArchive
 } from 'lucide-react';
 
 // Hardcoded system information
@@ -37,6 +38,7 @@ const PublicLayout: React.FC = () => {
     { path: '/resolutions', label: 'Resolutions', icon: Scale },
     { path: '/ordinances', label: 'Ordinances', icon: FileText },
     { path: '/procurements', label: 'Procurements', icon: ShoppingCart },
+    { path: '/documents', label: 'Documents', icon: FileArchive },
     { path: '/vacancies', label: 'Vacancies', icon: Briefcase },
     { path: '/announcements', label: 'Announcements', icon: Bell },
     { path: '/news', label: 'News', icon: Newspaper },
@@ -48,19 +50,19 @@ const PublicLayout: React.FC = () => {
       {/* Header */}
       <header className="bg-white shadow-md sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-20">
+          <div className="flex justify-between items-center h-16">
             {/* Logo and System Name - Hardcoded */}
             <Link to="/" className="flex items-center space-x-4">
               <img 
                 src="/homepage-images/logo.png"
                 alt="Sangguniang Bayan Logo"
-                className="h-14 w-14 object-contain"
+                className="h-10 w-10 object-contain"
               />
               <div className="hidden sm:block min-w-0">
-                <h1 className="text-base font-bold text-blue-900 whitespace-nowrap">
+                <h1 className="text-sm font-bold text-blue-900 whitespace-nowrap">
                   {SYSTEM_NAME_FULL}
                 </h1>
-                <p className="text-xs text-gray-600 font-medium whitespace-nowrap">
+                <p className="text-xs text-gray-600 whitespace-nowrap">
                   {MUNICIPALITY}, {PROVINCE}
                 </p>
               </div>
@@ -75,13 +77,13 @@ const PublicLayout: React.FC = () => {
                   <Link
                     key={item.path}
                     to={item.path}
-                    className={`flex items-center space-x-1.5 px-3 py-2 rounded-md text-sm font-medium transition-all duration-200 ${
+                    className={`flex items-center space-x-1 px-2 py-1.5 rounded-md text-xs font-medium transition-all duration-200 ${
                       active
                         ? 'bg-blue-600 text-white shadow-md'
                         : 'text-gray-700 hover:bg-blue-50 hover:text-blue-700'
                     }`}
                   >
-                    <Icon className={`h-4 w-4 ${active ? 'text-white' : 'text-blue-600'}`} />
+                    <Icon className={`h-3.5 w-3.5 ${active ? 'text-white' : 'text-blue-600'}`} />
                     <span className="whitespace-nowrap">{item.label}</span>
                   </Link>
                 );

@@ -15,6 +15,7 @@ import AnnouncementsPage from './pages/AnnouncementsPage';
 import NewsPage from './pages/NewsPage';
 import ContactPage from './pages/ContactPage';
 import ProcurementsBudgetsPage from './pages/ProcurementsBudgetsPage';
+import DocumentsPage from './pages/DocumentsPage';
 
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
@@ -32,6 +33,7 @@ root.render(
           <Route path="announcements" element={<AnnouncementsPage />} />
           <Route path="news" element={<NewsPage />} />
           <Route path="procurements" element={<ProcurementsBudgetsPage />} />
+          <Route path="documents" element={<DocumentsPage />} />
           <Route path="contact" element={<ContactPage />} />
         </Route>
       </Routes>
