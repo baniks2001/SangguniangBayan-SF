@@ -28,13 +28,13 @@ module.exports = async (req, res) => {
     await connectDB();
     const db = getDB();
 
-    // Parse query params exactly like admin-site
-    const { status, isPublic, series, search, page = '1', limit = '10' } = req.query;
+    // Parse query params - isPublic filter removed (always true for public site)
+    const { status, series, search, page = '1', limit = '10' } = req.query;
 
-    // Build query exactly like admin-site
-    let query = {};
+    // Build query - ALWAYS enforce isPublic: true for public site
+    let query = { isPublic: true };
+    
     if (status) query.status = status;
-    if (isPublic !== undefined) query.isPublic = isPublic === 'true';
     if (series) query.series = series;
     if (search) {
       query.$or = [

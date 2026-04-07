@@ -9,10 +9,17 @@ import {
   ChevronRight,
   Search,
   Filter,
-  ExternalLink
+  ExternalLink,
+  Loader2
 } from 'lucide-react';
 
 // Types
+interface ProcurementDocument {
+  name: string;
+  url: string;
+  filename: string;
+}
+
 interface ProcurementItem {
   id: string;
   title: string;
@@ -23,10 +30,64 @@ interface ProcurementItem {
   datePosted: string;
   deadline: string;
   description: string;
-  documents: { name: string; url: string }[];
+  documents: ProcurementDocument[];
+  isPublic: boolean;
 }
 
-// Hardcoded procurement data
+// API Base URL for static files
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+const STATIC_BASE_URL = API_BASE_URL.replace('/api', '');
+
+// Fetch procurements from API
+const fetchProcurements = async (params?: { search?: string; category?: string; status?: string; page?: number; limit?: number }) => {
+  const queryParams = new URLSearchParams();
+  if (params?.search) queryParams.append('search', params.search);
+  if (params?.category) queryParams.append('category', params.category);
+  if (params?.status) queryParams.append('status', params.status);
+  if (params?.page) queryParams.append('page', params.page.toString());
+  if (params?.limit) queryParams.append('limit', params.limit.toString());
+  
+  const response = await fetch(`/api/procurements?${queryParams}`);
+  if (!response.ok) {
+    throw new Error('Failed to fetch procurements');
+  }
+  return response.json();
+};
+
+// Get full URL for file
+const getFileUrl = (fileUrl: string | undefined) => {
+  if (!fileUrl) return null;
+  if (fileUrl.startsWith('http')) return fileUrl;
+  return `${STATIC_BASE_URL}${fileUrl}`;
+};
+
+// Download file
+const downloadFile = (fileUrl: string | undefined, fileName: string) => {
+  const fullUrl = getFileUrl(fileUrl);
+  if (!fullUrl) {
+    console.error('No file URL available');
+    return;
+  }
+  const link = document.createElement('a');
+  link.href = fullUrl;
+  link.download = fileName;
+  link.target = '_blank';
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+};
+
+// View file in new tab
+const viewFile = (fileUrl: string | undefined) => {
+  const fullUrl = getFileUrl(fileUrl);
+  if (fullUrl) {
+    window.open(fullUrl, '_blank');
+  } else {
+    console.error('No file URL available');
+  }
+};
+
+// Hardcoded procurement data (fallback)
 const PROCUREMENT_DATA: ProcurementItem[] = [
   {
     id: '1',
@@ -117,15 +178,36 @@ const BUDGET_SUMMARY = {
 };
 
 const ProcurementsBudgetsPage: React.FC = () => {
+  const [procurements, setProcurements] = useState<ProcurementItem[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState<string>('All');
   const [filterCategory, setFilterCategory] = useState<string>('All');
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    loadProcurements();
+  }, []);
+
+  const loadProcurements = async () => {
+    try {
+      setLoading(true);
+      const data = await fetchProcurements();
+      setProcurements(data.procurements || []);
+      setError(null);
+    } catch (err) {
+      setError('Failed to load procurements');
+      console.error('Error loading procurements:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // Filter procurements
-  const filteredProcurements = PROCUREMENT_DATA.filter(item => {
+  const filteredProcurements = procurements.filter(item => {
     const matchesSearch = item.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         item.department.toLowerCase().includes(searchTerm.toLowerCase());
+                         item.department.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         item.description.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus = filterStatus === 'All' || item.status === filterStatus;
     const matchesCategory = filterCategory === 'All' || item.category === filterCategory;
     return matchesSearch && matchesStatus && matchesCategory;
@@ -147,6 +229,15 @@ const ProcurementsBudgetsPage: React.FC = () => {
       currency: 'PHP',
       minimumFractionDigits: 0
     }).format(amount);
+  };
+
+  const formatDate = (dateString: string) => {
+    if (!dateString) return 'N/A';
+    return new Date(dateString).toLocaleDateString('en-PH', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric'
+    });
   };
 
   return (
@@ -253,7 +344,22 @@ const ProcurementsBudgetsPage: React.FC = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-8 pb-16">
         <h2 className="text-2xl font-bold text-gray-900 mb-6">Active Procurements</h2>
         
-        {filteredProcurements.length === 0 ? (
+        {loading ? (
+          <div className="bg-white rounded-xl shadow-md p-12 text-center">
+            <Loader2 className="h-12 w-12 text-blue-500 mx-auto mb-4 animate-spin" />
+            <p className="text-gray-500 text-lg">Loading procurements...</p>
+          </div>
+        ) : error ? (
+          <div className="bg-white rounded-xl shadow-md p-12 text-center">
+            <p className="text-red-500 text-lg">{error}</p>
+            <button 
+              onClick={loadProcurements}
+              className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+            >
+              Retry
+            </button>
+          </div>
+        ) : filteredProcurements.length === 0 ? (
           <div className="bg-white rounded-xl shadow-md p-12 text-center">
             <ShoppingCart className="h-16 w-16 text-gray-300 mx-auto mb-4" />
             <p className="text-gray-500 text-lg">No procurements found matching your criteria.</p>
@@ -279,11 +385,11 @@ const ProcurementsBudgetsPage: React.FC = () => {
                       <div className="flex flex-wrap gap-4 text-sm text-gray-500">
                         <div className="flex items-center gap-1">
                           <Calendar className="h-4 w-4" />
-                          <span>Posted: {new Date(item.datePosted).toLocaleDateString()}</span>
+                          <span>Posted: {formatDate(item.datePosted)}</span>
                         </div>
                         <div className="flex items-center gap-1">
                           <Calendar className="h-4 w-4" />
-                          <span>Deadline: {new Date(item.deadline).toLocaleDateString()}</span>
+                          <span>Deadline: {formatDate(item.deadline)}</span>
                         </div>
                         <div className="flex items-center gap-1">
                           <DollarSign className="h-4 w-4" />
@@ -292,25 +398,33 @@ const ProcurementsBudgetsPage: React.FC = () => {
                       </div>
                     </div>
                     
-                    <div className="lg:w-64 flex flex-col gap-2">
-                      <p className="text-sm font-semibold text-gray-700 mb-1">Documents:</p>
-                      {item.documents.map((doc, index) => (
-                        <button
-                          key={index}
-                          className="flex items-center justify-between px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg text-sm text-gray-700 transition-colors"
-                        >
-                          <span className="flex items-center gap-2">
-                            <FileText className="h-4 w-4" />
-                            {doc.name}
-                          </span>
-                          <Download className="h-4 w-4" />
-                        </button>
-                      ))}
-                      {item.status === 'Open' && (
-                        <button className="mt-2 flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-semibold transition-colors">
-                          <ExternalLink className="h-4 w-4" />
-                          View Details
-                        </button>
+                    <div className="lg:w-72 flex flex-col gap-2">
+                      {item.documents && item.documents.length > 0 && (
+                        <>
+                          <p className="text-sm font-semibold text-gray-700 mb-1">Documents:</p>
+                          {item.documents.map((doc, index) => (
+                            <div key={index} className="flex gap-2">
+                              <button
+                                onClick={() => viewFile(doc.url)}
+                                className="flex-1 flex items-center justify-between px-3 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg text-sm text-gray-700 transition-colors"
+                                title="View document"
+                              >
+                                <span className="flex items-center gap-2 truncate">
+                                  <FileText className="h-4 w-4 flex-shrink-0" />
+                                  <span className="truncate">{doc.name}</span>
+                                </span>
+                                <ExternalLink className="h-4 w-4 flex-shrink-0" />
+                              </button>
+                              <button
+                                onClick={() => downloadFile(doc.url, doc.name || doc.filename || 'document')}
+                                className="px-3 py-2 bg-blue-100 hover:bg-blue-200 rounded-lg text-blue-700 transition-colors"
+                                title="Download document"
+                              >
+                                <Download className="h-4 w-4" />
+                              </button>
+                            </div>
+                          ))}
+                        </>
                       )}
                     </div>
                   </div>

@@ -207,14 +207,6 @@ export const calendarApi = {
   }
 };
 
-// Public API for Settings - uses local serverless function
-export const settingsApi = {
-  getPublicConfig: async () => {
-    const response = await fetch('/api/settings');
-    return handleResponse(response);
-  }
-};
-
 // Public API for Contact - uses local serverless function
 export const contactApi = {
   submit: async (data: { name: string; email: string; phone?: string; subject: string; message: string }) => {
