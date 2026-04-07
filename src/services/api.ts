@@ -20,12 +20,13 @@ async function handleResponse(response: Response) {
 
 // Public API for Resolutions
 export const resolutionsApi = {
-  getAll: async (params?: { search?: string; series?: string; page?: number; limit?: number }) => {
+  getAll: async (params?: { search?: string; series?: string; page?: number; limit?: number; status?: string }) => {
     const queryParams = new URLSearchParams();
     if (params?.search) queryParams.append('search', params.search);
     if (params?.series) queryParams.append('series', params.series);
     if (params?.page) queryParams.append('page', params.page.toString());
     if (params?.limit) queryParams.append('limit', params.limit.toString());
+    if (params?.status) queryParams.append('status', params.status);
     
     const response = await fetch(`${API_BASE_URL}/resolutions?${queryParams}`);
     return handleResponse(response);
@@ -51,12 +52,13 @@ export const resolutionsApi = {
 
 // Public API for Ordinances
 export const ordinancesApi = {
-  getAll: async (params?: { search?: string; series?: string; page?: number; limit?: number }) => {
+  getAll: async (params?: { search?: string; series?: string; page?: number; limit?: number; status?: string }) => {
     const queryParams = new URLSearchParams();
     if (params?.search) queryParams.append('search', params.search);
     if (params?.series) queryParams.append('series', params.series);
     if (params?.page) queryParams.append('page', params.page.toString());
     if (params?.limit) queryParams.append('limit', params.limit.toString());
+    if (params?.status) queryParams.append('status', params.status);
     
     const response = await fetch(`${API_BASE_URL}/ordinances?${queryParams}`);
     return handleResponse(response);
@@ -157,6 +159,13 @@ export const applicationsApi = {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data)
+    });
+    return handleResponse(response);
+  },
+  submitWithFile: async (formData: FormData) => {
+    const response = await fetch(`${API_BASE_URL}/apply`, {
+      method: 'POST',
+      body: formData
     });
     return handleResponse(response);
   }

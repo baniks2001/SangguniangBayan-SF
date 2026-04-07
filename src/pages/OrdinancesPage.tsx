@@ -32,7 +32,8 @@ const OrdinancesPage: React.FC = () => {
       const response = await ordinancesApi.getAll({
         search: searchTerm,
         page: currentPage,
-        limit: 10
+        limit: 10,
+        status: 'Approved'  // Only fetch approved ordinances
       });
       setOrdinances(response.ordinances || []);
       setTotalPages(response.pagination?.total || 1);

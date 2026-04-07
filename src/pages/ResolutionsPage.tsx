@@ -33,7 +33,8 @@ const ResolutionsPage: React.FC = () => {
       const response = await resolutionsApi.getAll({
         search: searchTerm,
         page: currentPage,
-        limit: 10
+        limit: 10,
+        status: 'Approved'  // Only fetch approved resolutions
       });
       setResolutions(response.resolutions || []);
       setTotalPages(response.pagination?.total || 1);

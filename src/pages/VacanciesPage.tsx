@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { vacanciesApi, applicationsApi } from '../services/api';
-import { Briefcase, Building2, DollarSign, Clock, MapPin, ChevronRight, Calendar, X } from 'lucide-react';
+import { Briefcase, Building2, DollarSign, Clock, MapPin, ChevronRight, Calendar, X, Upload, FileText } from 'lucide-react';
 
 interface Vacancy {
   id: string;
@@ -28,6 +28,8 @@ const VacanciesPage: React.FC = () => {
     education: '',
     experience: ''
   });
+  const [resumeFile, setResumeFile] = useState<File | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [submitting, setSubmitting] = useState(false);
   const [submitSuccess, setSubmitSuccess] = useState(false);
 
@@ -59,10 +61,23 @@ const VacanciesPage: React.FC = () => {
 
     try {
       setSubmitting(true);
-      await applicationsApi.submit({
-        vacancyId: selectedVacancy.id,
-        ...applicationData
-      });
+      
+      // Create FormData for file upload
+      const formData = new FormData();
+      formData.append('vacancyId', selectedVacancy.id);
+      formData.append('fullName', applicationData.fullName);
+      formData.append('age', applicationData.age);
+      formData.append('mobileNumber', applicationData.mobileNumber);
+      formData.append('email', applicationData.email);
+      formData.append('address', applicationData.address);
+      formData.append('education', applicationData.education);
+      formData.append('experience', applicationData.experience);
+      
+      if (resumeFile) {
+        formData.append('resume', resumeFile);
+      }
+      
+      await applicationsApi.submitWithFile(formData);
       setSubmitSuccess(true);
       setApplicationData({
         fullName: '',
@@ -73,6 +88,7 @@ const VacanciesPage: React.FC = () => {
         education: '',
         experience: ''
       });
+      setResumeFile(null);
       setTimeout(() => {
         setShowApplicationForm(false);
         setSelectedVacancy(null);
@@ -208,6 +224,36 @@ const VacanciesPage: React.FC = () => {
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     />
                   </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Resume/CV (PDF, DOC, DOCX) *
+                    </label>
+                    <div className="flex items-center gap-2">
+                      <input
+                        ref={fileInputRef}
+                        type="file"
+                        accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                        onChange={(e) => setResumeFile(e.target.files?.[0] || null)}
+                        className="hidden"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => fileInputRef.current?.click()}
+                        className="flex items-center px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-50 text-sm"
+                      >
+                        <Upload className="h-4 w-4 mr-2" />
+                        Choose File
+                      </button>
+                      {resumeFile ? (
+                        <span className="text-sm text-green-600 flex items-center">
+                          <FileText className="h-4 w-4 mr-1" />
+                          {resumeFile.name}
+                        </span>
+                      ) : (
+                        <span className="text-sm text-gray-500">No file selected</span>
+                      )}
+                    </div>
+                  </div>
                   <div className="flex gap-3 pt-4">
                     <button
                       type="button"
@@ -218,7 +264,7 @@ const VacanciesPage: React.FC = () => {
                     </button>
                     <button
                       type="submit"
-                      disabled={submitting}
+                      disabled={submitting || !resumeFile}
                       className="flex-1 px-4 py-2 bg-orange-600 text-white rounded-md hover:bg-orange-700 disabled:opacity-50"
                     >
                       {submitting ? 'Submitting...' : 'Submit Application'}
