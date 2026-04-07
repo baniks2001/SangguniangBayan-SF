@@ -2,11 +2,60 @@
  * Apply API - Public endpoint
  * Based on admin-site routes/applications.js pattern
  * 
- * POST /api/apply - Submit job application
+ * POST /api/apply - Submit job application with file upload support
  */
 
 const { connectDB, getDB } = require('./database');
 const { ObjectId } = require('mongodb');
+const fs = require('fs');
+const path = require('path');
+
+// Parse multipart form data manually for serverless
+const parseFormData = (req) => {
+  return new Promise((resolve, reject) => {
+    const chunks = [];
+    req.on('data', chunk => chunks.push(chunk));
+    req.on('end', () => {
+      const buffer = Buffer.concat(chunks);
+      resolve(buffer);
+    });
+    req.on('error', reject);
+  });
+};
+
+// Simple multipart parser
+const parseMultipart = (buffer, boundary) => {
+  const parts = [];
+  const boundaryBuffer = Buffer.from('--' + boundary);
+  let start = buffer.indexOf(boundaryBuffer);
+  
+  while (start !== -1) {
+    let end = buffer.indexOf(boundaryBuffer, start + boundaryBuffer.length);
+    if (end === -1) break;
+    
+    const part = buffer.slice(start + boundaryBuffer.length, end);
+    const headerEnd = part.indexOf('\r\n\r\n');
+    
+    if (headerEnd !== -1) {
+      const header = part.slice(0, headerEnd).toString();
+      const content = part.slice(headerEnd + 4, part.length - 2);
+      
+      const nameMatch = header.match(/name="([^"]+)"/);
+      const filenameMatch = header.match(/filename="([^"]+)"/);
+      
+      parts.push({
+        name: nameMatch ? nameMatch[1] : null,
+        filename: filenameMatch ? filenameMatch[1] : null,
+        content: content,
+        isFile: !!filenameMatch
+      });
+    }
+    
+    start = end;
+  }
+  
+  return parts;
+};
 
 module.exports = async (req, res) => {
   // CORS headers
@@ -25,11 +74,66 @@ module.exports = async (req, res) => {
   }
 
   try {
+    const contentType = req.headers['content-type'] || '';
+    let applicationData = {};
+    let resumeUrl = '';
+    let certificateUrls = [];
+
+    // Handle multipart form data (file uploads)
+    if (contentType.includes('multipart/form-data')) {
+      const boundary = contentType.split('boundary=')[1];
+      const buffer = await parseFormData(req);
+      const parts = parseMultipart(buffer, boundary);
+      
+      // Ensure uploads directory exists
+      const uploadDir = path.join('/tmp', 'uploads', 'resumes');
+      if (!fs.existsSync(uploadDir)) {
+        fs.mkdirSync(uploadDir, { recursive: true });
+      }
+      
+      for (const part of parts) {
+        if (part.isFile && part.content.length > 0) {
+          // Save file
+          const uniqueName = `${Date.now()}-${Math.round(Math.random() * 1E9)}-${part.filename}`;
+          const filePath = path.join(uploadDir, uniqueName);
+          fs.writeFileSync(filePath, part.content);
+          
+          // Store file URL
+          const fileUrl = `/uploads/resumes/${uniqueName}`;
+          
+          if (part.name === 'resume') {
+            resumeUrl = fileUrl;
+          } else if (part.name === 'certificates') {
+            certificateUrls.push(fileUrl);
+          }
+        } else if (part.name && !part.isFile) {
+          // Form field
+          applicationData[part.name] = part.content.toString();
+        }
+      }
+    } else {
+      // Handle JSON data (no files)
+      const body = await new Promise((resolve, reject) => {
+        let data = '';
+        req.on('data', chunk => data += chunk);
+        req.on('end', () => {
+          try {
+            resolve(JSON.parse(data));
+          } catch (e) {
+            resolve({});
+          }
+        });
+        req.on('error', reject);
+      });
+      applicationData = body;
+      resumeUrl = body.resumeUrl || '';
+      certificateUrls = body.certificateUrls || [];
+    }
+
     const { 
       vacancyId, fullName, age, mobileNumber, email, address,
-      education, experience, certifications, coverLetter,
-      resumeUrl, certificateUrls
-    } = req.body;
+      education, experience, certifications, coverLetter
+    } = applicationData;
 
     // Validation
     if (!vacancyId || !fullName || !age || !mobileNumber || !email || !address) {

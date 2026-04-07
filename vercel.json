@@ -6,16 +6,16 @@
   "framework": "create-react-app",
   "rewrites": [
     {
-      "source": "/api/health",
-      "destination": "/api/health.js"
-    },
-    {
       "source": "/api/resolutions",
       "destination": "/api/resolutions.js"
     },
     {
       "source": "/api/ordinances",
       "destination": "/api/ordinances.js"
+    },
+    {
+      "source": "/api/procurements",
+      "destination": "/api/procurements.js"
     },
     {
       "source": "/api/vacancies",
@@ -28,10 +28,6 @@
     {
       "source": "/api/news",
       "destination": "/api/news.js"
-    },
-    {
-      "source": "/api/settings",
-      "destination": "/api/settings.js"
     },
     {
       "source": "/api/contact",
