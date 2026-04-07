@@ -30,12 +30,14 @@ const ResolutionsPage: React.FC = () => {
   const loadResolutions = async () => {
     try {
       setLoading(true);
+      console.log('Fetching resolutions with status: Approved');
       const response = await resolutionsApi.getAll({
         search: searchTerm,
         page: currentPage,
         limit: 10,
-        status: 'Approved'  // Only fetch approved resolutions
+        status: 'Approved'
       });
+      console.log('Resolutions API response:', response);
       setResolutions(response.resolutions || []);
       setTotalPages(response.pagination?.total || 1);
     } catch (error) {
