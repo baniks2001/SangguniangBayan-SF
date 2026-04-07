@@ -31,8 +31,8 @@ module.exports = async (req, res) => {
     // Parse query params exactly like admin-site
     const { status, category, department, search, page = '1', limit = '10' } = req.query;
 
-    // Build query exactly like admin-site - only public procurements
-    let query = { isPublic: true };
+    // Build query - show all procurements (isPublic filter removed for now)
+    let query = {};
     
     if (status) query.status = status;
     if (category) query.category = category;
