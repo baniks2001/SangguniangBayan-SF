@@ -1,7 +1,26 @@
 // Serverless function to submit job application
-// Based on admin-site routes/applications.js pattern
-import { connectDB, getDB } from './_lib/mongodb';
-import { ObjectId } from 'mongodb';
+// Inline MongoDB connection - no shared imports for Vercel compatibility
+import { MongoClient, Db, ObjectId } from 'mongodb';
+
+const MONGODB_URI = process.env.MONGODB_URI;
+const MONGODB_DB_NAME = process.env.MONGODB_DB_NAME || 'sangguniang_bayan';
+
+let client: MongoClient | null = null;
+let db: Db | null = null;
+
+async function connectDB(): Promise<{ client: MongoClient; db: Db }> {
+  if (client && db) return { client, db };
+  if (!MONGODB_URI) throw new Error('MONGODB_URI not defined');
+  client = new MongoClient(MONGODB_URI);
+  await client.connect();
+  db = client.db(MONGODB_DB_NAME);
+  return { client, db };
+}
+
+function getDB(): Db {
+  if (!db) throw new Error('Database not connected');
+  return db;
+}
 
 export default async function handler(req: any, res: any) {
   res.setHeader('Access-Control-Allow-Credentials', 'true');

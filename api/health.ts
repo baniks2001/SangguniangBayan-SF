@@ -1,6 +1,26 @@
 // Health check endpoint
-// Based on admin-site pattern
-import { connectDB, getDB } from './_lib/mongodb';
+// Inline MongoDB connection - no shared imports for Vercel compatibility
+import { MongoClient, Db } from 'mongodb';
+
+const MONGODB_URI = process.env.MONGODB_URI;
+const MONGODB_DB_NAME = process.env.MONGODB_DB_NAME || 'sangguniang_bayan';
+
+let client: MongoClient | null = null;
+let db: Db | null = null;
+
+async function connectDB(): Promise<{ client: MongoClient; db: Db }> {
+  if (client && db) return { client, db };
+  if (!MONGODB_URI) throw new Error('MONGODB_URI not defined');
+  client = new MongoClient(MONGODB_URI);
+  await client.connect();
+  db = client.db(MONGODB_DB_NAME);
+  return { client, db };
+}
+
+function getDB(): Db {
+  if (!db) throw new Error('Database not connected');
+  return db;
+}
 
 export default async function handler(req: any, res: any) {
   res.setHeader('Access-Control-Allow-Credentials', 'true');
@@ -18,18 +38,29 @@ export default async function handler(req: any, res: any) {
   }
 
   try {
-    // Test database connection (admin-site pattern)
+    // Check if environment variable is set
+    const hasMongoUri = !!MONGODB_URI;
+    
+    if (!hasMongoUri) {
+      return res.status(500).json({
+        status: 'ERROR',
+        timestamp: new Date().toISOString(),
+        error: 'MONGODB_URI environment variable is not set',
+        hint: 'Please set MONGODB_URI in your Vercel project settings'
+      });
+    }
+
+    // Test database connection
     await connectDB();
     const db = getDB();
-    
-    // Test a simple operation
     await db.admin().ping();
 
     res.status(200).json({
       status: 'OK',
       timestamp: new Date().toISOString(),
       environment: process.env.NODE_ENV || 'development',
-      database: 'MongoDB Atlas - Connected'
+      database: 'MongoDB Atlas - Connected',
+      hasEnvVars: true
     });
   } catch (error) {
     console.error('Health check failed:', error);
@@ -37,7 +68,8 @@ export default async function handler(req: any, res: any) {
       status: 'ERROR',
       timestamp: new Date().toISOString(),
       error: 'Database connection failed',
-      details: error instanceof Error ? error.message : 'Unknown error'
+      details: error instanceof Error ? error.message : 'Unknown error',
+      hasEnvVars: !!MONGODB_URI
     });
   }
 }
