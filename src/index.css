@@ -36,3 +36,43 @@ code {
     -webkit-line-clamp: 3;
   }
 }
+
+/* Resolution/Ordinance content styles for document builder output */
+.resolution-content,
+.ordinance-content {
+  font-family: 'Times New Roman', Times, serif;
+  line-height: 1.6;
+}
+
+.resolution-content p,
+.ordinance-content p {
+  margin-bottom: 0.75rem;
+}
+
+.resolution-content table,
+.ordinance-content table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1rem 0;
+}
+
+.resolution-content td,
+.ordinance-content td,
+.resolution-content th,
+.ordinance-content th {
+  border: 1px solid #000;
+  padding: 8px;
+}
+
+.resolution-content img,
+.ordinance-content img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+  margin: 1rem 0;
+}
+
+.resolution-content span[style*="font-size"],
+.ordinance-content span[style*="font-size"] {
+  display: inline;
+}

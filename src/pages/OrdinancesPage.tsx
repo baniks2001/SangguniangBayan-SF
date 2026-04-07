@@ -128,9 +128,15 @@ const OrdinancesPage: React.FC = () => {
               <h3 className="text-lg font-semibold text-gray-900 mb-4">
                 {selectedOrdinance.title}
               </h3>
-              <div className="prose max-w-none mb-6 text-gray-700 whitespace-pre-wrap">
-                {selectedOrdinance.content}
-              </div>
+              <div 
+                className="prose max-w-none mb-6 text-gray-700 ordinance-content"
+                dangerouslySetInnerHTML={{ 
+                  __html: selectedOrdinance.content?.replace(
+                    /src="\/uploads\//g, 
+                    `src="${window.location.protocol}//${window.location.host}/uploads/`
+                  ) || '' 
+                }}
+              />
 
               {/* PDF Actions */}
               <div className="border-t pt-4 mt-4 flex gap-3">

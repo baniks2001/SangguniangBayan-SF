@@ -128,9 +128,15 @@ const ResolutionsPage: React.FC = () => {
               <h3 className="text-lg font-semibold text-gray-900 mb-4">
                 {selectedResolution.title}
               </h3>
-              <div className="prose max-w-none mb-6 text-gray-700 whitespace-pre-wrap">
-                {selectedResolution.content}
-              </div>
+              <div 
+                className="prose max-w-none mb-6 text-gray-700 resolution-content"
+                dangerouslySetInnerHTML={{ 
+                  __html: selectedResolution.content?.replace(
+                    /src="\/uploads\//g, 
+                    `src="${window.location.protocol}//${window.location.host}/uploads/`
+                  ) || '' 
+                }}
+              />
               {selectedResolution.signatories && selectedResolution.signatories.length > 0 && (
                 <div className="border-t pt-4 mt-4">
                   <p className="font-semibold text-gray-900 mb-2">Signatories:</p>
