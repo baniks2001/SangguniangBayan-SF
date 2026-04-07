@@ -32,7 +32,7 @@ export const resolutionsApi = {
     const queryParams = new URLSearchParams();
     queryParams.append('id', id);
     if (download) queryParams.append('download', 'true');
-    return `${API_BASE_URL}/resolution-pdf?${queryParams}`;
+    return `${API_BASE_URL}/resolutions?${queryParams}`;
   },
   viewPdf: (id: string) => {
     window.open(resolutionsApi.getPdfUrl(id), '_blank');
@@ -63,7 +63,7 @@ export const ordinancesApi = {
     const queryParams = new URLSearchParams();
     queryParams.append('id', id);
     if (download) queryParams.append('download', 'true');
-    return `${API_BASE_URL}/ordinance-pdf?${queryParams}`;
+    return `${API_BASE_URL}/ordinances?${queryParams}`;
   },
   viewPdf: (id: string) => {
     window.open(ordinancesApi.getPdfUrl(id), '_blank');
@@ -112,7 +112,7 @@ export const organizationApi = {
   getPublic: async (params?: { category?: string }) => {
     const queryParams = new URLSearchParams();
     if (params?.category) queryParams.append('category', params.category);
-    const response = await fetch(`${API_BASE_URL}/organization/public/all?${queryParams}`);
+    const response = await fetch(`${API_BASE_URL}/organization?${queryParams}`);
     return handleResponse(response);
   }
 };
@@ -123,7 +123,7 @@ export const calendarApi = {
     const queryParams = new URLSearchParams();
     if (params?.upcoming) queryParams.append('upcoming', 'true');
     if (params?.limit) queryParams.append('limit', params.limit.toString());
-    const response = await fetch(`${API_BASE_URL}/calendar/public/all?${queryParams}`);
+    const response = await fetch(`${API_BASE_URL}/calendar?${queryParams}`);
     return handleResponse(response);
   }
 };

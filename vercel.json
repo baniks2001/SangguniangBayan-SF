@@ -50,14 +50,6 @@
       "destination": "/api/calendar.ts"
     },
     {
-      "source": "/api/resolution-pdf",
-      "destination": "/api/resolution-pdf.ts"
-    },
-    {
-      "source": "/api/ordinance-pdf",
-      "destination": "/api/ordinance-pdf.ts"
-    },
-    {
       "source": "/(.*)",
       "destination": "/index.html"
     }

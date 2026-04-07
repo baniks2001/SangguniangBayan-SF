@@ -1,6 +1,29 @@
-// Serverless function to fetch published resolutions
-// Based on admin-site routes/resolutions.js pattern
+// Serverless function for resolutions (list + PDF)
+// Consolidated for Vercel Hobby plan (12 function limit)
 import { connectDB, getDB } from './_lib/mongodb';
+import { ObjectId } from 'mongodb';
+import https from 'https';
+import http from 'http';
+
+// Helper function to fetch and stream PDF
+const streamPdf = (url: string, res: any, filename: string): Promise<void> => {
+  return new Promise((resolve, reject) => {
+    const client = url.startsWith('https') ? https : http;
+    client.get(url, (response) => {
+      if (response.statusCode !== 200) {
+        reject(new Error(`PDF not found: ${response.statusCode}`));
+        return;
+      }
+      res.setHeader('Content-Type', 'application/pdf');
+      if (filename) {
+        res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+      }
+      response.pipe(res);
+      response.on('end', () => resolve());
+      response.on('error', (err) => reject(err));
+    }).on('error', (err) => reject(err));
+  });
+};
 
 export default async function handler(req: any, res: any) {
   res.setHeader('Access-Control-Allow-Credentials', 'true');
@@ -18,14 +41,38 @@ export default async function handler(req: any, res: any) {
   }
 
   try {
-    // Connect to database first (admin-site pattern)
+    const { id, download, series, search, page = '1', limit = '10' } = req.query;
+
+    // Connect to database (admin-site pattern)
     await connectDB();
     const db = getDB();
     const collection = db.collection('resolutions');
 
-    const { series, search, page = '1', limit = '10' } = req.query;
+    // If ID provided, serve PDF
+    if (id) {
+      const resolution = await collection.findOne({
+        _id: new ObjectId(id as string),
+        isPublic: true,
+        status: 'Approved'
+      });
 
-    // Build query - only approved and public (public filter)
+      if (!resolution) {
+        return res.status(404).json({ error: 'Resolution not found' });
+      }
+
+      if (!resolution.pdfUrl) {
+        return res.status(404).json({ error: 'PDF not available for this resolution' });
+      }
+
+      const filename = download 
+        ? `Resolution-${resolution.resolutionNumber}-${resolution.series}.pdf`
+        : '';
+
+      await streamPdf(resolution.pdfUrl, res, filename);
+      return;
+    }
+
+    // Otherwise, list resolutions
     const query: Record<string, unknown> = { isPublic: true, status: 'Approved' };
     
     if (series) query.series = series;
@@ -51,7 +98,6 @@ export default async function handler(req: any, res: any) {
       collection.countDocuments(query)
     ]);
 
-    // Transform _id to id for frontend compatibility (admin-site pattern)
     const transformedResolutions = resolutions.map(res => ({
       ...res,
       id: res._id.toString(),
@@ -67,9 +113,9 @@ export default async function handler(req: any, res: any) {
       }
     });
   } catch (error) {
-    console.error('Error fetching resolutions:', error);
+    console.error('Error:', error);
     res.status(500).json({ 
-      error: 'Failed to fetch resolutions', 
+      error: 'Failed to process request', 
       details: error instanceof Error ? error.message : 'Unknown error'
     });
   }

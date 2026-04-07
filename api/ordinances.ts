@@ -1,6 +1,29 @@
-// Serverless function to fetch published ordinances
-// Based on admin-site routes/ordinances.js pattern
+// Serverless function for ordinances (list + PDF)
+// Consolidated for Vercel Hobby plan (12 function limit)
 import { connectDB, getDB } from './_lib/mongodb';
+import { ObjectId } from 'mongodb';
+import https from 'https';
+import http from 'http';
+
+// Helper function to fetch and stream PDF
+const streamPdf = (url: string, res: any, filename: string): Promise<void> => {
+  return new Promise((resolve, reject) => {
+    const client = url.startsWith('https') ? https : http;
+    client.get(url, (response) => {
+      if (response.statusCode !== 200) {
+        reject(new Error(`PDF not found: ${response.statusCode}`));
+        return;
+      }
+      res.setHeader('Content-Type', 'application/pdf');
+      if (filename) {
+        res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+      }
+      response.pipe(res);
+      response.on('end', () => resolve());
+      response.on('error', (err) => reject(err));
+    }).on('error', (err) => reject(err));
+  });
+};
 
 export default async function handler(req: any, res: any) {
   res.setHeader('Access-Control-Allow-Credentials', 'true');
@@ -18,14 +41,38 @@ export default async function handler(req: any, res: any) {
   }
 
   try {
-    // Connect to database first (admin-site pattern)
+    const { id, download, series, search, page = '1', limit = '10' } = req.query;
+
+    // Connect to database (admin-site pattern)
     await connectDB();
     const db = getDB();
     const collection = db.collection('ordinances');
 
-    const { series, search, page = '1', limit = '10' } = req.query;
+    // If ID provided, serve PDF
+    if (id) {
+      const ordinance = await collection.findOne({
+        _id: new ObjectId(id as string),
+        isPublic: true,
+        status: 'Approved'
+      });
 
-    // Build query - only approved and public (public filter)
+      if (!ordinance) {
+        return res.status(404).json({ error: 'Ordinance not found' });
+      }
+
+      if (!ordinance.pdfUrl) {
+        return res.status(404).json({ error: 'PDF not available for this ordinance' });
+      }
+
+      const filename = download 
+        ? `Ordinance-${ordinance.ordinanceNumber}-${ordinance.series}.pdf`
+        : '';
+
+      await streamPdf(ordinance.pdfUrl, res, filename);
+      return;
+    }
+
+    // Otherwise, list ordinances
     const query: Record<string, unknown> = { isPublic: true, status: 'Approved' };
     
     if (series) query.series = series;
@@ -51,7 +98,6 @@ export default async function handler(req: any, res: any) {
       collection.countDocuments(query)
     ]);
 
-    // Transform _id to id for frontend compatibility (admin-site pattern)
     const transformedOrdinances = ordinances.map(ord => ({
       ...ord,
       id: ord._id.toString(),
@@ -67,9 +113,9 @@ export default async function handler(req: any, res: any) {
       }
     });
   } catch (error) {
-    console.error('Error fetching ordinances:', error);
+    console.error('Error:', error);
     res.status(500).json({ 
-      error: 'Failed to fetch ordinances', 
+      error: 'Failed to process request', 
       details: error instanceof Error ? error.message : 'Unknown error'
     });
   }
