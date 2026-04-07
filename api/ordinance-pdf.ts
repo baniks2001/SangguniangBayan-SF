@@ -1,28 +1,8 @@
 // Serverless function to view/download ordinance PDF
-import { MongoClient, Db, ObjectId } from 'mongodb';
+import { connectToDatabase } from './_lib/mongodb';
+import { ObjectId } from 'mongodb';
 import https from 'https';
 import http from 'http';
-
-let cachedClient: MongoClient | null = null;
-let cachedDb: Db | null = null;
-
-const MONGODB_URI = process.env.MONGODB_URI;
-const MONGODB_DB_NAME = process.env.MONGODB_DB_NAME || 'sangguniang_bayan';
-
-async function connectToDatabase(): Promise<{ client: MongoClient; db: Db }> {
-  if (cachedClient && cachedDb) {
-    return { client: cachedClient, db: cachedDb };
-  }
-  if (!MONGODB_URI) {
-    throw new Error('MONGODB_URI not defined');
-  }
-  const client = new MongoClient(MONGODB_URI as string);
-  await client.connect();
-  const db = client.db(MONGODB_DB_NAME);
-  cachedClient = client;
-  cachedDb = db;
-  return { client, db };
-}
 
 // Helper function to fetch and stream PDF
 const streamPdf = (url: string, res: any, filename: string): Promise<void> => {
