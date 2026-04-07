@@ -12,6 +12,7 @@ interface Ordinance {
   isPublic: boolean;
   author: string;
   createdAt: string;
+  pdfUrl?: string;
 }
 
 const OrdinancesPage: React.FC = () => {
@@ -32,8 +33,8 @@ const OrdinancesPage: React.FC = () => {
       const response = await ordinancesApi.getAll({
         search: searchTerm,
         page: currentPage,
-        limit: 10,
-        status: 'Approved'  // Only fetch approved ordinances
+        limit: 10
+        // status: 'Approved' - temporarily removed for testing
       });
       setOrdinances(response.ordinances || []);
       setTotalPages(response.pagination?.total || 1);
@@ -142,14 +143,14 @@ const OrdinancesPage: React.FC = () => {
               {/* PDF Actions */}
               <div className="border-t pt-4 mt-4 flex gap-3">
                 <button
-                  onClick={() => ordinancesApi.viewPdf(selectedOrdinance.id)}
+                  onClick={() => ordinancesApi.viewPdf(selectedOrdinance.pdfUrl)}
                   className="flex items-center px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors"
                 >
                   <Eye className="h-4 w-4 mr-2" />
                   View PDF
                 </button>
                 <button
-                  onClick={() => ordinancesApi.downloadPdf(selectedOrdinance.id, selectedOrdinance.ordinanceNumber, selectedOrdinance.series)}
+                  onClick={() => ordinancesApi.downloadPdf(selectedOrdinance.pdfUrl, selectedOrdinance.ordinanceNumber, selectedOrdinance.series)}
                   className="flex items-center px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 transition-colors"
                 >
                   <Download className="h-4 w-4 mr-2" />
@@ -200,7 +201,7 @@ const OrdinancesPage: React.FC = () => {
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
-                        ordinancesApi.viewPdf(ordinance.id);
+                        ordinancesApi.viewPdf(ordinance.pdfUrl);
                       }}
                       className="p-2 text-green-600 hover:bg-green-50 rounded-md transition-colors"
                       title="View PDF"
@@ -210,7 +211,7 @@ const OrdinancesPage: React.FC = () => {
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
-                        ordinancesApi.downloadPdf(ordinance.id, ordinance.ordinanceNumber, ordinance.series);
+                        ordinancesApi.downloadPdf(ordinance.pdfUrl, ordinance.ordinanceNumber, ordinance.series);
                       }}
                       className="p-2 text-gray-600 hover:bg-gray-100 rounded-md transition-colors"
                       title="Download PDF"

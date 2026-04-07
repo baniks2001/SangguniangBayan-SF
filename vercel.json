@@ -10,14 +10,6 @@
       "destination": "/api/health.js"
     },
     {
-      "source": "/api/resolutions",
-      "destination": "/api/resolutions.js"
-    },
-    {
-      "source": "/api/ordinances",
-      "destination": "/api/ordinances.js"
-    },
-    {
       "source": "/api/vacancies",
       "destination": "/api/vacancies.js"
     },

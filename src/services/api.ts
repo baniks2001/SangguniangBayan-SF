@@ -32,19 +32,34 @@ export const resolutionsApi = {
     const response = await fetch(`${API_BASE_URL}/resolutions?${queryParams}`);
     return handleResponse(response);
   },
-  getPdfUrl: (id: string, download?: boolean) => {
-    const queryParams = new URLSearchParams();
-    queryParams.append('id', id);
-    if (download) queryParams.append('download', 'true');
-    return `${API_BASE_URL}/resolutions?${queryParams}`;
+  // Get full URL for PDF file
+  getPdfUrl: (pdfUrl: string | undefined) => {
+    if (!pdfUrl) return null;
+    // If already a full URL, return as-is
+    if (pdfUrl.startsWith('http')) return pdfUrl;
+    // Otherwise prepend the static base URL
+    return `${STATIC_BASE_URL}${pdfUrl}`;
   },
-  viewPdf: (id: string) => {
-    window.open(resolutionsApi.getPdfUrl(id), '_blank');
+  // View PDF in new tab
+  viewPdf: (pdfUrl: string | undefined) => {
+    const fullUrl = resolutionsApi.getPdfUrl(pdfUrl);
+    if (fullUrl) {
+      window.open(fullUrl, '_blank');
+    } else {
+      console.error('No PDF URL available');
+    }
   },
-  downloadPdf: (id: string, resolutionNumber: string, series: string) => {
+  // Download PDF with custom filename
+  downloadPdf: (pdfUrl: string | undefined, resolutionNumber: string, series: string) => {
+    const fullUrl = resolutionsApi.getPdfUrl(pdfUrl);
+    if (!fullUrl) {
+      console.error('No PDF URL available');
+      return;
+    }
     const link = document.createElement('a');
-    link.href = resolutionsApi.getPdfUrl(id, true);
+    link.href = fullUrl;
     link.download = `Resolution-${resolutionNumber}-${series}.pdf`;
+    link.target = '_blank';
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -64,19 +79,34 @@ export const ordinancesApi = {
     const response = await fetch(`${API_BASE_URL}/ordinances?${queryParams}`);
     return handleResponse(response);
   },
-  getPdfUrl: (id: string, download?: boolean) => {
-    const queryParams = new URLSearchParams();
-    queryParams.append('id', id);
-    if (download) queryParams.append('download', 'true');
-    return `${API_BASE_URL}/ordinances?${queryParams}`;
+  // Get full URL for PDF file
+  getPdfUrl: (pdfUrl: string | undefined) => {
+    if (!pdfUrl) return null;
+    // If already a full URL, return as-is
+    if (pdfUrl.startsWith('http')) return pdfUrl;
+    // Otherwise prepend the static base URL
+    return `${STATIC_BASE_URL}${pdfUrl}`;
   },
-  viewPdf: (id: string) => {
-    window.open(ordinancesApi.getPdfUrl(id), '_blank');
+  // View PDF in new tab
+  viewPdf: (pdfUrl: string | undefined) => {
+    const fullUrl = ordinancesApi.getPdfUrl(pdfUrl);
+    if (fullUrl) {
+      window.open(fullUrl, '_blank');
+    } else {
+      console.error('No PDF URL available');
+    }
   },
-  downloadPdf: (id: string, ordinanceNumber: string, series: string) => {
+  // Download PDF with custom filename
+  downloadPdf: (pdfUrl: string | undefined, ordinanceNumber: string, series: string) => {
+    const fullUrl = ordinancesApi.getPdfUrl(pdfUrl);
+    if (!fullUrl) {
+      console.error('No PDF URL available');
+      return;
+    }
     const link = document.createElement('a');
-    link.href = ordinancesApi.getPdfUrl(id, true);
+    link.href = fullUrl;
     link.download = `Ordinance-${ordinanceNumber}-${series}.pdf`;
+    link.target = '_blank';
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
