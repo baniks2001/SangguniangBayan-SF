@@ -216,6 +216,9 @@ const PublicLayout: React.FC = () => {
             <p className="text-blue-300 text-xs mt-2">
               Official Website of the Sangguniang Bayan of San Francisco, Southern Leyte
             </p>
+            <p className="text-blue-300 text-xs mt-2">
+              Developed by: Servando S. Tio III
+            </p>
           </div>
         </div>
       </footer>
