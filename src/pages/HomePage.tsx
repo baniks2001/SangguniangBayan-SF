@@ -28,7 +28,7 @@ import {
 
 // Hardcoded system information
 const WELCOME_TITLE = 'Welcome to Sangguniang Bayan Transparency Website';
-const WELCOME_SUBTITLE = 'San Francisco, Southern Leyte';
+const WELCOME_SUBTITLE = 'Municipal Compound, San Francisco, Southern Leyte, 6613 Philippines';
 const WELCOME_MESSAGE = 'Transparency in Governance, Service to the People';
 
 // Hero carousel images from homepage-images folder
@@ -214,21 +214,111 @@ const HomePage: React.FC = () => {
           <h2 className="text-3xl font-bold text-gray-900 mb-4">About Sangguniang Bayan</h2>
           <div className="w-24 h-1 bg-blue-600 mx-auto"></div>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-6xl mx-auto">
           <div className="bg-white rounded-xl shadow-lg p-8 hover:shadow-xl transition-shadow">
             <div className="bg-blue-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4"><Target className="h-8 w-8 text-blue-600" /></div>
             <h3 className="text-xl font-bold text-center mb-3">Our Mission</h3>
-            <p className="text-gray-600 text-center leading-relaxed">To enact ordinances and approve resolutions that promote the general welfare, ensure efficient delivery of basic services, and foster sustainable development.</p>
+            <p className="text-gray-600 text-center leading-relaxed">"TO ENACT QUALITY LEGISLATION AND EXERCISE EFFECTIVE OVERSIGHT THAT PROMOTES SOCIAL JUSTICE, ECONOMIC GROWTH, AND ENVIRONMENTAL SUSTAINABILITY THROUGH INCLUSIVE, TRANSPARENT, AND PARTICIPATORY GOVERNANCE"</p>
           </div>
           <div className="bg-white rounded-xl shadow-lg p-8 hover:shadow-xl transition-shadow">
             <div className="bg-green-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4"><Heart className="h-8 w-8 text-green-600" /></div>
             <h3 className="text-xl font-bold text-center mb-3">Our Vision</h3>
-            <p className="text-gray-600 text-center leading-relaxed">A transparent, accountable, and progressive local legislative body that serves as a model of good governance and excellence in public service.</p>
+            <p className="text-gray-600 text-center leading-relaxed">"A PREMIER AND PROACTIVE LEGISLATIVE BODY IN SOUTHERN LEYTE, ENACTING RESPONSIVE AND INNOVATIVE POLICIES THAT EMPOWER A RESILIENT, GOD-LOVING, AND PROSPEROUS SAN FRANCISCO</p>
           </div>
-          <div className="bg-white rounded-xl shadow-lg p-8 hover:shadow-xl transition-shadow">
-            <div className="bg-purple-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4"><Gavel className="h-8 w-8 text-purple-600" /></div>
-            <h3 className="text-xl font-bold text-center mb-3">Our Mandate</h3>
-            <p className="text-gray-600 text-center leading-relaxed">To exercise legislative powers, approve local budgets, conduct oversight functions, and represent the interests of our constituents.</p>
+        </div>
+      </section>
+
+      {/* Official Seal Section */}
+      <section className="bg-gradient-to-b from-white to-gray-50 py-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+            {/* Left Side - Official Seal */}
+            <div className="flex flex-col items-center">
+              <div className="bg-white rounded-full shadow-2xl p-4 mb-6 border-4 border-blue-100 ring-4 ring-blue-50">
+                <img 
+                  src="/homepage-images/logo.png" 
+                  alt="Official Seal of Sangguniang Bayan" 
+                  className="h-80 w-80 md:h-96 md:w-96 lg:h-[28rem] lg:w-[28rem] object-contain"
+                />
+              </div>
+            </div>    
+            
+            {/* Right Side - Seal Information */}
+            <div className="space-y-6">
+              <div>
+                <h3 className="text-3xl font-bold text-gray-900 mb-4">The Official Seal of the Sangguniang Bayan</h3>
+                <div className="w-24 h-1 bg-blue-600 mb-6"></div>
+              </div>
+              <div className="space-y-4 text-gray-600 leading-relaxed">
+                <p>
+                  <strong>Symbolism of the Official Seal:</strong>
+                  <strong> Sangguniang Bayan of San Francisco, Southern Leyte</strong>
+                </p>
+                <p> 
+                </p>
+                <div className="bg-blue-50 rounded-lg p-6 border-l-4 border-blue-600">
+                  <ul className="space-y-1 text-blue-800 text-sm">
+                    <li className="flex items-start">
+                      <span className="mr-2"></span>
+                      <span><strong>The Scale and the Quil (The Legislative Mandate)</strong></span>
+                      <span className="mr-2"></span>
+                    </li>
+                    <li className="flex items-start">
+                      <span className="mr-2"></span>
+                      <span>  The Scale Represents the unwavering commitment of the Council to social justice and equality,
+                        signifying that every ordinance is weighed with fairness. The Quill represents the power of legislation and the
+                        intellectual labor of the members in crafting laws that protect the welfare of the people.
+                      </span>
+                    </li>
+                    <p></p>
+                    <li className="flex items-start">
+                      <span className="mr-2"></span>
+                      <span><strong>The Sun and the Gear (Progress and Unity)</strong></span>
+                      <span className="mr-2"></span>
+                    </li>
+                    <li className="flex items-start">
+                      <span className="mr-2"></span>
+                      <span>The Sun symbolizes the distinct barangays of San Francisco, unified under a single version of hope and transarency. The integrated
+                        Gear reflects the Council's role as the engine of progress, driving the municipality toward modernization and economic growth.
+                      </span>
+                    </li>
+                    <li className="flex items-start">
+                      <span className="mr-2"></span>
+                      <span><strong>The Coconut Fronds and Waves (Geography and Heritage)</strong></span>
+                      <span className="mr-2"></span>
+                    </li>
+                    <li className="flex items-start">
+                      <span className="mr-2"></span>
+                      <span>The Sun symbolizes the distinct barangays of San Francisco, unified under a single version of hope and transarency. The integrated
+                        Gear reflects the Council's role as the engine of progress, driving the municipality toward modernization and economic growth.
+                      </span>
+                    </li>
+                    <li className="flex items-start">
+                      <span className="mr-2"></span>
+                      <span><strong>The Open Book (Transparebcy and Law)</strong></span>
+                      <span className="mr-2"></span>
+                    </li>
+                    <li className="flex items-start">
+                      <span className="mr-2"></span>
+                      <span>The Sun symbolizes the distinct barangays of San Francisco, unified under a single version of hope and transarency. The integrated
+                        Gear reflects the Council's role as the engine of progress, driving the municipality toward modernization and economic growth.
+                      </span>
+                    </li>
+                    <li className="flex items-start">
+                      <span className="mr-2"></span>
+                      <span><strong>The Navy and Gold Palette (Authority and Excellence)</strong></span>
+                      <span className="mr-2"></span>
+                    </li>
+                    <li className="flex items-start">
+                      <span className="mr-2"></span>
+                      <span>The Sun symbolizes the distinct barangays of San Francisco, unified under a single version of hope and transarency. The integrated
+                        Gear reflects the Council's role as the engine of progress, driving the municipality toward modernization and economic growth.
+                      </span>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </section>
@@ -238,7 +328,7 @@ const HomePage: React.FC = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold text-gray-900 mb-4">Legislative Organization</h2>
-            <p className="text-gray-600 max-w-2xl mx-auto">Meet the dedicated officials serving the people of San Francisco</p>
+            <p className="text-gray-600 max-w-2xl mx-auto">Meet the dedicated officials serving the people of San Francisco, Southern Leyte</p>
             <div className="w-24 h-1 bg-blue-600 mx-auto mt-4"></div>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
