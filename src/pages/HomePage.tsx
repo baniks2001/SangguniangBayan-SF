@@ -285,19 +285,20 @@ const HomePage: React.FC = () => {
                     </li>
                     <li className="flex items-start">
                       <span className="mr-2"></span>
-                      <span>The Sun symbolizes the distinct barangays of San Francisco, unified under a single version of hope and transarency. The integrated
-                        Gear reflects the Council's role as the engine of progress, driving the municipality toward modernization and economic growth.
+                      <span>The Coconut Fronds pay homage to the "Tree of Life." representing the agricultural
+                        roots and the resilience of the San Franciscanos people. The Waves signify the town's coastal
+                        identity and the life giving waters of Sogod Bay, reminding the leadership to remain constant and steadfast.
                       </span>
                     </li>
                     <li className="flex items-start">
                       <span className="mr-2"></span>
-                      <span><strong>The Open Book (Transparebcy and Law)</strong></span>
+                      <span><strong>The Open Book (Transparency and Law)</strong></span>
                       <span className="mr-2"></span>
                     </li>
                     <li className="flex items-start">
                       <span className="mr-2"></span>
-                      <span>The Sun symbolizes the distinct barangays of San Francisco, unified under a single version of hope and transarency. The integrated
-                        Gear reflects the Council's role as the engine of progress, driving the municipality toward modernization and economic growth.
+                      <span>The Open Book at the base represents the Local Government Code and the Constitution. It serves as a reminder
+                        that all legislative actions are rooted in the rule of law and remain open to the public, ensuring a clean and proactive administration.
                       </span>
                     </li>
                     <li className="flex items-start">
@@ -307,8 +308,12 @@ const HomePage: React.FC = () => {
                     </li>
                     <li className="flex items-start">
                       <span className="mr-2"></span>
-                      <span>The Sun symbolizes the distinct barangays of San Francisco, unified under a single version of hope and transarency. The integrated
-                        Gear reflects the Council's role as the engine of progress, driving the municipality toward modernization and economic growth.
+                      <span>* Deep Navy Blue: Signifies the depth of commitment, stability, and the formal authority of the institution.
+                      </span>
+                    </li>
+                    <li className="flex items-start">
+                      <span className="mr-2"></span>
+                      <span>* Gold: Represents the "Premier" status of the council, symbolizing excellence, prosperity, and the high standard of public service.
                       </span>
                     </li>
                   </ul>
