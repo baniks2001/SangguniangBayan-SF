@@ -230,7 +230,7 @@ const HomePage: React.FC = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
             {/* Left Side - Official Seal */}
             <div className="flex flex-col items-center">
-              <div className="bg-white rounded-full shadow-2xl p-4 mb-6 border-4 border-blue-100 ring-4 ring-blue-50">
+              <div className="bg-white rounded-full shadow-2xl p-4 mb-6">
                 <img 
                   src="/homepage-images/logo.png" 
                   alt="Official Seal of Sangguniang Bayan" 
