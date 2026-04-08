@@ -67,7 +67,7 @@ const ORGANIZATION_CATEGORIES = [
 ];
 
 // Hardcoded statistics - default values
-const DEFAULT_STATS = { resolutions: 0, ordinances: 0, yearsServing: 35, population: '13,000+' };
+const DEFAULT_STATS = { resolutions: 0, ordinances: 0, yearsServing: 76, population: '12,900+' };
 
 const HomePage: React.FC = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -183,9 +183,9 @@ const HomePage: React.FC = () => {
           <div className="mb-6 bg-white/10 backdrop-blur-sm p-4 rounded-full animate-fade-in-up">
             <img src="/homepage-images/logo.png" alt="Logo" className="h-32 w-32 md:h-48 md:w-48 object-contain animate-pulse-slow" />
           </div>
-          <h1 className="text-4xl md:text-6xl font-bold text-white mb-4 text-center drop-shadow-lg animate-fade-in-up delay-200">{WELCOME_TITLE}</h1>
-          <p className="text-xl md:text-3xl text-blue-100 mb-2 text-center drop-shadow-md animate-fade-in-up delay-400">{WELCOME_SUBTITLE}</p>
-          <p className="text-lg md:text-xl text-blue-200 text-center max-w-2xl drop-shadow-sm animate-fade-in-up delay-600">{WELCOME_MESSAGE}</p>
+          <h1 className="text-4xl md:text-6xl font-bold text-white mb-4 text-center drop-shadow-lg animate-fade-in-up animate-pulse-glow delay-200">{WELCOME_TITLE}</h1>
+          <p className="text-xl md:text-3xl text-blue-100 mb-2 text-center drop-shadow-md animate-slide-in-left delay-400">{WELCOME_SUBTITLE}</p>
+          <p className="text-lg md:text-xl text-blue-200 text-center max-w-2xl drop-shadow-sm animate-slide-in-right delay-600">{WELCOME_MESSAGE}</p>
         </div>
         <button onClick={prevSlide} className="absolute left-4 top-1/2 -translate-y-1/2 z-20 bg-white/20 hover:bg-white/30 text-white p-3 rounded-full backdrop-blur-sm transition"><ChevronLeft className="h-8 w-8" /></button>
         <button onClick={nextSlide} className="absolute right-4 top-1/2 -translate-y-1/2 z-20 bg-white/20 hover:bg-white/30 text-white p-3 rounded-full backdrop-blur-sm transition"><ChevronRight className="h-8 w-8" /></button>

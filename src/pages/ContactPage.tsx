@@ -257,7 +257,7 @@ const ContactPage: React.FC = () => {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
             <div>
               <h3 className="text-lg font-semibold mb-2">Legislative Sessions</h3>
-              <p className="text-blue-200">Every Tuesday at 9:00 AM</p>
+              <p className="text-blue-200">Every Monday at 9:00 AM</p>
               <p className="text-blue-300 text-sm mt-1">Session Hall, Municipal Hall</p>
             </div>
             <div>
