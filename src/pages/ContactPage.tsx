@@ -12,11 +12,11 @@ const FacebookIcon: React.FC<{ className?: string }> = ({ className }) => (
 const SYSTEM_NAME = 'Sangguniang Bayan';
 const MUNICIPALITY = 'San Francisco';
 const PROVINCE = 'Southern Leyte';
-const OFFICE_ADDRESS = 'Municipal Hall, Poblacion, San Francisco, Southern Leyte 6210, Philippines';
+const OFFICE_ADDRESS = 'Municipal Compound, Poblacion, San Francisco, Southern Leyte 6210, Philippines';
 const CONTACT_EMAIL = 'sb.sanfrancisco@gmail.com';
-const CONTACT_PHONE = '(053) 514-1234';
+const CONTACT_PHONE = '0926-905-3859';
 const OFFICE_HOURS = 'Monday - Friday, 8:00 AM - 5:00 PM';
-const FACEBOOK_URL = 'https://facebook.com/sb.sanfrancisco';
+const FACEBOOK_URL = 'https://web.facebook.com/profile.php?id=61578350702689';
 
 // Google Maps embed URL for San Francisco, Southern Leyte Municipal Hall
 // Using standard Google Maps embed format
@@ -148,7 +148,7 @@ const ContactPage: React.FC = () => {
                 />
               </div>
               <p className="mt-3 text-sm text-gray-500 text-center">
-                Municipal Hall of San Francisco, Southern Leyte
+                Municipal Compound of San Francisco, Southern Leyte
               </p>
             </div>
           </div>
