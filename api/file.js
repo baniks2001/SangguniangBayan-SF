@@ -4,6 +4,10 @@
  * GET /api/file?id=:id&download=true - Download file with original filename
  */
 
+const https = require('https');
+const http = require('http');
+const { URL } = require('url');
+
 const ADMIN_API_URL = process.env.ADMIN_API_URL || 'http://localhost:5000/api';
 
 module.exports = async (req, res) => {
@@ -32,42 +36,81 @@ module.exports = async (req, res) => {
 
     // Build admin backend URL
     const endpoint = isDownload ? `/uploads/download/${id}` : `/uploads/file/${id}`;
-    const adminUrl = `${ADMIN_API_URL}${endpoint}`;
+    const adminUrl = new URL(`${ADMIN_API_URL}${endpoint}`);
+    
+    console.log(`[File Proxy] Requesting file from admin: ${adminUrl.toString()}`);
 
-    // Fetch file from admin backend
-    const response = await fetch(adminUrl, {
-      method: 'GET',
+    // Choose http or https based on URL
+    const client = adminUrl.protocol === 'https:' ? https : http;
+
+    // Use Node.js native http module for better serverless compatibility
+    const proxyRequest = new Promise((resolve, reject) => {
+      const request = client.get(adminUrl.toString(), {
+        timeout: 30000, // 30 second timeout
+      }, (response) => {
+        const statusCode = response.statusCode;
+        
+        if (statusCode === 404) {
+          return resolve({ error: 'File not found', status: 404 });
+        }
+        
+        if (statusCode >= 400) {
+          return resolve({ error: `Admin backend error: ${statusCode}`, status: statusCode });
+        }
+
+        // Copy headers from admin response
+        const contentType = response.headers['content-type'] || 'application/octet-stream';
+        const contentLength = response.headers['content-length'];
+        const contentDisposition = response.headers['content-disposition'];
+
+        res.setHeader('Content-Type', contentType);
+        if (contentLength) {
+          res.setHeader('Content-Length', contentLength);
+        }
+        if (contentDisposition) {
+          res.setHeader('Content-Disposition', contentDisposition);
+        }
+        
+        // Add cache headers for better performance
+        res.setHeader('Cache-Control', 'public, max-age=31536000');
+
+        // Pipe the response directly
+        response.pipe(res);
+        
+        response.on('end', () => {
+          resolve({ success: true });
+        });
+        
+        response.on('error', (err) => {
+          reject(err);
+        });
+      });
+
+      request.on('error', (error) => {
+        console.error('[File Proxy] Request error:', error.message);
+        reject(error);
+      });
+
+      request.on('timeout', () => {
+        request.destroy();
+        reject(new Error('Request timeout'));
+      });
     });
 
-    if (!response.ok) {
-      if (response.status === 404) {
-        return res.status(404).json({ error: 'File not found' });
-      }
-      throw new Error(`Admin backend error: ${response.status}`);
-    }
-
-    // Get content type and other headers from response
-    const contentType = response.headers.get('content-type') || 'application/octet-stream';
-    const contentLength = response.headers.get('content-length');
-    const contentDisposition = response.headers.get('content-disposition');
-
-    // Set response headers
-    res.setHeader('Content-Type', contentType);
-    if (contentLength) {
-      res.setHeader('Content-Length', contentLength);
-    }
-    if (contentDisposition) {
-      res.setHeader('Content-Disposition', contentDisposition);
-    }
-
-    // Stream the response
-    const blob = await response.blob();
-    const arrayBuffer = await blob.arrayBuffer();
-    const buffer = Buffer.from(arrayBuffer);
+    const result = await proxyRequest;
     
-    res.send(buffer);
+    if (result.error) {
+      return res.status(result.status || 500).json({ error: result.error });
+    }
+    
   } catch (error) {
-    console.error('File proxy error:', error);
-    res.status(500).json({ error: 'Failed to retrieve file' });
+    console.error('[File Proxy] Error:', error.message);
+    // Only send error if headers haven't been sent yet
+    if (!res.headersSent) {
+      res.status(500).json({ 
+        error: 'Failed to retrieve file',
+        details: error.message 
+      });
+    }
   }
 };
