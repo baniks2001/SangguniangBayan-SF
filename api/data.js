@@ -65,7 +65,9 @@ async function handleAnnouncements(db, params, res) {
     .sort({ priority: -1, createdAt: -1 })
     .toArray();
   
-  res.json(announcements.map(doc => ({ ...doc, id: doc._id.toString(), _id: undefined })));
+  res.json({
+    announcements: announcements.map(doc => ({ ...doc, id: doc._id.toString(), _id: undefined }))
+  });
 }
 
 async function handleCalendar(db, params, res) {
@@ -82,7 +84,9 @@ async function handleCalendar(db, params, res) {
     .limit(parseInt(limit))
     .toArray();
   
-  res.json(events.map(doc => ({ ...doc, id: doc._id.toString(), _id: undefined })));
+  res.json({
+    events: events.map(doc => ({ ...doc, id: doc._id.toString(), _id: undefined }))
+  });
 }
 
 async function handleDocuments(db, params, res) {
@@ -168,7 +172,9 @@ async function handleOrganization(db, params, res) {
     .sort({ displayOrder: 1, name: 1 })
     .toArray();
   
-  res.json(members.map(doc => ({ ...doc, id: doc._id.toString(), _id: undefined })));
+  res.json({
+    members: members.map(doc => ({ ...doc, id: doc._id.toString(), _id: undefined }))
+  });
 }
 
 async function handleProcurements(db, params, res) {
@@ -225,5 +231,7 @@ async function handleVacancies(db, params, res) {
     .sort({ postedAt: -1 })
     .toArray();
   
-  res.json(vacancies.map(doc => ({ ...doc, id: doc._id.toString(), _id: undefined })));
+  res.json({
+    vacancies: vacancies.map(doc => ({ ...doc, id: doc._id.toString(), _id: undefined }))
+  });
 }

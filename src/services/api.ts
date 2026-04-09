@@ -35,30 +35,26 @@ export const resolutionsApi = {
     const response = await fetch(`/api/data?${queryParams}`);
     return handleResponse(response);
   },
-  // Get full URL for PDF file
-  getPdfUrl: (pdfUrl: string | undefined) => {
-    if (!pdfUrl) return null;
-    if (pdfUrl.startsWith('http')) return pdfUrl;
-    return `${STATIC_BASE_URL}${pdfUrl}`;
-  },
-  // View PDF in new tab
-  viewPdf: (pdfUrl: string | undefined) => {
-    const fullUrl = resolutionsApi.getPdfUrl(pdfUrl);
-    if (fullUrl) {
-      window.open(fullUrl, '_blank');
-    } else {
-      console.error('No PDF URL available');
-    }
-  },
-  // Download PDF with custom filename
-  downloadPdf: (pdfUrl: string | undefined, resolutionNumber: string, series: string) => {
-    const fullUrl = resolutionsApi.getPdfUrl(pdfUrl);
-    if (!fullUrl) {
-      console.error('No PDF URL available');
+  // View PDF in new tab (uses GridFS fileId)
+  viewPdf: (fileId: string | undefined) => {
+    if (!fileId) {
+      console.error('No file ID available');
       return;
     }
+    // Use the consolidated file endpoint
+    const url = `/api/file?id=${fileId}`;
+    window.open(url, '_blank');
+  },
+  // Download PDF with custom filename (uses GridFS fileId)
+  downloadPdf: (fileId: string | undefined, resolutionNumber: string, series: string) => {
+    if (!fileId) {
+      console.error('No file ID available');
+      return;
+    }
+    // Use the consolidated file endpoint with download flag
+    const url = `/api/file?id=${fileId}&download=true`;
     const link = document.createElement('a');
-    link.href = fullUrl;
+    link.href = url;
     link.download = `Resolution-${resolutionNumber}-${series}.pdf`;
     link.target = '_blank';
     document.body.appendChild(link);
@@ -83,30 +79,26 @@ export const ordinancesApi = {
     const response = await fetch(`/api/data?${queryParams}`);
     return handleResponse(response);
   },
-  // Get full URL for PDF file
-  getPdfUrl: (pdfUrl: string | undefined) => {
-    if (!pdfUrl) return null;
-    if (pdfUrl.startsWith('http')) return pdfUrl;
-    return `${STATIC_BASE_URL}${pdfUrl}`;
-  },
-  // View PDF in new tab
-  viewPdf: (pdfUrl: string | undefined) => {
-    const fullUrl = ordinancesApi.getPdfUrl(pdfUrl);
-    if (fullUrl) {
-      window.open(fullUrl, '_blank');
-    } else {
-      console.error('No PDF URL available');
-    }
-  },
-  // Download PDF with custom filename
-  downloadPdf: (pdfUrl: string | undefined, ordinanceNumber: string, series: string) => {
-    const fullUrl = ordinancesApi.getPdfUrl(pdfUrl);
-    if (!fullUrl) {
-      console.error('No PDF URL available');
+  // View PDF in new tab (uses GridFS fileId)
+  viewPdf: (fileId: string | undefined) => {
+    if (!fileId) {
+      console.error('No file ID available');
       return;
     }
+    // Use the consolidated file endpoint
+    const url = `/api/file?id=${fileId}`;
+    window.open(url, '_blank');
+  },
+  // Download PDF with custom filename (uses GridFS fileId)
+  downloadPdf: (fileId: string | undefined, ordinanceNumber: string, series: string) => {
+    if (!fileId) {
+      console.error('No file ID available');
+      return;
+    }
+    // Use the consolidated file endpoint with download flag
+    const url = `/api/file?id=${fileId}&download=true`;
     const link = document.createElement('a');
-    link.href = fullUrl;
+    link.href = url;
     link.download = `Ordinance-${ordinanceNumber}-${series}.pdf`;
     link.target = '_blank';
     document.body.appendChild(link);

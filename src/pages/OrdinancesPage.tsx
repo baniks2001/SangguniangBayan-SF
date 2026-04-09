@@ -13,6 +13,7 @@ interface Ordinance {
   author: string;
   createdAt: string;
   pdfUrl?: string;
+  fileId?: string;
 }
 
 const OrdinancesPage: React.FC = () => {
@@ -138,14 +139,14 @@ const OrdinancesPage: React.FC = () => {
               {/* PDF Actions */}
               <div className="border-t pt-4 mt-4 flex gap-3">
                 <button
-                  onClick={() => ordinancesApi.viewPdf(selectedOrdinance.pdfUrl)}
+                  onClick={() => ordinancesApi.viewPdf(selectedOrdinance.fileId || selectedOrdinance.pdfUrl)}
                   className="flex items-center px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors"
                 >
                   <Eye className="h-4 w-4 mr-2" />
                   View PDF
                 </button>
                 <button
-                  onClick={() => ordinancesApi.downloadPdf(selectedOrdinance.pdfUrl, selectedOrdinance.ordinanceNumber, selectedOrdinance.series)}
+                  onClick={() => ordinancesApi.downloadPdf(selectedOrdinance.fileId || selectedOrdinance.pdfUrl, selectedOrdinance.ordinanceNumber, selectedOrdinance.series)}
                   className="flex items-center px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 transition-colors"
                 >
                   <Download className="h-4 w-4 mr-2" />
@@ -196,7 +197,7 @@ const OrdinancesPage: React.FC = () => {
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
-                        ordinancesApi.viewPdf(ordinance.pdfUrl);
+                        ordinancesApi.viewPdf(ordinance.fileId || ordinance.pdfUrl);
                       }}
                       className="p-2 text-green-600 hover:bg-green-50 rounded-md transition-colors"
                       title="View PDF"
@@ -206,7 +207,7 @@ const OrdinancesPage: React.FC = () => {
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
-                        ordinancesApi.downloadPdf(ordinance.pdfUrl, ordinance.ordinanceNumber, ordinance.series);
+                        ordinancesApi.downloadPdf(ordinance.fileId || ordinance.pdfUrl, ordinance.ordinanceNumber, ordinance.series);
                       }}
                       className="p-2 text-gray-600 hover:bg-gray-100 rounded-md transition-colors"
                       title="Download PDF"

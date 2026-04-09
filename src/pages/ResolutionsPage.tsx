@@ -13,6 +13,7 @@ interface Resolution {
   author: string;
   createdAt: string;
   pdfUrl?: string;
+  fileId?: string;
   signatories?: any[];
 }
 
@@ -152,14 +153,14 @@ const ResolutionsPage: React.FC = () => {
               {/* PDF Actions */}
               <div className="border-t pt-4 mt-4 flex gap-3">
                 <button
-                  onClick={() => resolutionsApi.viewPdf(selectedResolution.pdfUrl)}
+                  onClick={() => resolutionsApi.viewPdf(selectedResolution.fileId || selectedResolution.pdfUrl)}
                   className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
                 >
                   <Eye className="h-4 w-4 mr-2" />
                   View PDF
                 </button>
                 <button
-                  onClick={() => resolutionsApi.downloadPdf(selectedResolution.pdfUrl, selectedResolution.resolutionNumber, selectedResolution.series)}
+                  onClick={() => resolutionsApi.downloadPdf(selectedResolution.fileId || selectedResolution.pdfUrl, selectedResolution.resolutionNumber, selectedResolution.series)}
                   className="flex items-center px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 transition-colors"
                 >
                   <Download className="h-4 w-4 mr-2" />
@@ -210,7 +211,7 @@ const ResolutionsPage: React.FC = () => {
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
-                        resolutionsApi.viewPdf(resolution.pdfUrl);
+                        resolutionsApi.viewPdf(resolution.fileId || resolution.pdfUrl);
                       }}
                       className="p-2 text-blue-600 hover:bg-blue-50 rounded-md transition-colors"
                       title="View PDF"
@@ -220,7 +221,7 @@ const ResolutionsPage: React.FC = () => {
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
-                        resolutionsApi.downloadPdf(resolution.pdfUrl, resolution.resolutionNumber, resolution.series);
+                        resolutionsApi.downloadPdf(resolution.fileId || resolution.pdfUrl, resolution.resolutionNumber, resolution.series);
                       }}
                       className="p-2 text-gray-600 hover:bg-gray-100 rounded-md transition-colors"
                       title="Download PDF"

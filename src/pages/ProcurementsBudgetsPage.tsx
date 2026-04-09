@@ -49,7 +49,8 @@ const fetchProcurements = async (params?: { search?: string; category?: string; 
   if (params?.page) queryParams.append('page', params.page.toString());
   if (params?.limit) queryParams.append('limit', params.limit.toString());
   
-  const response = await fetch(`/api/procurements?${queryParams}`);
+  queryParams.append('endpoint', 'procurements');
+  const response = await fetch(`/api/data?${queryParams}`);
   if (!response.ok) {
     throw new Error('Failed to fetch procurements');
   }
