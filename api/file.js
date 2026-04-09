@@ -1,14 +1,46 @@
 /**
- * File Proxy API - Proxies GridFS file requests to admin backend
+ * File API - Streams files directly from MongoDB GridFS
  * GET /api/file?id=:id - View/stream file from GridFS
  * GET /api/file?id=:id&download=true - Download file with original filename
  */
 
-const https = require('https');
-const http = require('http');
-const { URL } = require('url');
+const { MongoClient, ObjectId } = require('mongodb');
+const { GridFSBucket } = require('mongodb');
 
-const ADMIN_API_URL = process.env.ADMIN_API_URL || 'http://localhost:5000/api';
+const MONGODB_URI = process.env.MONGODB_URI;
+const BUCKET_NAME = 'uploads';
+
+// Cache client connection for serverless reuse
+let cachedClient = null;
+let cachedDb = null;
+
+async function connectToDatabase() {
+  if (cachedClient && cachedDb) {
+    return { client: cachedClient, db: cachedDb };
+  }
+
+  if (!MONGODB_URI) {
+    throw new Error('MONGODB_URI environment variable is not set');
+  }
+
+  const client = new MongoClient(MONGODB_URI, {
+    maxPoolSize: 10,
+    serverSelectionTimeoutMS: 5000,
+    socketTimeoutMS: 45000,
+  });
+
+  await client.connect();
+  const db = client.db();
+  
+  cachedClient = client;
+  cachedDb = db;
+  
+  return { client, db };
+}
+
+function getBucket(db) {
+  return new GridFSBucket(db, { bucketName: BUCKET_NAME });
+}
 
 module.exports = async (req, res) => {
   // CORS headers
@@ -26,6 +58,8 @@ module.exports = async (req, res) => {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
+  let client;
+  
   try {
     const { id, download } = req.query;
     const isDownload = download === 'true';
@@ -34,78 +68,53 @@ module.exports = async (req, res) => {
       return res.status(400).json({ error: 'File ID is required (use ?id=FILE_ID)' });
     }
 
-    // Build admin backend URL
-    const endpoint = isDownload ? `/uploads/download/${id}` : `/uploads/file/${id}`;
-    const adminUrl = new URL(`${ADMIN_API_URL}${endpoint}`);
+    // Validate ObjectId
+    if (!ObjectId.isValid(id)) {
+      return res.status(400).json({ error: 'Invalid file ID format' });
+    }
+
+    // Connect to MongoDB
+    const { client: mongoClient, db } = await connectToDatabase();
+    client = mongoClient;
     
-    console.log(`[File Proxy] Requesting file from admin: ${adminUrl.toString()}`);
+    const bucket = getBucket(db);
+    const fileId = new ObjectId(id);
 
-    // Choose http or https based on URL
-    const client = adminUrl.protocol === 'https:' ? https : http;
+    // Find file metadata
+    const files = await bucket.find({ _id: fileId }).toArray();
+    
+    if (files.length === 0) {
+      return res.status(404).json({ error: 'File not found' });
+    }
 
-    // Use Node.js native http module for better serverless compatibility
-    const proxyRequest = new Promise((resolve, reject) => {
-      const request = client.get(adminUrl.toString(), {
-        timeout: 30000, // 30 second timeout
-      }, (response) => {
-        const statusCode = response.statusCode;
-        
-        if (statusCode === 404) {
-          return resolve({ error: 'File not found', status: 404 });
-        }
-        
-        if (statusCode >= 400) {
-          return resolve({ error: `Admin backend error: ${statusCode}`, status: statusCode });
-        }
+    const file = files[0];
+    const contentType = file.contentType || 'application/octet-stream';
+    const contentLength = file.length;
+    const originalName = file.metadata?.originalName || file.filename;
 
-        // Copy headers from admin response
-        const contentType = response.headers['content-type'] || 'application/octet-stream';
-        const contentLength = response.headers['content-length'];
-        const contentDisposition = response.headers['content-disposition'];
+    // Set response headers
+    res.setHeader('Content-Type', contentType);
+    res.setHeader('Content-Length', contentLength);
+    res.setHeader('Cache-Control', 'public, max-age=31536000');
+    
+    if (isDownload) {
+      res.setHeader('Content-Disposition', `attachment; filename="${originalName}"`);
+    }
 
-        res.setHeader('Content-Type', contentType);
-        if (contentLength) {
-          res.setHeader('Content-Length', contentLength);
-        }
-        if (contentDisposition) {
-          res.setHeader('Content-Disposition', contentDisposition);
-        }
-        
-        // Add cache headers for better performance
-        res.setHeader('Cache-Control', 'public, max-age=31536000');
-
-        // Pipe the response directly
-        response.pipe(res);
-        
-        response.on('end', () => {
-          resolve({ success: true });
-        });
-        
-        response.on('error', (err) => {
-          reject(err);
-        });
-      });
-
-      request.on('error', (error) => {
-        console.error('[File Proxy] Request error:', error.message);
-        reject(error);
-      });
-
-      request.on('timeout', () => {
-        request.destroy();
-        reject(new Error('Request timeout'));
-      });
+    // Stream file from GridFS
+    const downloadStream = bucket.openDownloadStream(fileId);
+    
+    downloadStream.on('error', (error) => {
+      console.error('[GridFS] Stream error:', error.message);
+      if (!res.headersSent) {
+        res.status(500).json({ error: 'Error streaming file' });
+      }
     });
 
-    const result = await proxyRequest;
-    
-    if (result.error) {
-      return res.status(result.status || 500).json({ error: result.error });
-    }
+    downloadStream.pipe(res);
     
   } catch (error) {
-    console.error('[File Proxy] Error:', error.message);
-    // Only send error if headers haven't been sent yet
+    console.error('[File API] Error:', error.message);
     if (!res.headersSent) {
       res.status(500).json({ 
         error: 'Failed to retrieve file',
@@ -113,4 +122,5 @@ module.exports = async (req, res) => {
       });
     }
   }
+  // Don't close client here - it's cached for reuse
 };
