@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { documentsApi } from '../services/api';
+import { documentsApi, filesApi } from '../services/api';
 import { FileArchive, Search, ChevronLeft, ChevronRight, FileText, Calendar, Eye, Download, FolderOpen } from 'lucide-react';
 
 interface Document {
@@ -7,7 +7,8 @@ interface Document {
   title: string;
   description: string;
   category: string;
-  fileUrl: string;
+  fileId?: string;
+  fileUrl?: string;
   fileName: string;
   fileSize: string;
   downloadCount: number;
@@ -179,7 +180,7 @@ const DocumentsPage: React.FC = () => {
                     View
                   </button>
                   <button
-                    onClick={() => documentsApi.downloadFile(doc.fileUrl, doc.fileName)}
+                    onClick={() => filesApi.downloadFile(doc.fileId || doc.fileUrl, doc.fileName)}
                     className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
                   >
                     <Download className="h-4 w-4 mr-1.5" />
@@ -274,7 +275,7 @@ const DocumentsPage: React.FC = () => {
               <div className="flex gap-3 pt-4 border-t border-gray-200">
                 <button
                   onClick={() => {
-                    documentsApi.viewFile(selectedDocument.fileUrl);
+                    filesApi.viewFile(selectedDocument.fileId || selectedDocument.fileUrl);
                   }}
                   className="flex-1 flex items-center justify-center px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors font-medium"
                 >
@@ -283,7 +284,7 @@ const DocumentsPage: React.FC = () => {
                 </button>
                 <button
                   onClick={() => {
-                    documentsApi.downloadFile(selectedDocument.fileUrl, selectedDocument.fileName);
+                    filesApi.downloadFile(selectedDocument.fileId || selectedDocument.fileUrl, selectedDocument.fileName);
                   }}
                   className="flex-1 flex items-center justify-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
                 >

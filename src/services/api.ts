@@ -237,3 +237,48 @@ export const applicationsApi = {
     return handleResponse(response);
   }
 };
+
+// Public API for Files (GridFS) - view and download from admin backend
+export const filesApi = {
+  // Build the proxy URL for viewing/downloading GridFS files
+  getFileUrl: (fileId: string | undefined): string | null => {
+    if (!fileId) return null;
+    return `/api/file/${fileId}`;
+  },
+
+  // View file in new tab (works for PDFs, images)
+  viewFile: (fileId: string | undefined) => {
+    const url = filesApi.getFileUrl(fileId);
+    if (url) {
+      window.open(url, '_blank');
+    } else {
+      console.error('No file ID provided');
+    }
+  },
+
+  // Download file with custom filename
+  downloadFile: (fileId: string | undefined, fileName: string) => {
+    if (!fileId) {
+      console.error('No file ID provided');
+      return;
+    }
+    
+    const url = `/api/file/${fileId}/download`;
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = fileName;
+    link.target = '_blank';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  },
+
+  // Get file metadata
+  getMetadata: async (fileId: string) => {
+    const response = await fetch(`/api/file/${fileId}/metadata`);
+    if (!response.ok) {
+      throw new Error(`Failed to fetch file metadata: ${response.status}`);
+    }
+    return response.json();
+  }
+};
