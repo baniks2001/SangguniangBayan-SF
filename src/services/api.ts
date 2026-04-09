@@ -35,10 +35,17 @@ export const resolutionsApi = {
     const response = await fetch(`/api/data?${queryParams}`);
     return handleResponse(response);
   },
+  // Helper to check if value is valid ObjectId (24 hex chars)
+  isValidObjectId: (id: string | undefined): boolean => {
+    if (!id || typeof id !== 'string') return false;
+    // MongoDB ObjectId is 24 hex characters
+    return /^[0-9a-fA-F]{24}$/.test(id);
+  },
   // View PDF in new tab (uses GridFS fileId)
   viewPdf: (fileId: string | undefined) => {
-    if (!fileId) {
-      console.error('No file ID available');
+    if (!resolutionsApi.isValidObjectId(fileId)) {
+      console.error('Invalid or missing file ID:', fileId);
+      alert('No PDF file available for this resolution. Please re-upload the file.');
       return;
     }
     // Use the consolidated file endpoint
@@ -47,8 +54,9 @@ export const resolutionsApi = {
   },
   // Download PDF with custom filename (uses GridFS fileId)
   downloadPdf: (fileId: string | undefined, resolutionNumber: string, series: string) => {
-    if (!fileId) {
-      console.error('No file ID available');
+    if (!resolutionsApi.isValidObjectId(fileId)) {
+      console.error('Invalid or missing file ID:', fileId);
+      alert('No PDF file available for this resolution. Please re-upload the file.');
       return;
     }
     // Use the consolidated file endpoint with download flag
@@ -79,10 +87,17 @@ export const ordinancesApi = {
     const response = await fetch(`/api/data?${queryParams}`);
     return handleResponse(response);
   },
+  // Helper to check if value is valid ObjectId (24 hex chars)
+  isValidObjectId: (id: string | undefined): boolean => {
+    if (!id || typeof id !== 'string') return false;
+    // MongoDB ObjectId is 24 hex characters
+    return /^[0-9a-fA-F]{24}$/.test(id);
+  },
   // View PDF in new tab (uses GridFS fileId)
   viewPdf: (fileId: string | undefined) => {
-    if (!fileId) {
-      console.error('No file ID available');
+    if (!ordinancesApi.isValidObjectId(fileId)) {
+      console.error('Invalid or missing file ID:', fileId);
+      alert('No PDF file available for this ordinance. Please re-upload the file.');
       return;
     }
     // Use the consolidated file endpoint
@@ -91,8 +106,9 @@ export const ordinancesApi = {
   },
   // Download PDF with custom filename (uses GridFS fileId)
   downloadPdf: (fileId: string | undefined, ordinanceNumber: string, series: string) => {
-    if (!fileId) {
-      console.error('No file ID available');
+    if (!ordinancesApi.isValidObjectId(fileId)) {
+      console.error('Invalid or missing file ID:', fileId);
+      alert('No PDF file available for this ordinance. Please re-upload the file.');
       return;
     }
     // Use the consolidated file endpoint with download flag
@@ -120,30 +136,32 @@ export const documentsApi = {
     const response = await fetch(`/api/data?${queryParams}`);
     return handleResponse(response);
   },
-  // Get full URL for document file
-  getFileUrl: (fileUrl: string | undefined) => {
-    if (!fileUrl) return null;
-    if (fileUrl.startsWith('http')) return fileUrl;
-    return `${STATIC_BASE_URL}${fileUrl}`;
+  // Helper to check if value is valid ObjectId (24 hex chars)
+  isValidObjectId: (id: string | undefined): boolean => {
+    if (!id || typeof id !== 'string') return false;
+    // MongoDB ObjectId is 24 hex characters
+    return /^[0-9a-fA-F]{24}$/.test(id);
   },
-  // View document in new tab
-  viewFile: (fileUrl: string | undefined) => {
-    const fullUrl = documentsApi.getFileUrl(fileUrl);
-    if (fullUrl) {
-      window.open(fullUrl, '_blank');
-    } else {
-      console.error('No file URL available');
-    }
-  },
-  // Download document
-  downloadFile: (fileUrl: string | undefined, fileName: string) => {
-    const fullUrl = documentsApi.getFileUrl(fileUrl);
-    if (!fullUrl) {
-      console.error('No file URL available');
+  // View document in new tab (uses GridFS fileId)
+  viewFile: (fileId: string | undefined) => {
+    if (!documentsApi.isValidObjectId(fileId)) {
+      console.error('Invalid or missing file ID:', fileId);
+      alert('No file available. Please re-upload the file.');
       return;
     }
+    const url = `/api/file?id=${fileId}`;
+    window.open(url, '_blank');
+  },
+  // Download document (uses GridFS fileId)
+  downloadFile: (fileId: string | undefined, fileName: string) => {
+    if (!documentsApi.isValidObjectId(fileId)) {
+      console.error('Invalid or missing file ID:', fileId);
+      alert('No file available. Please re-upload the file.');
+      return;
+    }
+    const url = `/api/file?id=${fileId}&download=true`;
     const link = document.createElement('a');
-    link.href = fullUrl;
+    link.href = url;
     link.download = fileName;
     link.target = '_blank';
     document.body.appendChild(link);

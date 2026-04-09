@@ -64,13 +64,20 @@ module.exports = async (req, res) => {
     const { id, download } = req.query;
     const isDownload = download === 'true';
 
+    console.log(`[File API] Received request - id: ${id}, download: ${isDownload}`);
+
     if (!id) {
       return res.status(400).json({ error: 'File ID is required (use ?id=FILE_ID)' });
     }
 
-    // Validate ObjectId
-    if (!ObjectId.isValid(id)) {
-      return res.status(400).json({ error: 'Invalid file ID format' });
+    // Validate ObjectId (must be 24 character hex string)
+    if (!ObjectId.isValid(id) || id.length !== 24) {
+      console.error(`[File API] Invalid file ID format: "${id}" (length: ${id.length})`);
+      return res.status(400).json({ 
+        error: 'Invalid file ID format',
+        details: `ID must be a 24-character hex string. Received: "${id}"`,
+        receivedId: id
+      });
     }
 
     // Connect to MongoDB
