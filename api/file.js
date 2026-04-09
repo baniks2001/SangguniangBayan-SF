@@ -1,7 +1,7 @@
 /**
  * File Proxy API - Proxies GridFS file requests to admin backend
- * GET /api/file/:id - View/stream file from GridFS
- * GET /api/file/:id/download - Download file with original filename
+ * GET /api/file?id=:id - View/stream file from GridFS
+ * GET /api/file?id=:id&download=true - Download file with original filename
  */
 
 const ADMIN_API_URL = process.env.ADMIN_API_URL || 'http://localhost:5000/api';
@@ -23,11 +23,11 @@ module.exports = async (req, res) => {
   }
 
   try {
-    const { id } = req.query;
-    const isDownload = req.url.includes('/download');
+    const { id, download } = req.query;
+    const isDownload = download === 'true';
 
     if (!id) {
-      return res.status(400).json({ error: 'File ID is required' });
+      return res.status(400).json({ error: 'File ID is required (use ?id=FILE_ID)' });
     }
 
     // Build admin backend URL

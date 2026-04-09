@@ -30,8 +30,9 @@ export const resolutionsApi = {
     if (params?.status) queryParams.append('status', params.status);
     if (params?.isPublic !== undefined) queryParams.append('isPublic', params.isPublic.toString());
     
-    // Use local serverless endpoint
-    const response = await fetch(`/api/resolutions?${queryParams}`);
+    // Use consolidated data endpoint
+    queryParams.append('endpoint', 'resolutions');
+    const response = await fetch(`/api/data?${queryParams}`);
     return handleResponse(response);
   },
   // Get full URL for PDF file
@@ -77,8 +78,9 @@ export const ordinancesApi = {
     if (params?.status) queryParams.append('status', params.status);
     if (params?.isPublic !== undefined) queryParams.append('isPublic', params.isPublic.toString());
     
-    // Use local serverless endpoint
-    const response = await fetch(`/api/ordinances?${queryParams}`);
+    // Use consolidated data endpoint
+    queryParams.append('endpoint', 'ordinances');
+    const response = await fetch(`/api/data?${queryParams}`);
     return handleResponse(response);
   },
   // Get full URL for PDF file
@@ -122,7 +124,8 @@ export const documentsApi = {
     if (params?.page) queryParams.append('page', params.page.toString());
     if (params?.limit) queryParams.append('limit', params.limit.toString());
     
-    const response = await fetch(`/api/documents?${queryParams}`);
+    queryParams.append('endpoint', 'documents');
+    const response = await fetch(`/api/data?${queryParams}`);
     return handleResponse(response);
   },
   // Get full URL for document file
@@ -160,7 +163,7 @@ export const documentsApi = {
 // Public API for Vacancies - uses local serverless function
 export const vacanciesApi = {
   getAll: async () => {
-    const response = await fetch('/api/vacancies');
+    const response = await fetch('/api/data?endpoint=vacancies');
     return handleResponse(response);
   }
 };
@@ -168,7 +171,7 @@ export const vacanciesApi = {
 // Public API for Announcements - uses local serverless function
 export const announcementsApi = {
   getAll: async () => {
-    const response = await fetch('/api/announcements');
+    const response = await fetch('/api/data?endpoint=announcements');
     return handleResponse(response);
   }
 };
@@ -181,7 +184,8 @@ export const newsApi = {
     if (params?.page) queryParams.append('page', params.page.toString());
     if (params?.limit) queryParams.append('limit', params.limit.toString());
     
-    const response = await fetch(`/api/news?${queryParams}`);
+    queryParams.append('endpoint', 'news');
+    const response = await fetch(`/api/data?${queryParams}`);
     return handleResponse(response);
   }
 };
@@ -191,7 +195,8 @@ export const organizationApi = {
   getPublic: async (params?: { category?: string }) => {
     const queryParams = new URLSearchParams();
     if (params?.category) queryParams.append('category', params.category);
-    const response = await fetch(`/api/organization?${queryParams}`);
+    queryParams.append('endpoint', 'organization');
+    const response = await fetch(`/api/data?${queryParams}`);
     return handleResponse(response);
   }
 };
@@ -202,7 +207,8 @@ export const calendarApi = {
     const queryParams = new URLSearchParams();
     if (params?.upcoming) queryParams.append('upcoming', 'true');
     if (params?.limit) queryParams.append('limit', params.limit.toString());
-    const response = await fetch(`/api/calendar?${queryParams}`);
+    queryParams.append('endpoint', 'calendar');
+    const response = await fetch(`/api/data?${queryParams}`);
     return handleResponse(response);
   }
 };
@@ -210,7 +216,7 @@ export const calendarApi = {
 // Public API for Contact - uses local serverless function
 export const contactApi = {
   submit: async (data: { name: string; email: string; phone?: string; subject: string; message: string }) => {
-    const response = await fetch('/api/contact', {
+    const response = await fetch('/api/submit?endpoint=contact', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data)
@@ -222,7 +228,7 @@ export const contactApi = {
 // Public API for Applications - uses local serverless function
 export const applicationsApi = {
   submit: async (data: any) => {
-    const response = await fetch('/api/apply', {
+    const response = await fetch('/api/submit?endpoint=apply', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data)
@@ -230,7 +236,7 @@ export const applicationsApi = {
     return handleResponse(response);
   },
   submitWithFile: async (formData: FormData) => {
-    const response = await fetch('/api/apply', {
+    const response = await fetch('/api/submit?endpoint=apply', {
       method: 'POST',
       body: formData
     });
@@ -243,7 +249,7 @@ export const filesApi = {
   // Build the proxy URL for viewing/downloading GridFS files
   getFileUrl: (fileId: string | undefined): string | null => {
     if (!fileId) return null;
-    return `/api/file/${fileId}`;
+    return `/api/file?id=${fileId}`;
   },
 
   // View file in new tab (works for PDFs, images)
@@ -263,7 +269,7 @@ export const filesApi = {
       return;
     }
     
-    const url = `/api/file/${fileId}/download`;
+    const url = `/api/file?id=${fileId}&download=true`;
     const link = document.createElement('a');
     link.href = url;
     link.download = fileName;
@@ -273,12 +279,8 @@ export const filesApi = {
     document.body.removeChild(link);
   },
 
-  // Get file metadata
+  // Get file metadata (not implemented in consolidated endpoint)
   getMetadata: async (fileId: string) => {
-    const response = await fetch(`/api/file/${fileId}/metadata`);
-    if (!response.ok) {
-      throw new Error(`Failed to fetch file metadata: ${response.status}`);
-    }
-    return response.json();
+    throw new Error('Metadata endpoint not available in consolidated API');
   }
 };
