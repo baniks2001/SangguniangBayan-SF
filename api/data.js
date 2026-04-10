@@ -226,10 +226,21 @@ async function handleResolutions(db, params, res) {
 }
 
 async function handleVacancies(db, params, res) {
-  const vacancies = await db.collection('vacancies')
-    .find({ status: 'Open', isActive: true })
+  // Filter for active vacancies (status: 'active', isActive: true)
+  let vacancies = await db.collection('vacancies')
+    .find({ status: 'active', isActive: true })
     .sort({ postedAt: -1 })
     .toArray();
+  
+  // If no active vacancies, return all vacancies for debugging
+  if (vacancies.length === 0) {
+    console.log('No active vacancies found, checking all vacancies...');
+    const allVacancies = await db.collection('vacancies').find({}).toArray();
+    console.log(`Total vacancies in DB: ${allVacancies.length}`);
+    if (allVacancies.length > 0) {
+      console.log('Sample vacancy:', JSON.stringify(allVacancies[0], null, 2));
+    }
+  }
   
   res.json({
     vacancies: vacancies.map(doc => ({ ...doc, id: doc._id.toString(), _id: undefined }))
