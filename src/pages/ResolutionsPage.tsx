@@ -199,9 +199,6 @@ const ResolutionsPage: React.FC = () => {
                     <h3 className="text-lg font-medium text-gray-900 mb-2">
                       {resolution.title}
                     </h3>
-                    <p className="text-sm text-gray-500 line-clamp-2 mb-2">
-                      {resolution.content.substring(0, 200)}...
-                    </p>
                     <div className="flex items-center text-sm text-gray-400">
                       <Calendar className="h-4 w-4 mr-1" />
                       {new Date(resolution.createdAt).toLocaleDateString()}
