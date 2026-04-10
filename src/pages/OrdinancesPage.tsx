@@ -131,7 +131,7 @@ const OrdinancesPage: React.FC = () => {
                 dangerouslySetInnerHTML={{ 
                   __html: selectedOrdinance.content?.replace(
                     /src="gridfs:\/\//g, 
-                    `${process.env.REACT_APP_API_URL || ''}/api/files/view/`
+                    `${process.env.REACT_APP_API_URL || ''}/api/files/gridfs/`
                   ).replace(
                     /src="\/uploads\//g, 
                     `${process.env.REACT_APP_API_URL || ''}/uploads/`
