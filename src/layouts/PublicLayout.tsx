@@ -18,7 +18,7 @@ import {
 
 // Hardcoded system information
 const SYSTEM_NAME_SHORT = 'Sangguniang Bayan';
-const SYSTEM_NAME_FULL = 'Office Of The Sangguniang Bayan';
+const SYSTEM_NAME_FULL = 'Office Of The Sangguniang Bayan - Municipality of San Francisco';
 const MUNICIPALITY = 'Municipality of San Francisco';
 const PROVINCE = 'Southern Leyte';
 
@@ -93,7 +93,7 @@ const PublicLayout: React.FC = () => {
           {/* Top Row: Logo and System Name */}
           <div className="flex items-center justify-between h-16">
             {/* 3 Logos with System Name */}
-            <Link to="/" className="flex items-center space-x-3">
+            <Link to="/" className="flex items-center space-x-1">
               {/* Logo 1 - Left (Municipality) */}
               <img 
                 src="/homepage-images/municipality-logo.png"
@@ -101,28 +101,25 @@ const PublicLayout: React.FC = () => {
                 className="h-12 w-12 object-contain"
               />
               
-              {/* Vertical Line */}
-              <div className="hidden sm:block w-px h-10 bg-gray-800"></div>
-              
-              {/* Logo 2 - Center (Sangguniang Bayan - existing) */}
+              {/* Logo 2 - Center (Sangguniang Bayan) */}
               <img 
                 src="/homepage-images/logo.png"
                 alt="Sangguniang Bayan Logo"
                 className="h-12 w-12 object-contain"
               />
               
-              {/* Vertical Line */}
-              <div className="hidden sm:block w-px h-10 bg-gray-800"></div>
-              
-              {/* Logo 3 - Right (Optional/Secondary) */}
+              {/* Logo 3 - Right (Bagong Pilipinas) */}
               <img 
                 src="/homepage-images/bagongpilipinas.png"
-                alt="Secondary Logo"
+                alt="Bagong Pilipinas Logo"
                 className="h-12 w-12 object-contain hidden sm:block"
               />
               
+              {/* Vertical Line - Between 3rd logo and system name */}
+              <div className="hidden sm:block w-px h-10 bg-gray-800"></div>
+              
               {/* System Name */}
-              <div className="min-w-0 ml-2">
+              <div className="min-w-0 ml-3">
                 <h1 className="text-sm sm:text-base font-bold text-blue-900 whitespace-nowrap">
                   {SYSTEM_NAME_FULL}
                 </h1>
