@@ -18,7 +18,7 @@ import {
 
 // Hardcoded system information
 const SYSTEM_NAME_SHORT = 'Sangguniang Bayan';
-const SYSTEM_NAME_FULL = 'Office Of The Sangguniang Bayan - Municipality of San Francisco';
+const SYSTEM_NAME_FULL = 'Office Of The Sangguniang Bayan';
 const MUNICIPALITY = 'Municipality of San Francisco';
 const PROVINCE = 'Southern Leyte';
 
