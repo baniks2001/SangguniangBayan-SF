@@ -34,16 +34,12 @@ const PublicLayout: React.FC = () => {
 
   const isActive = (path: string) => location.pathname === path;
 
-  // Split into 2 rows of 5 items each
-  const navItemsRow1 = [
+  const navItems = [
     { path: '/', label: 'Home', icon: Home },
     { path: '/resolutions', label: 'Resolutions', icon: Scale },
     { path: '/ordinances', label: 'Ordinances', icon: FileText },
     { path: '/procurements', label: 'Procurements', icon: ShoppingCart },
     { path: '/documents', label: 'Documents', icon: FileArchive },
-  ];
-
-  const navItemsRow2 = [
     { path: '/vacancies', label: 'Vacancies', icon: Briefcase },
     { path: '/announcements', label: 'Announcements', icon: Bell },
     { path: '/news', label: 'News', icon: Newspaper },
@@ -51,9 +47,7 @@ const PublicLayout: React.FC = () => {
     { path: '/contact', label: 'Contact', icon: Mail },
   ];
 
-  const allNavItems = [...navItemsRow1, ...navItemsRow2];
-
-  const NavItem = ({ item, isMobile = false }: { item: typeof navItemsRow1[0]; isMobile?: boolean }) => {
+  const NavItem = ({ item, isMobile = false }: { item: typeof navItems[0]; isMobile?: boolean }) => {
     const Icon = item.icon;
     const active = isActive(item.path);
     
@@ -98,15 +92,15 @@ const PublicLayout: React.FC = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Top Row: Logo and System Name */}
           <div className="flex items-center justify-between h-16">
-            {/* Logo, Vertical Line, and System Name */}
-            <Link to="/" className="flex items-center space-x-4">
+            {/* Logo, Vertical Line, and System Name - Closer spacing */}
+            <Link to="/" className="flex items-center space-x-2">
               <img 
                 src="/homepage-images/logo.png"
                 alt="Sangguniang Bayan Logo"
                 className="h-12 w-12 object-contain"
               />
               {/* Vertical Line */}
-              <div className="hidden sm:block w-px h-10 bg-gray-800"></div>
+              <div className="hidden sm:block w-px h-10 bg-gray-800 mx-1"></div>
               {/* System Name - visible on all screens */}
               <div className="min-w-0">
                 <h1 className="text-sm sm:text-base font-bold text-blue-900 whitespace-nowrap">
@@ -128,20 +122,11 @@ const PublicLayout: React.FC = () => {
             </button>
           </div>
 
-          {/* Desktop Navigation - 2 Rows of 5 items */}
-          <nav className="hidden lg:block pb-4">
-            {/* Row 1 */}
-            <div className="flex items-center justify-center space-x-2 mb-2">
-              {navItemsRow1.map((item) => (
-                <NavItem key={item.path} item={item} />
-              ))}
-            </div>
-            {/* Row 2 */}
-            <div className="flex items-center justify-center space-x-2">
-              {navItemsRow2.map((item) => (
-                <NavItem key={item.path} item={item} />
-              ))}
-            </div>
+          {/* Desktop Navigation - Single row */}
+          <nav className="hidden lg:flex items-center justify-center space-x-1 pb-3">
+            {navItems.map((item) => (
+              <NavItem key={item.path} item={item} />
+            ))}
           </nav>
         </div>
 
@@ -149,7 +134,7 @@ const PublicLayout: React.FC = () => {
         {isMobileMenuOpen && (
           <div className="lg:hidden border-t border-gray-200 bg-white shadow-lg">
             <div className="px-4 pt-3 pb-4 space-y-2">
-              {allNavItems.map((item) => (
+              {navItems.map((item) => (
                 <NavItem key={item.path} item={item} isMobile />
               ))}
             </div>
