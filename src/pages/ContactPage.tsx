@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Mail, MapPin, Phone, Clock, Send, Building2, CheckCircle } from 'lucide-react';
+import React, { useState, useRef } from 'react';
+import { Mail, MapPin, Phone, Clock, Send, Building2, CheckCircle, Upload, X } from 'lucide-react';
 
 // Facebook icon component (not available in lucide-react)
 const FacebookIcon: React.FC<{ className?: string }> = ({ className }) => (
@@ -22,24 +22,87 @@ const FACEBOOK_URL = 'https://web.facebook.com/profile.php?id=61578350702689';
 // Using standard Google Maps embed format
 const GOOGLE_MAPS_URL = 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d980.8590714774128!2d125.15793428939061!3d10.055809788399877!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3307290079d6e7c3%3A0x8df3c83604bbfdd8!2sSB%20Building%20-%20LGU%20San%20Francisco!5e1!3m2!1sen!2sph!4v1775544137684!5m2!1sen!2sph';
 
+const SUBJECT_OPTIONS = [
+  { value: '', label: 'Select a subject...' },
+  { value: 'Inquire', label: 'Inquire' },
+  { value: 'Appointment', label: 'Appointment' },
+  { value: 'Complain', label: 'Complain' }
+];
+
 const ContactPage: React.FC = () => {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
     phone: '',
-    subject: '',
+    subjectType: '',
     message: ''
   });
+  const [images, setImages] = useState<File[]>([]);
+  const [imagePreviews, setImagePreviews] = useState<string[]>([]);
   const [submitting, setSubmitting] = useState(false);
   const [submitSuccess, setSubmitSuccess] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const isComplain = formData.subjectType === 'Complain';
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    if (files.length + images.length > 3) {
+      alert('You can only upload up to 3 images');
+      return;
+    }
+    
+    const newImages = [...images, ...files].slice(0, 3);
+    setImages(newImages);
+    
+    const newPreviews = newImages.map(file => URL.createObjectURL(file));
+    setImagePreviews(newPreviews);
+  };
+
+  const removeImage = (index: number) => {
+    const newImages = images.filter((_, i) => i !== index);
+    const newPreviews = imagePreviews.filter((_, i) => i !== index);
+    setImages(newImages);
+    setImagePreviews(newPreviews);
+    URL.revokeObjectURL(imagePreviews[index]);
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (isComplain && images.length < 3) {
+      alert('Please upload at least 3 images for your complaint');
+      return;
+    }
+
     try {
       setSubmitting(true);
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      const formDataToSend = new FormData();
+      formDataToSend.append('name', formData.name);
+      formDataToSend.append('email', formData.email);
+      formDataToSend.append('phone', formData.phone || '');
+      formDataToSend.append('subjectType', formData.subjectType);
+      formDataToSend.append('message', formData.message);
+      
+      images.forEach((image, index) => {
+        formDataToSend.append(`image${index + 1}`, image);
+      });
+
+      const response = await fetch('/api/submit?endpoint=contact', {
+        method: 'POST',
+        body: formDataToSend
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to submit');
+      }
+      
       setSubmitSuccess(true);
-      setFormData({ name: '', email: '', phone: '', subject: '', message: '' });
+      setFormData({ name: '', email: '', phone: '', subjectType: '', message: '' });
+      setImages([]);
+      imagePreviews.forEach(url => URL.revokeObjectURL(url));
+      setImagePreviews([]);
       setTimeout(() => setSubmitSuccess(false), 5000);
     } catch (error) {
       console.error('Error submitting form:', error);
@@ -206,15 +269,77 @@ const ContactPage: React.FC = () => {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Subject *</label>
-                  <input
-                    type="text"
+                  <select
                     required
-                    value={formData.subject}
-                    onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
-                    placeholder="What is this regarding?"
-                  />
+                    value={formData.subjectType}
+                    onChange={(e) => setFormData({ ...formData, subjectType: e.target.value })}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition bg-white"
+                  >
+                    {SUBJECT_OPTIONS.map((option) => (
+                      <option key={option.value} value={option.value}>
+                        {option.label}
+                      </option>
+                    ))}
+                  </select>
                 </div>
+
+                {isComplain && (
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Upload Images * <span className="text-red-500">(Required: 3 images)</span>
+                    </label>
+                    <div className="space-y-3">
+                      {images.length < 3 && (
+                        <div className="flex items-center justify-center w-full">
+                          <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100 transition">
+                            <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                              <Upload className="w-8 h-8 text-gray-400 mb-2" />
+                              <p className="text-sm text-gray-500">
+                                Click to upload images ({images.length}/3)
+                              </p>
+                              <p className="text-xs text-gray-400">PNG, JPG, JPEG</p>
+                            </div>
+                            <input
+                              ref={fileInputRef}
+                              type="file"
+                              accept="image/*"
+                              multiple
+                              onChange={handleImageChange}
+                              className="hidden"
+                            />
+                          </label>
+                        </div>
+                      )}
+                      
+                      {imagePreviews.length > 0 && (
+                        <div className="grid grid-cols-3 gap-2">
+                          {imagePreviews.map((preview, index) => (
+                            <div key={index} className="relative">
+                              <img
+                                src={preview}
+                                alt={`Preview ${index + 1}`}
+                                className="w-full h-24 object-cover rounded-lg"
+                              />
+                              <button
+                                type="button"
+                                onClick={() => removeImage(index)}
+                                className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600 transition"
+                              >
+                                <X className="w-3 h-3" />
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                      
+                      {images.length < 3 && (
+                        <p className="text-sm text-red-500">
+                          Please upload at least {3 - images.length} more image{3 - images.length > 1 ? 's' : ''}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                )}
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Message *</label>

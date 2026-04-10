@@ -207,27 +207,70 @@ async function handleApply(req, res) {
 
 // Handle contact form submission
 async function handleContact(req, res) {
-  // Parse JSON body
-  const body = await new Promise((resolve, reject) => {
-    let data = '';
-    req.on('data', chunk => data += chunk);
-    req.on('end', () => {
-      try {
-        resolve(JSON.parse(data));
-      } catch (e) {
-        resolve({});
-      }
-    });
-    req.on('error', reject);
-  });
+  const contentType = req.headers['content-type'] || '';
+  let contactData = {};
+  let imageUrls = [];
 
-  const { name, email, subject, message, phone } = body;
+  // Handle multipart form data (file uploads for complaints)
+  if (contentType.includes('multipart/form-data')) {
+    const boundary = contentType.split('boundary=')[1];
+    const buffer = await parseFormData(req);
+    const parts = parseMultipart(buffer, boundary);
+    
+    // Ensure uploads directory exists
+    const uploadDir = path.join('/tmp', 'uploads', 'contacts');
+    if (!fs.existsSync(uploadDir)) {
+      fs.mkdirSync(uploadDir, { recursive: true });
+    }
+    
+    for (const part of parts) {
+      if (part.isFile && part.content.length > 0) {
+        // Save file
+        const uniqueName = `${Date.now()}-${Math.round(Math.random() * 1E9)}-${part.filename}`;
+        const filePath = path.join(uploadDir, uniqueName);
+        fs.writeFileSync(filePath, part.content);
+        
+        // Store file URL
+        const fileUrl = `/uploads/contacts/${uniqueName}`;
+        imageUrls.push(fileUrl);
+      } else if (part.name && !part.isFile) {
+        // Form field
+        contactData[part.name] = part.content.toString();
+      }
+    }
+  } else {
+    // Handle JSON data (no files)
+    const body = await new Promise((resolve, reject) => {
+      let data = '';
+      req.on('data', chunk => data += chunk);
+      req.on('end', () => {
+        try {
+          resolve(JSON.parse(data));
+        } catch (e) {
+          resolve({});
+        }
+      });
+      req.on('error', reject);
+    });
+    contactData = body;
+  }
+
+  const { name, email, subjectType, message, phone } = contactData;
 
   // Validation
-  if (!name || !email || !subject || !message) {
+  if (!name || !email || !subjectType || !message) {
     return res.status(400).json({ 
       error: 'Missing required fields',
-      fields: ['name', 'email', 'subject', 'message']
+      fields: ['name', 'email', 'subjectType', 'message']
+    });
+  }
+
+  // If complain, require at least 3 images
+  if (subjectType === 'Complain' && imageUrls.length < 3) {
+    return res.status(400).json({
+      error: 'Complaints require at least 3 images',
+      requiredImages: 3,
+      providedImages: imageUrls.length
     });
   }
 
@@ -239,8 +282,10 @@ async function handleContact(req, res) {
     name,
     email,
     phone: phone || '',
-    subject,
+    subjectType,
+    subject: subjectType, // Keep for backward compatibility
     message,
+    images: imageUrls,
     status: 'unread',
     createdAt: new Date(),
     updatedAt: new Date()
