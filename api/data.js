@@ -226,10 +226,10 @@ async function handleResolutions(db, params, res) {
 }
 
 async function handleVacancies(db, params, res) {
-  // Filter for active vacancies - use case-insensitive regex to match "Active" or "active"
+  // Filter for active vacancies - admin-site saves status as "Active" (no isActive field)
   let vacancies = await db.collection('vacancies')
-    .find({ status: { $regex: '^active$', $options: 'i' }, isActive: true })
-    .sort({ postedAt: -1 })
+    .find({ status: { $regex: '^active$', $options: 'i' } })
+    .sort({ createdAt: -1 })
     .toArray();
   
   // If no active vacancies, return all vacancies for debugging
@@ -238,7 +238,8 @@ async function handleVacancies(db, params, res) {
     const allVacancies = await db.collection('vacancies').find({}).toArray();
     console.log(`Total vacancies in DB: ${allVacancies.length}`);
     if (allVacancies.length > 0) {
-      console.log('Sample vacancy:', JSON.stringify(allVacancies[0], null, 2));
+      console.log('Sample vacancy fields:', Object.keys(allVacancies[0]));
+      console.log('Sample vacancy status:', allVacancies[0].status);
     }
   }
   
