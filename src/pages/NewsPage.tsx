@@ -11,6 +11,17 @@ interface NewsItem {
   publishedAt: string;
 }
 
+// Helper to convert stored imageUrl to full file URL
+const getFileUrl = (imageUrl: string | undefined): string => {
+  if (!imageUrl) return '';
+  if (imageUrl.startsWith('http')) return imageUrl;
+  // Handle /file?id=xxx format (stored from admin-site)
+  if (imageUrl.startsWith('/file?')) {
+    return `/api${imageUrl}`;
+  }
+  return imageUrl;
+};
+
 const NewsPage: React.FC = () => {
   const [news, setNews] = useState<NewsItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -116,7 +127,7 @@ const NewsPage: React.FC = () => {
             <div className="p-6">
               {selectedNews.imageUrl && (
                 <img
-                  src={selectedNews.imageUrl}
+                  src={getFileUrl(selectedNews.imageUrl)}
                   alt={selectedNews.title}
                   className="w-full h-64 object-cover rounded-lg mb-4"
                 />
@@ -152,7 +163,7 @@ const NewsPage: React.FC = () => {
               >
                 {item.imageUrl ? (
                   <img
-                    src={item.imageUrl}
+                    src={getFileUrl(item.imageUrl)}
                     alt={item.title}
                     className="w-full h-48 object-cover"
                   />

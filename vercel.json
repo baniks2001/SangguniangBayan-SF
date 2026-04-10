@@ -50,6 +50,10 @@
       "destination": "/api/documents.js"
     },
     {
+      "source": "/api/file",
+      "destination": "/api/file.js"
+    },
+    {
       "source": "/(.*)",
       "destination": "/index.html"
     }
