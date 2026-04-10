@@ -180,14 +180,15 @@ async function handleOrganization(db, params, res) {
 async function handleProcurements(db, params, res) {
   const { category, year, page = '1', limit = '10' } = params;
   
-  let query = { isActive: true };
+  // Admin-site saves with isPublic: true (not isActive)
+  let query = { isPublic: true };
   if (category) query.category = category;
   if (year) query.year = year;
   
   const skip = (parseInt(page) - 1) * parseInt(limit);
   
   const [procurements, total] = await Promise.all([
-    db.collection('procurements').find(query).sort({ date: -1 }).skip(skip).limit(parseInt(limit)).toArray(),
+    db.collection('procurements').find(query).sort({ createdAt: -1 }).skip(skip).limit(parseInt(limit)).toArray(),
     db.collection('procurements').countDocuments(query)
   ]);
   
