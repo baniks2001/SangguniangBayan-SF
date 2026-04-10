@@ -16,14 +16,16 @@ import {
   Building2,
   MapPin,
   Phone,
-  Mail
+  Mail,
+  Calendar
 } from 'lucide-react';
 import { 
   resolutionsApi, 
   ordinancesApi, 
   vacanciesApi, 
   announcementsApi, 
-  newsApi 
+  newsApi,
+  calendarApi
 } from '../services/api';
 
 // Hardcoded system information
@@ -76,6 +78,7 @@ const HomePage: React.FC = () => {
   const [vacancies, setVacancies] = useState<any[]>([]);
   const [announcements, setAnnouncements] = useState<any[]>([]);
   const [news, setNews] = useState<any[]>([]);
+  const [calendarEvents, setCalendarEvents] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState(DEFAULT_STATS);
 
@@ -93,20 +96,22 @@ const HomePage: React.FC = () => {
   const loadData = async () => {
     try {
       setLoading(true);
-      const [resolutionsRes, ordinancesRes, vacanciesRes, announcementsRes, newsRes, allResolutions, allOrdinances] = await Promise.all([
+      const [resolutionsRes, ordinancesRes, vacanciesRes, announcementsRes, newsRes, allResolutions, allOrdinances, calendarRes] = await Promise.all([
         resolutionsApi.getAll({ limit: 3, status: 'Approved', isPublic: true }).catch(() => ({ resolutions: [], pagination: { totalItems: 0 } })),
         ordinancesApi.getAll({ limit: 3, status: 'Approved', isPublic: true }).catch(() => ({ ordinances: [], pagination: { totalItems: 0 } })),
         vacanciesApi.getAll().catch(() => ({ vacancies: [] })),
         announcementsApi.getAll().catch(() => ({ announcements: [] })),
         newsApi.getAll({ limit: 3 }).catch(() => ({ news: [] })),
         resolutionsApi.getAll({ status: 'Approved', isPublic: true, limit: 1 }).catch(() => ({ pagination: { totalItems: 0 } })),
-        ordinancesApi.getAll({ status: 'Approved', isPublic: true, limit: 1 }).catch(() => ({ pagination: { totalItems: 0 } }))
+        ordinancesApi.getAll({ status: 'Approved', isPublic: true, limit: 1 }).catch(() => ({ pagination: { totalItems: 0 } })),
+        calendarApi.getPublic({ upcoming: true, limit: 5 }).catch(() => ({ events: [] }))
       ]);
       setResolutions(resolutionsRes.resolutions || []);
       setOrdinances(ordinancesRes.ordinances || []);
       setVacancies(vacanciesRes.vacancies || []);
       setAnnouncements(announcementsRes.announcements || []);
       setNews(newsRes.news || []);
+      setCalendarEvents(calendarRes.events || []);
       // Update stats with actual counts from database
       setStats(prev => ({
         ...prev,
@@ -388,6 +393,32 @@ const HomePage: React.FC = () => {
                   <p className="font-bold text-white text-lg">{vac.jobTitle}</p>
                   <p className="text-orange-100 mt-1">{vac.position}</p>
                   <p className="text-sm text-orange-200/80 mt-2">{vac.department}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* Calendar of Activities */}
+      {calendarEvents.length > 0 && (
+        <section className="bg-white py-16">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex items-center justify-between mb-8">
+              <h2 className="text-2xl font-bold text-gray-900 flex items-center"><Calendar className="h-7 w-7 mr-3 text-indigo-600" />Calendar of Activities</h2>
+              <Link to="/calendar" className="text-indigo-600 hover:text-indigo-800 flex items-center text-sm font-medium">View Calendar <ChevronRight className="h-4 w-4 ml-1" /></Link>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {calendarEvents.slice(0, 3).map((event) => (
+                <div key={event.id} className="bg-indigo-50 rounded-xl p-6 border-l-4 border-indigo-500 hover:shadow-md transition-shadow">
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="px-2 py-1 bg-indigo-100 text-indigo-700 text-xs font-medium rounded">{event.eventType}</span>
+                  </div>
+                  <h3 className="font-bold text-gray-900 mb-2">{event.title}</h3>
+                  <p className="text-sm text-gray-600 mb-1">
+                    {new Date(event.eventDate).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
+                  </p>
+                  {event.location && <p className="text-sm text-gray-500">{event.location}</p>}
                 </div>
               ))}
             </div>

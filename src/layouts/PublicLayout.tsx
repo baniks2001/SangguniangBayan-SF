@@ -12,7 +12,8 @@ import {
   Home,
   Building2,
   ShoppingCart,
-  FileArchive
+  FileArchive,
+  Calendar
 } from 'lucide-react';
 
 // Hardcoded system information
@@ -42,6 +43,7 @@ const PublicLayout: React.FC = () => {
     { path: '/vacancies', label: 'Vacancies', icon: Briefcase },
     { path: '/announcements', label: 'Announcements', icon: Bell },
     { path: '/news', label: 'News', icon: Newspaper },
+    { path: '/calendar', label: 'Calendar', icon: Calendar },
     { path: '/contact', label: 'Contact', icon: Mail },
   ];
 
@@ -165,6 +167,7 @@ const PublicLayout: React.FC = () => {
                 <li><Link to="/vacancies" className="text-blue-100 hover:text-white hover:underline transition">Job Vacancies</Link></li>
                 <li><Link to="/announcements" className="text-blue-100 hover:text-white hover:underline transition">Announcements</Link></li>
                 <li><Link to="/news" className="text-blue-100 hover:text-white hover:underline transition">News & Updates</Link></li>
+                <li><Link to="/calendar" className="text-blue-100 hover:text-white hover:underline transition">Calendar of Activities</Link></li>
               </ul>
             </div>
 

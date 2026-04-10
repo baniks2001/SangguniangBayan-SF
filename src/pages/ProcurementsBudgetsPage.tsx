@@ -97,6 +97,7 @@ const ProcurementsBudgetsPage: React.FC = () => {
   const [filterCategory, setFilterCategory] = useState<string>('All');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [selectedProcurement, setSelectedProcurement] = useState<ProcurementItem | null>(null);
 
   useEffect(() => {
     loadProcurements();
@@ -270,6 +271,90 @@ const ProcurementsBudgetsPage: React.FC = () => {
         </div>
       </div>
 
+      {/* Procurement Detail Modal */}
+      {selectedProcurement && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg shadow-xl max-w-3xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-6 border-b">
+              <div className="flex items-center justify-between">
+                <h2 className="text-xl font-bold text-gray-900">Procurement Details</h2>
+                <button
+                  onClick={() => setSelectedProcurement(null)}
+                  className="text-gray-400 hover:text-gray-600"
+                >
+                  <span className="sr-only">Close</span>
+                  <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+            <div className="p-6">
+              <div className="mb-4">
+                <span className={`inline-block px-3 py-1 text-sm font-medium rounded ${getStatusColor(selectedProcurement.status)}`}>
+                  {selectedProcurement.status}
+                </span>
+                <span className="ml-2 text-sm text-gray-500">{selectedProcurement.category}</span>
+              </div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                {selectedProcurement.title}
+              </h3>
+              <p className="text-gray-600 mb-6">{selectedProcurement.description}</p>
+              
+              <div className="grid grid-cols-2 gap-4 mb-6 text-sm">
+                <div>
+                  <span className="font-medium text-gray-700">Department:</span> {selectedProcurement.department}
+                </div>
+                <div>
+                  <span className="font-medium text-gray-700">Budget:</span> <span className="text-blue-600 font-semibold">{formatCurrency(selectedProcurement.budget)}</span>
+                </div>
+                <div>
+                  <span className="font-medium text-gray-700">Posted:</span> {formatDate(selectedProcurement.datePosted)}
+                </div>
+                <div>
+                  <span className="font-medium text-gray-700">Deadline:</span> {formatDate(selectedProcurement.deadline)}
+                </div>
+                {selectedProcurement.winningBidder && (
+                  <div className="col-span-2 pt-4 border-t mt-4">
+                    <span className="font-medium text-gray-700">Winning Bidder:</span> {selectedProcurement.winningBidder} - {formatCurrency(selectedProcurement.winningAmount || 0)}
+                  </div>
+                )}
+              </div>
+
+              {selectedProcurement.documents && selectedProcurement.documents.length > 0 && (
+                <div className="border-t pt-4 mt-4">
+                  <p className="font-semibold text-gray-900 mb-2">Documents:</p>
+                  <div className="space-y-2">
+                    {selectedProcurement.documents.map((doc, index) => (
+                      <div key={index} className="flex gap-2">
+                        <button
+                          onClick={() => viewFile(doc.url)}
+                          className="flex-1 flex items-center justify-between px-3 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg text-sm text-gray-700 transition-colors"
+                          title="View document"
+                        >
+                          <span className="flex items-center gap-2 truncate">
+                            <FileText className="h-4 w-4 flex-shrink-0" />
+                            <span className="truncate">{doc.name}</span>
+                          </span>
+                          <ExternalLink className="h-4 w-4 flex-shrink-0" />
+                        </button>
+                        <button
+                          onClick={() => downloadFile(doc.url, doc.name || doc.filename || 'document')}
+                          className="px-3 py-2 bg-blue-100 hover:bg-blue-200 rounded-lg text-blue-700 transition-colors"
+                          title="Download document"
+                        >
+                          <Download className="h-4 w-4" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Procurement List */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-8 pb-16">
         <h2 className="text-2xl font-bold text-gray-900 mb-6">Active Procurements</h2>
@@ -297,66 +382,33 @@ const ProcurementsBudgetsPage: React.FC = () => {
         ) : (
           <div className="space-y-4">
             {filteredProcurements.map((item) => (
-              <div key={item.id} className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-shadow">
+              <div 
+                key={item.id} 
+                className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-shadow cursor-pointer"
+                onClick={() => setSelectedProcurement(item)}
+              >
                 <div className="p-6">
-                  <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4">
+                  <div className="flex items-start justify-between">
                     <div className="flex-1">
                       <div className="flex items-center gap-3 mb-2">
                         <span className={`px-3 py-1 rounded-full text-xs font-semibold ${getStatusColor(item.status)}`}>
                           {item.status}
                         </span>
                         <span className="text-sm text-gray-500">{item.category}</span>
-                        <span className="text-gray-300">|</span>
-                        <span className="text-sm text-gray-500">{item.department}</span>
                       </div>
-                      <h3 className="text-xl font-bold text-gray-900 mb-2">{item.title}</h3>
-                      <p className="text-gray-600 mb-4">{item.description}</p>
-                      
+                      <h3 className="text-lg font-bold text-gray-900 mb-2">{item.title}</h3>
                       <div className="flex flex-wrap gap-4 text-sm text-gray-500">
                         <div className="flex items-center gap-1">
                           <Calendar className="h-4 w-4" />
-                          <span>Posted: {formatDate(item.datePosted)}</span>
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <Calendar className="h-4 w-4" />
-                          <span>Deadline: {formatDate(item.deadline)}</span>
+                          <span>{formatDate(item.datePosted)}</span>
                         </div>
                         <div className="flex items-center gap-1">
                           <DollarSign className="h-4 w-4" />
-                          <span className="font-semibold text-blue-600">Budget: {formatCurrency(item.budget)}</span>
+                          <span className="font-semibold text-blue-600">{formatCurrency(item.budget)}</span>
                         </div>
                       </div>
                     </div>
-                    
-                    <div className="lg:w-72 flex flex-col gap-2">
-                      {item.documents && item.documents.length > 0 && (
-                        <>
-                          <p className="text-sm font-semibold text-gray-700 mb-1">Documents:</p>
-                          {item.documents.map((doc, index) => (
-                            <div key={index} className="flex gap-2">
-                              <button
-                                onClick={() => viewFile(doc.url)}
-                                className="flex-1 flex items-center justify-between px-3 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg text-sm text-gray-700 transition-colors"
-                                title="View document"
-                              >
-                                <span className="flex items-center gap-2 truncate">
-                                  <FileText className="h-4 w-4 flex-shrink-0" />
-                                  <span className="truncate">{doc.name}</span>
-                                </span>
-                                <ExternalLink className="h-4 w-4 flex-shrink-0" />
-                              </button>
-                              <button
-                                onClick={() => downloadFile(doc.url, doc.name || doc.filename || 'document')}
-                                className="px-3 py-2 bg-blue-100 hover:bg-blue-200 rounded-lg text-blue-700 transition-colors"
-                                title="Download document"
-                              >
-                                <Download className="h-4 w-4" />
-                              </button>
-                            </div>
-                          ))}
-                        </>
-                      )}
-                    </div>
+                    <ChevronRight className="h-5 w-5 text-gray-400 mt-1" />
                   </div>
                 </div>
               </div>
