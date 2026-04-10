@@ -40,11 +40,11 @@ const PublicLayout: React.FC = () => {
     { path: '/ordinances', label: 'Ordinances', icon: FileText },
     { path: '/procurements', label: 'Procurements', icon: ShoppingCart },
     { path: '/documents', label: 'Documents', icon: FileArchive },
-    { path: '/vacancies', label: 'Vacancies', icon: Briefcase },
+    { path: '/vacancies', label: 'Job Vacancies', icon: Briefcase },
     { path: '/announcements', label: 'Announcements', icon: Bell },
     { path: '/news', label: 'News', icon: Newspaper },
     { path: '/calendar', label: 'Calendar', icon: Calendar },
-    { path: '/contact', label: 'Contact', icon: Mail },
+    { path: '/contact', label: 'Contact Us', icon: Mail },
   ];
 
   return (
@@ -71,7 +71,7 @@ const PublicLayout: React.FC = () => {
             </Link>
 
             {/* Desktop Navigation */}
-            <nav className="hidden lg:flex items-center space-x-1">
+            <nav className="hidden xl:flex items-center space-x-0.5">
               {navItems.map((item) => {
                 const Icon = item.icon;
                 const active = isActive(item.path);
@@ -79,33 +79,35 @@ const PublicLayout: React.FC = () => {
                   <Link
                     key={item.path}
                     to={item.path}
-                    className={`flex items-center space-x-1 px-2 py-1.5 rounded-md text-xs font-medium transition-all duration-200 ${
+                    className={`flex items-center space-x-1.5 px-3 py-2 rounded-lg text-sm font-semibold transition-all duration-200 ${
                       active
                         ? 'bg-blue-600 text-white shadow-md'
-                        : 'text-gray-700 hover:bg-blue-50 hover:text-blue-700'
+                        : 'text-gray-700 hover:bg-blue-50 hover:text-blue-700 hover:shadow-sm'
                     }`}
                   >
-                    <Icon className={`h-3.5 w-3.5 ${active ? 'text-white' : 'text-blue-600'}`} />
+                    <Icon className={`h-4 w-4 ${active ? 'text-white' : 'text-blue-600'}`} />
                     <span className="whitespace-nowrap">{item.label}</span>
                   </Link>
                 );
               })}
             </nav>
-
-            {/* Mobile Menu Button */}
+            
+            {/* Tablet Navigation - Show hamburger on lg screens */}
             <button
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="lg:hidden p-2 rounded-md text-gray-700 hover:bg-gray-100"
+              className="xl:hidden p-2 rounded-md text-gray-700 hover:bg-blue-50 hover:text-blue-700 transition-colors"
             >
+              <span className="sr-only">Open menu</span>
               {isMobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
             </button>
+
           </div>
         </div>
 
-        {/* Mobile Navigation */}
+        {/* Mobile/Tablet Navigation Dropdown */}
         {isMobileMenuOpen && (
-          <div className="lg:hidden border-t border-gray-200 bg-white shadow-lg">
-            <div className="px-4 pt-3 pb-4 space-y-2">
+          <div className="xl:hidden border-t border-gray-200 bg-white shadow-xl">
+            <div className="px-4 py-3 space-y-1 max-h-[80vh] overflow-y-auto">
               {navItems.map((item) => {
                 const Icon = item.icon;
                 const active = isActive(item.path);
@@ -114,9 +116,9 @@ const PublicLayout: React.FC = () => {
                     key={item.path}
                     to={item.path}
                     onClick={() => setIsMobileMenuOpen(false)}
-                    className={`flex items-center space-x-3 px-4 py-3 rounded-lg text-base font-semibold transition-colors ${
+                    className={`flex items-center space-x-3 px-4 py-3 rounded-lg text-base font-semibold transition-all ${
                       active
-                        ? 'bg-blue-600 text-white'
+                        ? 'bg-blue-600 text-white shadow-sm'
                         : 'text-gray-700 hover:bg-blue-50 hover:text-blue-700'
                     }`}
                   >
