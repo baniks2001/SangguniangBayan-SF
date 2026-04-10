@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { resolutionsApi } from '../services/api';
-import { Scale, Search, ChevronLeft, ChevronRight, FileText, Calendar, Eye, Download, Info, FileSearch } from 'lucide-react';
+import { Scale, Search, ChevronLeft, ChevronRight, FileText, Calendar, Download, Info } from 'lucide-react';
 
 interface Resolution {
   id: string;
@@ -24,7 +24,6 @@ const ResolutionsPage: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [selectedResolution, setSelectedResolution] = useState<Resolution | null>(null);
-  const [viewPdfResolution, setViewPdfResolution] = useState<Resolution | null>(null);
 
   useEffect(() => {
     loadResolutions();
@@ -102,45 +101,6 @@ const ResolutionsPage: React.FC = () => {
         </div>
       </form>
 
-      {/* Resolution PDF Preview Modal */}
-      {viewPdfResolution && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg shadow-xl max-w-5xl w-full max-h-[90vh] flex flex-col">
-            <div className="p-4 border-b flex items-center justify-between">
-              <div>
-                <h2 className="text-lg font-bold text-gray-900">View Resolution</h2>
-                <p className="text-sm text-gray-600">Resolution No. {viewPdfResolution.resolutionNumber}, Series {viewPdfResolution.series}</p>
-              </div>
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={() => resolutionsApi.downloadPdf(viewPdfResolution.fileId || viewPdfResolution.pdfUrl, viewPdfResolution.resolutionNumber, viewPdfResolution.series)}
-                  className="flex items-center px-3 py-2 bg-gray-600 text-white text-sm rounded-md hover:bg-gray-700 transition-colors"
-                >
-                  <Download className="h-4 w-4 mr-1" />
-                  Download
-                </button>
-                <button
-                  onClick={() => setViewPdfResolution(null)}
-                  className="p-2 text-gray-400 hover:text-gray-600"
-                >
-                  <span className="sr-only">Close</span>
-                  <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                </button>
-              </div>
-            </div>
-            <div className="flex-1 overflow-hidden bg-gray-100">
-              <iframe
-                src={`${process.env.REACT_APP_API_URL || ''}/api/files/view/${viewPdfResolution.fileId}`}
-                className="w-full h-full min-h-[70vh]"
-                title="Resolution PDF"
-              />
-            </div>
-          </div>
-        </div>
-      )}
-
       {/* Resolution Detail Modal */}
       {selectedResolution && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
@@ -196,15 +156,8 @@ const ResolutionsPage: React.FC = () => {
               {/* PDF Actions */}
               <div className="border-t pt-4 mt-4 flex gap-3">
                 <button
-                  onClick={() => { setSelectedResolution(null); setViewPdfResolution(selectedResolution); }}
-                  className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
-                >
-                  <Eye className="h-4 w-4 mr-2" />
-                  View Approved File
-                </button>
-                <button
                   onClick={() => resolutionsApi.downloadPdf(selectedResolution.fileId || selectedResolution.pdfUrl, selectedResolution.resolutionNumber, selectedResolution.series)}
-                  className="flex items-center px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 transition-colors"
+                  className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
                 >
                   <Download className="h-4 w-4 mr-2" />
                   Download Approved File
@@ -248,15 +201,8 @@ const ResolutionsPage: React.FC = () => {
                   </div>
                   <div className="flex flex-col gap-2 ml-4">
                     <button
-                      onClick={() => setViewPdfResolution(resolution)}
-                      className="flex items-center px-3 py-2 bg-blue-600 text-white text-sm rounded-md hover:bg-blue-700 transition-colors"
-                    >
-                      <FileSearch className="h-4 w-4 mr-2" />
-                      View Resolution
-                    </button>
-                    <button
                       onClick={() => resolutionsApi.downloadPdf(resolution.fileId || resolution.pdfUrl, resolution.resolutionNumber, resolution.series)}
-                      className="flex items-center px-3 py-2 bg-gray-600 text-white text-sm rounded-md hover:bg-gray-700 transition-colors"
+                      className="flex items-center px-3 py-2 bg-blue-600 text-white text-sm rounded-md hover:bg-blue-700 transition-colors"
                     >
                       <Download className="h-4 w-4 mr-2" />
                       Download Approved File
