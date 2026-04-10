@@ -34,12 +34,16 @@ const PublicLayout: React.FC = () => {
 
   const isActive = (path: string) => location.pathname === path;
 
-  const navItems = [
+  // Split into 2 rows of 5 items each
+  const navItemsRow1 = [
     { path: '/', label: 'Home', icon: Home },
     { path: '/resolutions', label: 'Resolutions', icon: Scale },
     { path: '/ordinances', label: 'Ordinances', icon: FileText },
     { path: '/procurements', label: 'Procurements', icon: ShoppingCart },
     { path: '/documents', label: 'Documents', icon: FileArchive },
+  ];
+
+  const navItemsRow2 = [
     { path: '/vacancies', label: 'Vacancies', icon: Briefcase },
     { path: '/announcements', label: 'Announcements', icon: Bell },
     { path: '/news', label: 'News', icon: Newspaper },
@@ -47,85 +51,107 @@ const PublicLayout: React.FC = () => {
     { path: '/contact', label: 'Contact', icon: Mail },
   ];
 
+  const allNavItems = [...navItemsRow1, ...navItemsRow2];
+
+  const NavItem = ({ item, isMobile = false }: { item: typeof navItemsRow1[0]; isMobile?: boolean }) => {
+    const Icon = item.icon;
+    const active = isActive(item.path);
+    
+    if (isMobile) {
+      return (
+        <Link
+          key={item.path}
+          to={item.path}
+          onClick={() => setIsMobileMenuOpen(false)}
+          className={`flex items-center space-x-3 px-4 py-3 rounded-lg text-base font-semibold transition-colors ${
+            active
+              ? 'bg-blue-600 text-white'
+              : 'text-gray-700 hover:bg-blue-50 hover:text-blue-700'
+          }`}
+        >
+          <Icon className={`h-5 w-5 ${active ? 'text-white' : 'text-blue-600'}`} />
+          <span>{item.label}</span>
+        </Link>
+      );
+    }
+
+    return (
+      <Link
+        key={item.path}
+        to={item.path}
+        className={`flex items-center justify-center space-x-2 px-4 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200 ${
+          active
+            ? 'bg-blue-600 text-white shadow-md'
+            : 'text-gray-700 hover:bg-blue-50 hover:text-blue-700 hover:shadow-sm'
+        }`}
+      >
+        <Icon className={`h-4 w-4 ${active ? 'text-white' : 'text-blue-600'}`} />
+        <span className="whitespace-nowrap">{item.label}</span>
+      </Link>
+    );
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
       {/* Header */}
       <header className="bg-white shadow-md sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            {/* Logo and System Name - Hardcoded */}
+          {/* Top Row: Logo and System Name */}
+          <div className="flex items-center justify-between h-16">
+            {/* Logo, Vertical Line, and System Name */}
             <Link to="/" className="flex items-center space-x-4">
               <img 
                 src="/homepage-images/logo.png"
                 alt="Sangguniang Bayan Logo"
-                className="h-10 w-10 object-contain"
+                className="h-12 w-12 object-contain"
               />
-              <div className="hidden sm:block min-w-0">
-                <h1 className="text-sm font-bold text-blue-900 whitespace-nowrap">
+              {/* Vertical Line */}
+              <div className="hidden sm:block w-px h-10 bg-gray-800"></div>
+              {/* System Name - visible on all screens */}
+              <div className="min-w-0">
+                <h1 className="text-sm sm:text-base font-bold text-blue-900 whitespace-nowrap">
                   {SYSTEM_NAME_FULL}
                 </h1>
-                <p className="text-xs text-gray-600 whitespace-nowrap">
+                <p className="text-xs text-gray-600 whitespace-nowrap hidden sm:block">
                   {MUNICIPALITY}, {PROVINCE}
                 </p>
               </div>
             </Link>
 
-            {/* Desktop Navigation */}
-            <nav className="hidden lg:flex items-center space-x-0.5">
-              {navItems.map((item) => {
-                const Icon = item.icon;
-                const active = isActive(item.path);
-                return (
-                  <Link
-                    key={item.path}
-                    to={item.path}
-                    className={`flex items-center space-x-1 px-2 py-1.5 rounded-md text-xs font-medium transition-all duration-200 ${
-                      active
-                        ? 'bg-blue-600 text-white shadow-sm'
-                        : 'text-gray-700 hover:bg-blue-50 hover:text-blue-700'
-                    }`}
-                  >
-                    <Icon className={`h-3.5 w-3.5 ${active ? 'text-white' : 'text-blue-600'}`} />
-                    <span className="whitespace-nowrap">{item.label}</span>
-                  </Link>
-                );
-              })}
-            </nav>
-            
             {/* Mobile Menu Button */}
             <button
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
               className="lg:hidden p-2 rounded-md text-gray-700 hover:bg-gray-100"
+              aria-label="Toggle menu"
             >
               {isMobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
             </button>
-
           </div>
+
+          {/* Desktop Navigation - 2 Rows of 5 items */}
+          <nav className="hidden lg:block pb-4">
+            {/* Row 1 */}
+            <div className="flex items-center justify-center space-x-2 mb-2">
+              {navItemsRow1.map((item) => (
+                <NavItem key={item.path} item={item} />
+              ))}
+            </div>
+            {/* Row 2 */}
+            <div className="flex items-center justify-center space-x-2">
+              {navItemsRow2.map((item) => (
+                <NavItem key={item.path} item={item} />
+              ))}
+            </div>
+          </nav>
         </div>
 
         {/* Mobile Navigation */}
         {isMobileMenuOpen && (
           <div className="lg:hidden border-t border-gray-200 bg-white shadow-lg">
             <div className="px-4 pt-3 pb-4 space-y-2">
-              {navItems.map((item) => {
-                const Icon = item.icon;
-                const active = isActive(item.path);
-                return (
-                  <Link
-                    key={item.path}
-                    to={item.path}
-                    onClick={() => setIsMobileMenuOpen(false)}
-                    className={`flex items-center space-x-3 px-4 py-3 rounded-lg text-base font-semibold transition-colors ${
-                      active
-                        ? 'bg-blue-600 text-white'
-                        : 'text-gray-700 hover:bg-blue-50 hover:text-blue-700'
-                    }`}
-                  >
-                    <Icon className={`h-5 w-5 ${active ? 'text-white' : 'text-blue-600'}`} />
-                    <span>{item.label}</span>
-                  </Link>
-                );
-              })}
+              {allNavItems.map((item) => (
+                <NavItem key={item.path} item={item} isMobile />
+              ))}
             </div>
           </div>
         )}
