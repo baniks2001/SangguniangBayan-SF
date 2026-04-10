@@ -92,17 +92,37 @@ const PublicLayout: React.FC = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Top Row: Logo and System Name */}
           <div className="flex items-center justify-between h-16">
-            {/* Logo, Vertical Line, and System Name - Closer spacing */}
-            <Link to="/" className="flex items-center space-x-2">
+            {/* 3 Logos with System Name */}
+            <Link to="/" className="flex items-center space-x-3">
+              {/* Logo 1 - Left (Municipality) */}
+              <img 
+                src="/homepage-images/municipality-logo.png"
+                alt="Municipality Logo"
+                className="h-12 w-12 object-contain"
+              />
+              
+              {/* Vertical Line */}
+              <div className="hidden sm:block w-px h-10 bg-gray-800"></div>
+              
+              {/* Logo 2 - Center (Sangguniang Bayan - existing) */}
               <img 
                 src="/homepage-images/logo.png"
                 alt="Sangguniang Bayan Logo"
                 className="h-12 w-12 object-contain"
               />
+              
               {/* Vertical Line */}
-              <div className="hidden sm:block w-px h-10 bg-gray-800 mx-1"></div>
-              {/* System Name - visible on all screens */}
-              <div className="min-w-0">
+              <div className="hidden sm:block w-px h-10 bg-gray-800"></div>
+              
+              {/* Logo 3 - Right (Optional/Secondary) */}
+              <img 
+                src="/homepage-images/bagongpilipinas.png"
+                alt="Secondary Logo"
+                className="h-12 w-12 object-contain hidden sm:block"
+              />
+              
+              {/* System Name */}
+              <div className="min-w-0 ml-2">
                 <h1 className="text-sm sm:text-base font-bold text-blue-900 whitespace-nowrap">
                   {SYSTEM_NAME_FULL}
                 </h1>
