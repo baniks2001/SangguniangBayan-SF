@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { ordinancesApi } from '../services/api';
-import { FileText, Search, ChevronLeft, ChevronRight, Calendar, Scroll, Eye, Download } from 'lucide-react';
+import { FileText, Search, ChevronLeft, ChevronRight, Calendar, Scroll, Eye, Download, Info, FileSearch } from 'lucide-react';
 
 interface Ordinance {
   id: string;
@@ -23,6 +23,7 @@ const OrdinancesPage: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [selectedOrdinance, setSelectedOrdinance] = useState<Ordinance | null>(null);
+  const [viewPdfOrdinance, setViewPdfOrdinance] = useState<Ordinance | null>(null);
 
   useEffect(() => {
     loadOrdinances();
@@ -99,6 +100,45 @@ const OrdinancesPage: React.FC = () => {
         </div>
       </form>
 
+      {/* Ordinance PDF Preview Modal */}
+      {viewPdfOrdinance && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg shadow-xl max-w-5xl w-full max-h-[90vh] flex flex-col">
+            <div className="p-4 border-b flex items-center justify-between">
+              <div>
+                <h2 className="text-lg font-bold text-gray-900">View Ordinance</h2>
+                <p className="text-sm text-gray-600">Ordinance No. {viewPdfOrdinance.ordinanceNumber}, Series {viewPdfOrdinance.series}</p>
+              </div>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => ordinancesApi.downloadPdf(viewPdfOrdinance.fileId || viewPdfOrdinance.pdfUrl, viewPdfOrdinance.ordinanceNumber, viewPdfOrdinance.series)}
+                  className="flex items-center px-3 py-2 bg-gray-600 text-white text-sm rounded-md hover:bg-gray-700 transition-colors"
+                >
+                  <Download className="h-4 w-4 mr-1" />
+                  Download
+                </button>
+                <button
+                  onClick={() => setViewPdfOrdinance(null)}
+                  className="p-2 text-gray-400 hover:text-gray-600"
+                >
+                  <span className="sr-only">Close</span>
+                  <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+            <div className="flex-1 overflow-hidden bg-gray-100">
+              <iframe
+                src={`${process.env.REACT_APP_API_URL || ''}/api/files/view/${viewPdfOrdinance.fileId}`}
+                className="w-full h-full min-h-[70vh]"
+                title="Ordinance PDF"
+              />
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Ordinance Detail Modal */}
       {selectedOrdinance && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
@@ -130,8 +170,11 @@ const OrdinancesPage: React.FC = () => {
                 className="prose max-w-none mb-6 text-gray-700 ordinance-content"
                 dangerouslySetInnerHTML={{ 
                   __html: selectedOrdinance.content?.replace(
+                    /src="gridfs:\/\//g, 
+                    `${process.env.REACT_APP_API_URL || ''}/api/files/view/`
+                  ).replace(
                     /src="\/uploads\//g, 
-                    `src="${window.location.protocol}//${window.location.host}/uploads/`
+                    `${process.env.REACT_APP_API_URL || ''}/uploads/`
                   ) || '' 
                 }}
               />
@@ -139,18 +182,18 @@ const OrdinancesPage: React.FC = () => {
               {/* PDF Actions */}
               <div className="border-t pt-4 mt-4 flex gap-3">
                 <button
-                  onClick={() => ordinancesApi.viewPdf(selectedOrdinance.fileId || selectedOrdinance.pdfUrl)}
+                  onClick={() => { setSelectedOrdinance(null); setViewPdfOrdinance(selectedOrdinance); }}
                   className="flex items-center px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors"
                 >
                   <Eye className="h-4 w-4 mr-2" />
-                  View PDF
+                  View Approved File
                 </button>
                 <button
                   onClick={() => ordinancesApi.downloadPdf(selectedOrdinance.fileId || selectedOrdinance.pdfUrl, selectedOrdinance.ordinanceNumber, selectedOrdinance.series)}
                   className="flex items-center px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 transition-colors"
                 >
                   <Download className="h-4 w-4 mr-2" />
-                  Download PDF
+                  Download Approved File
                 </button>
               </div>
             </div>
@@ -165,14 +208,13 @@ const OrdinancesPage: React.FC = () => {
             {ordinances.map((ordinance) => (
               <div
                 key={ordinance.id}
-                className="p-6 hover:bg-gray-50 transition-colors cursor-pointer"
-                onClick={() => setSelectedOrdinance(ordinance)}
+                className="p-6 hover:bg-gray-50 transition-colors"
               >
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
                     <div className="flex items-center gap-3 mb-2">
                       <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                        {ordinance.ordinanceNumber}-{ordinance.series}
+                        Ordinance No. {ordinance.ordinanceNumber}, Series {ordinance.series}
                       </span>
                       <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
                         ordinance.status === 'Approved' ? 'bg-green-100 text-green-800' :
@@ -190,28 +232,28 @@ const OrdinancesPage: React.FC = () => {
                       {new Date(ordinance.createdAt).toLocaleDateString()}
                     </div>
                   </div>
-                  <div className="flex items-center gap-2 ml-4">
+                  <div className="flex flex-col gap-2 ml-4">
                     <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        ordinancesApi.viewPdf(ordinance.fileId || ordinance.pdfUrl);
-                      }}
-                      className="p-2 text-green-600 hover:bg-green-50 rounded-md transition-colors"
-                      title="View PDF"
+                      onClick={() => setViewPdfOrdinance(ordinance)}
+                      className="flex items-center px-3 py-2 bg-green-600 text-white text-sm rounded-md hover:bg-green-700 transition-colors"
                     >
-                      <Eye className="h-5 w-5" />
+                      <FileSearch className="h-4 w-4 mr-2" />
+                      View Ordinance
                     </button>
                     <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        ordinancesApi.downloadPdf(ordinance.fileId || ordinance.pdfUrl, ordinance.ordinanceNumber, ordinance.series);
-                      }}
-                      className="p-2 text-gray-600 hover:bg-gray-100 rounded-md transition-colors"
-                      title="Download PDF"
+                      onClick={() => ordinancesApi.downloadPdf(ordinance.fileId || ordinance.pdfUrl, ordinance.ordinanceNumber, ordinance.series)}
+                      className="flex items-center px-3 py-2 bg-gray-600 text-white text-sm rounded-md hover:bg-gray-700 transition-colors"
                     >
-                      <Download className="h-5 w-5" />
+                      <Download className="h-4 w-4 mr-2" />
+                      Download Approved File
                     </button>
-                    <FileText className="h-6 w-6 text-gray-400" />
+                    <button
+                      onClick={() => setSelectedOrdinance(ordinance)}
+                      className="flex items-center px-3 py-2 bg-white border border-gray-300 text-gray-700 text-sm rounded-md hover:bg-gray-50 transition-colors"
+                    >
+                      <Info className="h-4 w-4 mr-2" />
+                      Ordinance Details
+                    </button>
                   </div>
                 </div>
               </div>
