@@ -226,9 +226,9 @@ async function handleResolutions(db, params, res) {
 }
 
 async function handleVacancies(db, params, res) {
-  // Filter for active vacancies (status: 'active', isActive: true)
+  // Filter for active vacancies - use case-insensitive regex to match "Active" or "active"
   let vacancies = await db.collection('vacancies')
-    .find({ status: 'active', isActive: true })
+    .find({ status: { $regex: '^active$', $options: 'i' }, isActive: true })
     .sort({ postedAt: -1 })
     .toArray();
   
