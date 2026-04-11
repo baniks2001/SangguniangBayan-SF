@@ -109,6 +109,9 @@ async function handleApply(req, res) {
   let barangayClearanceUrl = '';
   let medicalCertificateUrl = '';
   let otherDocumentUrls = [];
+  
+  // Dynamic requirement files (key: requirementId, value: fileUrl)
+  let requirementFiles = {};
 
   // Handle multipart form data (file uploads)
   if (contentType.includes('multipart/form-data')) {
@@ -170,6 +173,13 @@ async function handleApply(req, res) {
           case 'otherDocuments':
           case 'others':
             otherDocumentUrls.push(fileUrl);
+            break;
+          default:
+            // Handle dynamic requirement files (requirement_${id})
+            if (part.name && part.name.startsWith('requirement_')) {
+              const reqId = part.name.replace('requirement_', '');
+              requirementFiles[reqId] = fileUrl;
+            }
             break;
         }
       } else if (part.name && !part.isFile) {
@@ -255,6 +265,9 @@ async function handleApply(req, res) {
     barangayClearanceUrl: barangayClearanceUrl || '',
     medicalCertificateUrl: medicalCertificateUrl || '',
     otherDocumentUrls: otherDocumentUrls || [],
+    // Dynamic requirement files
+    requirementFiles: requirementFiles || {},
+    requirements: applicationData.requirements ? JSON.parse(applicationData.requirements) : [],
     // Application status workflow
     status: 'New Applicant', // New status: New Applicant, Pending, In Process, Rejected, Accepted
     statusHistory: [{

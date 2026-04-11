@@ -1,6 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { vacanciesApi, applicationsApi } from '../services/api';
-import { Briefcase, Building2, DollarSign, Clock, MapPin, ChevronRight, Calendar, X, Upload, FileText } from 'lucide-react';
+import { Briefcase, Building2, DollarSign, Clock, MapPin, ChevronRight, Calendar, X, Upload, FileText, CheckCircle, AlertCircle, User, Phone, Mail, Home, GraduationCap, Building } from 'lucide-react';
+
+interface Requirement {
+  id: string;
+  name: string;
+  description: string;
+}
 
 interface Vacancy {
   id: string;
@@ -10,7 +16,7 @@ interface Vacancy {
   employmentType: string;
   estimatedSalary: string;
   jobDescription: string;
-  requirements?: string[];
+  requirements?: Requirement[];
   closingDate?: string;
 }
 
@@ -30,6 +36,8 @@ const VacanciesPage: React.FC = () => {
   });
   const [resumeFile, setResumeFile] = useState<File | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [requirementFiles, setRequirementFiles] = useState<Record<string, File | null>>({});
+  const requirementInputRefs = useRef<Record<string, HTMLInputElement | null>>({});
   const [submitting, setSubmitting] = useState(false);
   const [submitSuccess, setSubmitSuccess] = useState(false);
 
@@ -53,6 +61,12 @@ const VacanciesPage: React.FC = () => {
     setSelectedVacancy(vacancy);
     setShowApplicationForm(true);
     setSubmitSuccess(false);
+    setRequirementFiles({});
+    setResumeFile(null);
+  };
+
+  const handleRequirementFileChange = (reqId: string, file: File | null) => {
+    setRequirementFiles(prev => ({ ...prev, [reqId]: file }));
   };
 
   const handleSubmitApplication = async (e: React.FormEvent) => {
@@ -77,6 +91,18 @@ const VacanciesPage: React.FC = () => {
         formData.append('resume', resumeFile);
       }
       
+      // Append requirement files
+      Object.entries(requirementFiles).forEach(([reqId, file]) => {
+        if (file) {
+          formData.append(`requirement_${reqId}`, file);
+        }
+      });
+      
+      // Append requirements metadata
+      if (selectedVacancy.requirements) {
+        formData.append('requirements', JSON.stringify(selectedVacancy.requirements));
+      }
+      
       await applicationsApi.submitWithFile(formData);
       setSubmitSuccess(true);
       setApplicationData({
@@ -89,6 +115,7 @@ const VacanciesPage: React.FC = () => {
         experience: ''
       });
       setResumeFile(null);
+      setRequirementFiles({});
       setTimeout(() => {
         setShowApplicationForm(false);
         setSelectedVacancy(null);
@@ -141,133 +168,245 @@ const VacanciesPage: React.FC = () => {
             </div>
             <div className="p-6">
               {submitSuccess ? (
-                <div className="text-center py-8">
-                  <div className="bg-green-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <svg className="h-8 w-8 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                    </svg>
+                <div className="text-center py-12">
+                  <div className="bg-green-100 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <CheckCircle className="h-10 w-10 text-green-600" />
                   </div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">Application Submitted!</h3>
-                  <p className="text-gray-600">Thank you for your application. We will review it and contact you soon.</p>
+                  <h3 className="text-2xl font-bold text-gray-900 mb-3">Application Submitted!</h3>
+                  <p className="text-gray-600 mb-2">Thank you for your application for <strong>{selectedVacancy.jobTitle}</strong>.</p>
+                  <p className="text-gray-500 text-sm">We will review your application and contact you soon.</p>
                 </div>
               ) : (
-                <form onSubmit={handleSubmitApplication} className="space-y-4">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Full Name *</label>
-                      <input
-                        type="text"
-                        required
-                        value={applicationData.fullName}
-                        onChange={(e) => setApplicationData({ ...applicationData, fullName: e.target.value })}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      />
+                <form onSubmit={handleSubmitApplication} className="space-y-6">
+                  {/* Personal Information Section */}
+                  <div className="bg-blue-50 rounded-xl p-5">
+                    <h3 className="text-lg font-semibold text-blue-900 mb-4 flex items-center">
+                      <User className="h-5 w-5 mr-2" />
+                      Personal Information
+                    </h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Full Name *</label>
+                        <div className="relative">
+                          <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                          <input
+                            type="text"
+                            required
+                            value={applicationData.fullName}
+                            onChange={(e) => setApplicationData({ ...applicationData, fullName: e.target.value })}
+                            className="w-full pl-10 pr-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
+                            placeholder="Enter your full name"
+                          />
+                        </div>
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Age *</label>
+                        <input
+                          type="number"
+                          required
+                          min="18"
+                          max="70"
+                          value={applicationData.age}
+                          onChange={(e) => setApplicationData({ ...applicationData, age: e.target.value })}
+                          className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
+                          placeholder="Enter your age"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Mobile Number *</label>
+                        <div className="relative">
+                          <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                          <input
+                            type="tel"
+                            required
+                            value={applicationData.mobileNumber}
+                            onChange={(e) => setApplicationData({ ...applicationData, mobileNumber: e.target.value })}
+                            className="w-full pl-10 pr-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
+                            placeholder="09XX XXX XXXX"
+                          />
+                        </div>
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Email Address *</label>
+                        <div className="relative">
+                          <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                          <input
+                            type="email"
+                            required
+                            value={applicationData.email}
+                            onChange={(e) => setApplicationData({ ...applicationData, email: e.target.value })}
+                            className="w-full pl-10 pr-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
+                            placeholder="your@email.com"
+                          />
+                        </div>
+                      </div>
                     </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Age *</label>
-                      <input
-                        type="number"
-                        required
-                        value={applicationData.age}
-                        onChange={(e) => setApplicationData({ ...applicationData, age: e.target.value })}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Mobile Number *</label>
-                      <input
-                        type="tel"
-                        required
-                        value={applicationData.mobileNumber}
-                        onChange={(e) => setApplicationData({ ...applicationData, mobileNumber: e.target.value })}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Email Address *</label>
-                      <input
-                        type="email"
-                        required
-                        value={applicationData.email}
-                        onChange={(e) => setApplicationData({ ...applicationData, email: e.target.value })}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      />
-                    </div>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Address *</label>
-                    <textarea
-                      required
-                      rows={2}
-                      value={applicationData.address}
-                      onChange={(e) => setApplicationData({ ...applicationData, address: e.target.value })}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Education</label>
-                    <textarea
-                      rows={2}
-                      placeholder="List your educational background..."
-                      value={applicationData.education}
-                      onChange={(e) => setApplicationData({ ...applicationData, education: e.target.value })}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Work Experience</label>
-                    <textarea
-                      rows={2}
-                      placeholder="Describe your relevant work experience..."
-                      value={applicationData.experience}
-                      onChange={(e) => setApplicationData({ ...applicationData, experience: e.target.value })}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Resume/CV (PDF, DOC, DOCX) *
-                    </label>
-                    <div className="flex items-center gap-2">
-                      <input
-                        ref={fileInputRef}
-                        type="file"
-                        accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-                        onChange={(e) => setResumeFile(e.target.files?.[0] || null)}
-                        className="hidden"
-                      />
-                      <button
-                        type="button"
-                        onClick={() => fileInputRef.current?.click()}
-                        className="flex items-center px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-50 text-sm"
-                      >
-                        <Upload className="h-4 w-4 mr-2" />
-                        Choose File
-                      </button>
-                      {resumeFile ? (
-                        <span className="text-sm text-green-600 flex items-center">
-                          <FileText className="h-4 w-4 mr-1" />
-                          {resumeFile.name}
-                        </span>
-                      ) : (
-                        <span className="text-sm text-gray-500">No file selected</span>
-                      )}
+                    <div className="mt-4">
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Address *</label>
+                      <div className="relative">
+                        <Home className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                        <textarea
+                          required
+                          rows={2}
+                          value={applicationData.address}
+                          onChange={(e) => setApplicationData({ ...applicationData, address: e.target.value })}
+                          className="w-full pl-10 pr-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
+                          placeholder="Enter your complete address"
+                        />
+                      </div>
                     </div>
                   </div>
-                  <div className="flex gap-3 pt-4">
+
+                  {/* Background Section */}
+                  <div className="bg-green-50 rounded-xl p-5">
+                    <h3 className="text-lg font-semibold text-green-900 mb-4 flex items-center">
+                      <GraduationCap className="h-5 w-5 mr-2" />
+                      Background
+                    </h3>
+                    <div className="space-y-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Education</label>
+                        <textarea
+                          rows={2}
+                          placeholder="List your educational background (degrees, schools, etc.)"
+                          value={applicationData.education}
+                          onChange={(e) => setApplicationData({ ...applicationData, education: e.target.value })}
+                          className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Work Experience</label>
+                        <textarea
+                          rows={2}
+                          placeholder="Describe your relevant work experience..."
+                          value={applicationData.experience}
+                          onChange={(e) => setApplicationData({ ...applicationData, experience: e.target.value })}
+                          className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Required Documents Section */}
+                  <div className="bg-orange-50 rounded-xl p-5">
+                    <h3 className="text-lg font-semibold text-orange-900 mb-4 flex items-center">
+                      <FileText className="h-5 w-5 mr-2" />
+                      Required Documents
+                    </h3>
+
+                    {/* Standard Resume Upload */}
+                    <div className="mb-4">
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Resume/CV (PDF, DOC, DOCX) *
+                      </label>
+                      <div className="flex items-center gap-3">
+                        <input
+                          ref={fileInputRef}
+                          type="file"
+                          accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                          onChange={(e) => setResumeFile(e.target.files?.[0] || null)}
+                          className="hidden"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => fileInputRef.current?.click()}
+                          className={`flex items-center px-4 py-2.5 border-2 border-dashed rounded-lg transition-colors ${
+                            resumeFile ? 'border-green-400 bg-green-50 text-green-700' : 'border-gray-300 hover:border-orange-400 hover:bg-orange-50'
+                          }`}
+                        >
+                          <Upload className="h-5 w-5 mr-2" />
+                          {resumeFile ? 'Change File' : 'Choose File'}
+                        </button>
+                        {resumeFile ? (
+                          <span className="text-sm text-green-700 flex items-center font-medium">
+                            <CheckCircle className="h-4 w-4 mr-1" />
+                            {resumeFile.name}
+                          </span>
+                        ) : (
+                          <span className="text-sm text-gray-500 flex items-center">
+                            <AlertCircle className="h-4 w-4 mr-1 text-orange-500" />
+                            Required
+                          </span>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Dynamic Requirement Uploads */}
+                    {selectedVacancy.requirements && selectedVacancy.requirements.length > 0 && (
+                      <div className="space-y-3 mt-4 pt-4 border-t border-orange-200">
+                        <p className="text-sm font-medium text-orange-800 mb-3">
+                          Additional Requirements for this position:
+                        </p>
+                        {selectedVacancy.requirements.map((req) => (
+                          <div key={req.id} className="bg-white rounded-lg p-4 border border-orange-200">
+                            <div className="flex items-start justify-between">
+                              <div className="flex-1">
+                                <label className="block text-sm font-semibold text-gray-800 mb-1">
+                                  {req.name} *
+                                </label>
+                                {req.description && (
+                                  <p className="text-xs text-gray-500 mb-2">{req.description}</p>
+                                )}
+                                <div className="flex items-center gap-3">
+                                  <input
+                                    ref={(el) => { requirementInputRefs.current[req.id] = el; }}
+                                    type="file"
+                                    accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,application/pdf,application/msword,image/*"
+                                    onChange={(e) => handleRequirementFileChange(req.id, e.target.files?.[0] || null)}
+                                    className="hidden"
+                                  />
+                                  <button
+                                    type="button"
+                                    onClick={() => requirementInputRefs.current[req.id]?.click()}
+                                    className={`flex items-center px-3 py-2 text-sm border-2 border-dashed rounded-lg transition-colors ${
+                                      requirementFiles[req.id] ? 'border-green-400 bg-green-50 text-green-700' : 'border-gray-300 hover:border-orange-400 hover:bg-orange-50'
+                                    }`}
+                                  >
+                                    <Upload className="h-4 w-4 mr-2" />
+                                    {requirementFiles[req.id] ? 'Change File' : 'Upload'}
+                                  </button>
+                                  {requirementFiles[req.id] ? (
+                                    <span className="text-sm text-green-700 flex items-center">
+                                      <CheckCircle className="h-4 w-4 mr-1" />
+                                      {requirementFiles[req.id]?.name}
+                                    </span>
+                                  ) : (
+                                    <span className="text-xs text-orange-600 flex items-center">
+                                      <AlertCircle className="h-3 w-3 mr-1" />
+                                      Required
+                                    </span>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Submit Buttons */}
+                  <div className="flex gap-4 pt-2">
                     <button
                       type="button"
                       onClick={() => setShowApplicationForm(false)}
-                      className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50"
+                      className="flex-1 px-6 py-3 border-2 border-gray-300 text-gray-700 rounded-xl font-medium hover:bg-gray-50 transition-colors"
                     >
                       Cancel
                     </button>
                     <button
                       type="submit"
                       disabled={submitting || !resumeFile}
-                      className="flex-1 px-4 py-2 bg-orange-600 text-white rounded-md hover:bg-orange-700 disabled:opacity-50"
+                      className="flex-1 px-6 py-3 bg-gradient-to-r from-orange-600 to-orange-500 text-white rounded-xl font-medium hover:from-orange-700 hover:to-orange-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg hover:shadow-xl"
                     >
-                      {submitting ? 'Submitting...' : 'Submit Application'}
+                      {submitting ? (
+                        <span className="flex items-center justify-center">
+                          <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2" />
+                          Submitting...
+                        </span>
+                      ) : (
+                        'Submit Application'
+                      )}
                     </button>
                   </div>
                 </form>
