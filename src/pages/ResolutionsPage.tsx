@@ -156,8 +156,8 @@ const ResolutionsPage: React.FC = () => {
                       key={img.id}
                       className="absolute"
                       style={{
-                        left: `${72 + img.x}px`, // Add left padding offset
-                        top: `${72 + img.y}px`, // Add top padding offset
+                        left: `${img.x + 30}px`, // Shift left to center blue logo
+                        top: `${img.y}px`,
                         width: `${img.width}px`,
                         height: 'auto',
                         zIndex: 10
