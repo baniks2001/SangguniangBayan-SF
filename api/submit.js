@@ -97,8 +97,18 @@ module.exports = async (req, res) => {
 async function handleApply(req, res) {
   const contentType = req.headers['content-type'] || '';
   let applicationData = {};
+  
+  // Multiple file upload fields
   let resumeUrl = '';
   let certificateUrls = [];
+  let governmentIdUrl = '';
+  let diplomaUrl = '';
+  let transcriptUrl = '';
+  let nbiClearanceUrl = '';
+  let policeClearanceUrl = '';
+  let barangayClearanceUrl = '';
+  let medicalCertificateUrl = '';
+  let otherDocumentUrls = [];
 
   // Handle multipart form data (file uploads)
   if (contentType.includes('multipart/form-data')) {
@@ -107,7 +117,7 @@ async function handleApply(req, res) {
     const parts = parseMultipart(buffer, boundary);
     
     // Ensure uploads directory exists
-    const uploadDir = path.join('/tmp', 'uploads', 'resumes');
+    const uploadDir = path.join('/tmp', 'uploads', 'applications');
     if (!fs.existsSync(uploadDir)) {
       fs.mkdirSync(uploadDir, { recursive: true });
     }
@@ -120,12 +130,47 @@ async function handleApply(req, res) {
         fs.writeFileSync(filePath, part.content);
         
         // Store file URL
-        const fileUrl = `/uploads/resumes/${uniqueName}`;
+        const fileUrl = `/uploads/applications/${uniqueName}`;
         
-        if (part.name === 'resume') {
-          resumeUrl = fileUrl;
-        } else if (part.name === 'certificates') {
-          certificateUrls.push(fileUrl);
+        // Handle multiple file field names
+        switch (part.name) {
+          case 'resume':
+          case 'cv':
+            resumeUrl = fileUrl;
+            break;
+          case 'certificates':
+          case 'certificate':
+            certificateUrls.push(fileUrl);
+            break;
+          case 'governmentId':
+          case 'validId':
+          case 'id':
+            governmentIdUrl = fileUrl;
+            break;
+          case 'diploma':
+          case 'degree':
+            diplomaUrl = fileUrl;
+            break;
+          case 'transcript':
+          case 'tor':
+            transcriptUrl = fileUrl;
+            break;
+          case 'nbiClearance':
+            nbiClearanceUrl = fileUrl;
+            break;
+          case 'policeClearance':
+            policeClearanceUrl = fileUrl;
+            break;
+          case 'barangayClearance':
+            barangayClearanceUrl = fileUrl;
+            break;
+          case 'medicalCertificate':
+            medicalCertificateUrl = fileUrl;
+            break;
+          case 'otherDocuments':
+          case 'others':
+            otherDocumentUrls.push(fileUrl);
+            break;
         }
       } else if (part.name && !part.isFile) {
         // Form field
@@ -147,8 +192,16 @@ async function handleApply(req, res) {
       req.on('error', reject);
     });
     applicationData = body;
-    resumeUrl = body.resumeUrl || '';
-    certificateUrls = body.certificateUrls || [];
+    resumeUrl = body.resumeUrl || body.cvUrl || '';
+    certificateUrls = body.certificateUrls || body.certificates || [];
+    governmentIdUrl = body.governmentIdUrl || body.idUrl || '';
+    diplomaUrl = body.diplomaUrl || '';
+    transcriptUrl = body.transcriptUrl || body.torUrl || '';
+    nbiClearanceUrl = body.nbiClearanceUrl || '';
+    policeClearanceUrl = body.policeClearanceUrl || '';
+    barangayClearanceUrl = body.barangayClearanceUrl || '';
+    medicalCertificateUrl = body.medicalCertificateUrl || '';
+    otherDocumentUrls = body.otherDocumentUrls || body.others || [];
   }
 
   const { 
@@ -178,7 +231,7 @@ async function handleApply(req, res) {
     return res.status(404).json({ error: 'Vacancy not found or no longer active' });
   }
 
-  // Insert application
+  // Insert application with new status 'New Applicant' and all document URLs
   const result = await applicationsCollection.insertOne({
     vacancyId,
     vacancyTitle: vacancy.jobTitle || vacancy.position,
@@ -191,9 +244,24 @@ async function handleApply(req, res) {
     experience: experience || '',
     certifications: certifications || '',
     coverLetter: coverLetter || '',
+    // All document uploads
     resumeUrl: resumeUrl || '',
     certificateUrls: certificateUrls || [],
-    status: 'Pending',
+    governmentIdUrl: governmentIdUrl || '',
+    diplomaUrl: diplomaUrl || '',
+    transcriptUrl: transcriptUrl || '',
+    nbiClearanceUrl: nbiClearanceUrl || '',
+    policeClearanceUrl: policeClearanceUrl || '',
+    barangayClearanceUrl: barangayClearanceUrl || '',
+    medicalCertificateUrl: medicalCertificateUrl || '',
+    otherDocumentUrls: otherDocumentUrls || [],
+    // Application status workflow
+    status: 'New Applicant', // New status: New Applicant, Pending, In Process, Rejected, Accepted
+    statusHistory: [{
+      status: 'New Applicant',
+      date: new Date(),
+      notes: 'Application submitted'
+    }],
     submittedAt: new Date(),
     createdAt: new Date(),
     updatedAt: new Date()
