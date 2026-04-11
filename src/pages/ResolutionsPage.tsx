@@ -15,6 +15,17 @@ interface Resolution {
   pdfUrl?: string;
   fileId?: string;
   signatories?: any[];
+  imageElements?: Array<{
+    id: string;
+    src: string;
+    alt: string;
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+    locked?: boolean;
+    gridfsId?: string;
+  }>;
 }
 
 const ResolutionsPage: React.FC = () => {
@@ -128,18 +139,64 @@ const ResolutionsPage: React.FC = () => {
               <h3 className="text-lg font-semibold text-gray-900 mb-4">
                 {selectedResolution.title}
               </h3>
-              <div 
-                className="prose max-w-none mb-6 text-gray-700 resolution-content"
-                dangerouslySetInnerHTML={{ 
-                  __html: selectedResolution.content?.replace(
-                    /src="gridfs:\/\//g, 
-                    `${process.env.REACT_APP_API_URL || ''}/api/files/gridfs/`
-                  ).replace(
-                    /src="\/uploads\//g, 
-                    `${process.env.REACT_APP_API_URL || ''}/uploads/`
-                  ) || '' 
-                }}
-              />
+              {/* Resolution Page - matches document builder layout */}
+              <div className="flex justify-center mb-6">
+                <div
+                  className="relative bg-white shadow-lg"
+                  style={{
+                    width: '816px', // Letter size portrait width
+                    minHeight: '1056px', // Letter size portrait height
+                    padding: '72px', // 0.5 inch margins
+                    boxShadow: '0 0 0 1px #d1d5db, 0 10px 25px -5px rgba(0, 0, 0, 0.1)'
+                  }}
+                >
+                  {/* Image Elements - Absolutely positioned on top of content */}
+                  {selectedResolution.imageElements && selectedResolution.imageElements.map((img) => (
+                    <div
+                      key={img.id}
+                      className="absolute"
+                      style={{
+                        left: `${72 + img.x}px`, // Add left padding offset
+                        top: `${72 + img.y}px`, // Add top padding offset
+                        width: `${img.width}px`,
+                        height: 'auto',
+                        zIndex: 10
+                      }}
+                    >
+                      <img
+                        src={img.src?.startsWith('gridfs://') 
+                          ? `${process.env.REACT_APP_API_URL || ''}/api/files/gridfs/${img.src.replace('gridfs://', '')}`
+                          : img.src
+                        }
+                        alt={img.alt}
+                        style={{
+                          width: '100%',
+                          height: 'auto',
+                          display: 'block'
+                        }}
+                      />
+                    </div>
+                  ))}
+                  {/* Resolution Content */}
+                  <div 
+                    className="text-justify"
+                    style={{
+                      fontFamily: "'Times New Roman', Times, serif",
+                      fontSize: '12pt',
+                      lineHeight: 1.6
+                    }}
+                    dangerouslySetInnerHTML={{ 
+                      __html: selectedResolution.content?.replace(
+                        /src="gridfs:\/\//g, 
+                        `${process.env.REACT_APP_API_URL || ''}/api/files/gridfs/`
+                      ).replace(
+                        /src="\/uploads\//g, 
+                        `${process.env.REACT_APP_API_URL || ''}/uploads/`
+                      ) || '' 
+                    }}
+                  />
+                </div>
+              </div>
               {selectedResolution.signatories && selectedResolution.signatories.length > 0 && (
                 <div className="border-t pt-4 mt-4">
                   <p className="font-semibold text-gray-900 mb-2">Signatories:</p>
