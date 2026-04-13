@@ -171,7 +171,7 @@ const ResolutionsPage: React.FC = () => {
                     }}
                   >
                     <img
-                      src={img.src?.startsWith('gridfs://') 
+                      src={img.src?.startsWith('gridfs://')
                         ? `${process.env.REACT_APP_API_URL || ''}/api/files/gridfs/${img.src.replace('gridfs://', '')}`
                         : img.src
                       }
@@ -185,47 +185,23 @@ const ResolutionsPage: React.FC = () => {
                   </div>
                 ))}
                 {/* Resolution Content */}
-                <div 
+                <div
                   className="text-justify"
                   style={{
                     fontFamily: "'Times New Roman', Times, serif",
                     fontSize: '12pt',
                     lineHeight: 1.6
                   }}
-                  dangerouslySetInnerHTML={{ 
+                  dangerouslySetInnerHTML={{
                     __html: selectedResolution.content?.replace(
-                      /src="gridfs:\/\//g, 
+                      /src="gridfs:\/\//g,
                       `${process.env.REACT_APP_API_URL || ''}/api/files/gridfs/`
                     ).replace(
-                      /src="\/uploads\//g, 
+                      /src="\/uploads\//g,
                       `${process.env.REACT_APP_API_URL || ''}/uploads/`
-                    ) || '<p>No content available</p>' 
+                    ) || '<p>No content available</p>'
                   }}
                 />
-              </div>
-
-              {selectedResolution.signatories && selectedResolution.signatories.length > 0 && (
-                <div className="border-t pt-4 mt-4">
-                  <p className="font-semibold text-gray-900 mb-2">Signatories:</p>
-                  <div className="space-y-1">
-                    {selectedResolution.signatories.map((sig, idx) => (
-                      <p key={idx} className="text-sm text-gray-600">
-                        {sig.name} - {sig.position}
-                      </p>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* PDF Actions */}
-              <div className="border-t pt-4 mt-4 flex gap-3">
-                <button
-                  onClick={() => resolutionsApi.downloadPdf(selectedResolution.fileId || selectedResolution.pdfUrl, selectedResolution.resolutionNumber, selectedResolution.series)}
-                  className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
-                >
-                  <Download className="h-4 w-4 mr-2" />
-                  Download Approved File
-                </button>
               </div>
             </div>
             <div className="p-4 border-t bg-gray-50 text-center">
