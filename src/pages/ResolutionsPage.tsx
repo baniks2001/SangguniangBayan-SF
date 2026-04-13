@@ -203,19 +203,7 @@ const ResolutionsPage: React.FC = () => {
                   }}
                 />
               </div>
-            </div>
-            <div className="p-4 border-t bg-gray-50 text-center">
-              <p className="text-sm text-gray-600">
-                Status: <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                  Approved
-                </span>
-                <span className="mx-2">|</span>
-                Public Document
-              </p>
-            </div>
-          </div>
-        </div>
-      )}
+
               {selectedResolution.signatories && selectedResolution.signatories.length > 0 && (
                 <div className="border-t pt-4 mt-4">
                   <p className="font-semibold text-gray-900 mb-2">Signatories:</p>
@@ -239,6 +227,15 @@ const ResolutionsPage: React.FC = () => {
                   Download Approved File
                 </button>
               </div>
+            </div>
+            <div className="p-4 border-t bg-gray-50 text-center">
+              <p className="text-sm text-gray-600">
+                Status: <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                  Approved
+                </span>
+                <span className="mx-2">|</span>
+                Public Document
+              </p>
             </div>
           </div>
         </div>
