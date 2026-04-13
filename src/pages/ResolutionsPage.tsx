@@ -112,91 +112,110 @@ const ResolutionsPage: React.FC = () => {
         </div>
       </form>
 
-      {/* Resolution Detail Modal */}
+      {/* Resolution Detail Modal - matches print view style */}
       {selectedResolution && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg shadow-xl max-w-3xl w-full max-h-[90vh] overflow-y-auto">
-            <div className="p-6 border-b">
+          <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[95vh] overflow-y-auto">
+            <div className="p-4 border-b bg-gray-50">
               <div className="flex items-center justify-between">
-                <h2 className="text-xl font-bold text-gray-900">Resolution Details</h2>
-                <button
-                  onClick={() => setSelectedResolution(null)}
-                  className="text-gray-400 hover:text-gray-600"
-                >
-                  <span className="sr-only">Close</span>
-                  <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                </button>
-              </div>
-            </div>
-            <div className="p-6">
-              <div className="mb-4">
-                <span className="inline-block px-3 py-1 text-sm font-medium bg-blue-100 text-blue-800 rounded">
-                  Resolution No. {selectedResolution.resolutionNumber}, Series {selectedResolution.series}
-                </span>
-              </div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                {selectedResolution.title}
-              </h3>
-              {/* Resolution Page - matches document builder layout */}
-              <div className="flex justify-center mb-6">
-                <div
-                  className="relative bg-white shadow-lg"
-                  style={{
-                    width: '816px', // Letter size portrait width
-                    minHeight: '1056px', // Letter size portrait height
-                    padding: '72px', // 0.5 inch margins
-                    boxShadow: '0 0 0 1px #d1d5db, 0 10px 25px -5px rgba(0, 0, 0, 0.1)'
-                  }}
-                >
-                  {/* Image Elements - Absolutely positioned on top of content */}
-                  {selectedResolution.imageElements && selectedResolution.imageElements.map((img) => (
-                    <div
-                      key={img.id}
-                      className="absolute"
-                      style={{
-                        left: `${img.x + 30}px`, // Shift left to center blue logo
-                        top: `${img.y}px`,
-                        width: `${img.width}px`,
-                        height: 'auto',
-                        zIndex: 10
-                      }}
-                    >
-                      <img
-                        src={img.src?.startsWith('gridfs://') 
-                          ? `${process.env.REACT_APP_API_URL || ''}/api/files/gridfs/${img.src.replace('gridfs://', '')}`
-                          : img.src
-                        }
-                        alt={img.alt}
-                        style={{
-                          width: '100%',
-                          height: 'auto',
-                          display: 'block'
-                        }}
-                      />
-                    </div>
-                  ))}
-                  {/* Resolution Content */}
-                  <div 
-                    className="text-justify"
-                    style={{
-                      fontFamily: "'Times New Roman', Times, serif",
-                      fontSize: '12pt',
-                      lineHeight: 1.6
-                    }}
-                    dangerouslySetInnerHTML={{ 
-                      __html: selectedResolution.content?.replace(
-                        /src="gridfs:\/\//g, 
-                        `${process.env.REACT_APP_API_URL || ''}/api/files/gridfs/`
-                      ).replace(
-                        /src="\/uploads\//g, 
-                        `${process.env.REACT_APP_API_URL || ''}/uploads/`
-                      ) || '' 
-                    }}
-                  />
+                <h2 className="text-xl font-bold text-gray-900">
+                  Resolution No. {selectedResolution.resolutionNumber} - Series {selectedResolution.series}
+                </h2>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => window.print()}
+                    className="px-4 py-2 text-purple-600 hover:bg-purple-50 rounded-lg transition-colors flex items-center gap-1"
+                  >
+                    <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+                    </svg>
+                    <span className="text-sm">Print</span>
+                  </button>
+                  <button
+                    onClick={() => setSelectedResolution(null)}
+                    className="p-2 hover:bg-gray-200 rounded"
+                  >
+                    <svg className="h-5 w-5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
                 </div>
               </div>
+            </div>
+            <div className="p-8 bg-gray-100 flex justify-center">
+              {/* Resolution Page - matches document builder layout */}
+              <div
+                className="relative bg-white mx-auto"
+                style={{
+                  width: '816px',
+                  minHeight: '1056px',
+                  padding: '72px',
+                  boxShadow: '0 0 0 1px #d1d5db',
+                  fontFamily: "'Times New Roman', Times, serif",
+                  fontSize: '12pt',
+                  lineHeight: 1.6,
+                  color: '#000'
+                }}
+              >
+                {/* Image Elements - Absolutely positioned on top of content */}
+                {selectedResolution.imageElements && selectedResolution.imageElements.map((img) => (
+                  <div
+                    key={img.id}
+                    className="absolute"
+                    style={{
+                      left: `${img.x}px`,
+                      top: `${img.y}px`,
+                      width: `${img.width}px`,
+                      height: 'auto',
+                      zIndex: 10
+                    }}
+                  >
+                    <img
+                      src={img.src?.startsWith('gridfs://') 
+                        ? `${process.env.REACT_APP_API_URL || ''}/api/files/gridfs/${img.src.replace('gridfs://', '')}`
+                        : img.src
+                      }
+                      alt={img.alt}
+                      style={{
+                        width: '100%',
+                        height: 'auto',
+                        display: 'block'
+                      }}
+                    />
+                  </div>
+                ))}
+                {/* Resolution Content */}
+                <div 
+                  className="text-justify"
+                  style={{
+                    fontFamily: "'Times New Roman', Times, serif",
+                    fontSize: '12pt',
+                    lineHeight: 1.6
+                  }}
+                  dangerouslySetInnerHTML={{ 
+                    __html: selectedResolution.content?.replace(
+                      /src="gridfs:\/\//g, 
+                      `${process.env.REACT_APP_API_URL || ''}/api/files/gridfs/`
+                    ).replace(
+                      /src="\/uploads\//g, 
+                      `${process.env.REACT_APP_API_URL || ''}/uploads/`
+                    ) || '<p>No content available</p>' 
+                  }}
+                />
+              </div>
+            </div>
+            <div className="p-4 border-t bg-gray-50 text-center">
+              <p className="text-sm text-gray-600">
+                Status: <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                  Approved
+                </span>
+                <span className="mx-2">|</span>
+                Public Document
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
               {selectedResolution.signatories && selectedResolution.signatories.length > 0 && (
                 <div className="border-t pt-4 mt-4">
                   <p className="font-semibold text-gray-900 mb-2">Signatories:</p>
