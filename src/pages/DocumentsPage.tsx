@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { documentsApi, filesApi } from '../services/api';
-import { FileArchive, Search, ChevronLeft, ChevronRight, FileText, Calendar, Eye, Download, FolderOpen } from 'lucide-react';
+import { FileArchive, Search, ChevronLeft, ChevronRight, FileText, Calendar, Eye, Download, FolderOpen, Printer } from 'lucide-react';
 
 interface Document {
   id: string;
@@ -280,7 +280,24 @@ const DocumentsPage: React.FC = () => {
                   className="flex-1 flex items-center justify-center px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors font-medium"
                 >
                   <Eye className="h-4 w-4 mr-2" />
-                  View Document
+                  View
+                </button>
+                <button
+                  onClick={() => {
+                    const fileUrl = filesApi.getFileUrl(selectedDocument.fileId || selectedDocument.fileUrl);
+                    if (fileUrl) {
+                      const printWindow = window.open(fileUrl, '_blank');
+                      if (printWindow) {
+                        printWindow.addEventListener('load', () => {
+                          setTimeout(() => printWindow.print(), 500);
+                        });
+                      }
+                    }
+                  }}
+                  className="flex-1 flex items-center justify-center px-4 py-2 border border-purple-300 text-purple-700 rounded-lg hover:bg-purple-50 transition-colors font-medium"
+                >
+                  <Printer className="h-4 w-4 mr-2" />
+                  Print
                 </button>
                 <button
                   onClick={() => {

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { resolutionsApi } from '../services/api';
-import { Scale, Search, ChevronLeft, ChevronRight, FileText, Calendar, Download, Info } from 'lucide-react';
+import { Scale, Search, ChevronLeft, ChevronRight, FileText, Calendar, Download, Info, Printer } from 'lucide-react';
 
 interface Resolution {
   id: string;
@@ -67,6 +67,98 @@ const ResolutionsPage: React.FC = () => {
     loadResolutions();
   };
 
+  // Print document function - shows full builder content with images
+  const handlePrintDocument = (resolution: Resolution) => {
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) return;
+
+    // Build image elements HTML if they exist
+    let imagesHtml = '';
+    if (resolution.imageElements && resolution.imageElements.length > 0) {
+      imagesHtml = resolution.imageElements.map(img => {
+        const imgSrc = img.src?.startsWith('gridfs://')
+          ? `${process.env.REACT_APP_API_URL || ''}/api/files/gridfs/${img.src.replace('gridfs://', '')}`
+          : img.src;
+        return `
+        <div style="position:absolute;left:${img.x}px;top:${img.y}px;width:${img.width}px;height:auto;z-index:10;">
+          <img src="${imgSrc}" alt="${img.alt}" style="width:100%;height:auto;display:block;" />
+        </div>
+      `;
+      }).join('');
+    }
+
+    // Process content to fix image URLs
+    const processedContent = resolution.content
+      ?.replace(/src="gridfs:\/\//g, `${process.env.REACT_APP_API_URL || ''}/api/files/gridfs/`)
+      ?.replace(/src="\/uploads\//g, `${process.env.REACT_APP_API_URL || ''}/uploads/`)
+      || '<p>No content available</p>';
+
+    const printContent = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>Resolution ${resolution.resolutionNumber} - Series ${resolution.series}</title>
+        <style>
+          @page { size: letter; margin: 0; }
+          * { box-sizing: border-box; }
+          body {
+            font-family: 'Times New Roman', Times, serif;
+            font-size: 12pt;
+            line-height: 1.6;
+            max-width: 8.5in;
+            margin: 0 auto;
+            padding: 0;
+            color: #000;
+          }
+          .builder-content {
+            width: 816px;
+            min-height: 1056px;
+            padding: 72px;
+            position: relative;
+            margin: 0 auto;
+          }
+          .builder-content img {
+            max-width: 100%;
+            height: auto;
+          }
+          .builder-content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1em 0;
+          }
+          .builder-content table td,
+          .builder-content table th {
+            border: 1px solid #000;
+            padding: 8px;
+          }
+          .builder-content p {
+            margin: 0.5em 0;
+          }
+          @media print {
+            body { padding: 0; margin: 0; }
+            .no-print { display: none !important; }
+          }
+        </style>
+      </head>
+      <body>
+        <div class="builder-content">
+          ${imagesHtml}
+          ${processedContent}
+        </div>
+        <div class="no-print" style="margin-top: 2em; text-align: center; padding: 2em; background: #f5f5f5; border-radius: 8px;">
+          <p style="margin-bottom: 1em; color: #666;">This is a preview. Click below to print the official document.</p>
+          <button onclick="window.print()" style="padding: 12px 30px; font-size: 14px; cursor: pointer; background: #2563eb; color: white; border: none; border-radius: 6px; font-weight: bold;">
+            Print Document
+          </button>
+        </div>
+      </body>
+      </html>
+    `;
+
+    printWindow.document.write(printContent);
+    printWindow.document.close();
+  };
+
   if (loading && resolutions.length === 0) {
     return (
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -123,12 +215,10 @@ const ResolutionsPage: React.FC = () => {
                 </h2>
                 <div className="flex items-center gap-2">
                   <button
-                    onClick={() => window.print()}
+                    onClick={() => selectedResolution && handlePrintDocument(selectedResolution)}
                     className="px-4 py-2 text-purple-600 hover:bg-purple-50 rounded-lg transition-colors flex items-center gap-1"
                   >
-                    <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
-                    </svg>
+                    <Printer className="h-4 w-4" />
                     <span className="text-sm">Print</span>
                   </button>
                   <button

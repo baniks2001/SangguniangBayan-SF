@@ -10,7 +10,8 @@ import {
   Search,
   Filter,
   ExternalLink,
-  Loader2
+  Loader2,
+  Printer
 } from 'lucide-react';
 
 // Types
@@ -171,6 +172,174 @@ const ProcurementsBudgetsPage: React.FC = () => {
     });
   };
 
+  // Print procurement details
+  const handlePrintDocument = (procurement: ProcurementItem) => {
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) return;
+
+    const printContent = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>${procurement.title}</title>
+        <style>
+          @page { size: letter; margin: 0.5in; }
+          * { box-sizing: border-box; }
+          body {
+            font-family: 'Times New Roman', Times, serif;
+            font-size: 12pt;
+            line-height: 1.6;
+            max-width: 8.5in;
+            margin: 0 auto;
+            padding: 0;
+            color: #000;
+          }
+          .header {
+            text-align: center;
+            margin-bottom: 2em;
+            padding-bottom: 1em;
+            border-bottom: 2px solid #1e40af;
+          }
+          .header h1 {
+            font-size: 18pt;
+            margin: 0 0 0.5em 0;
+            color: #1e40af;
+          }
+          .header .subtitle {
+            font-size: 14pt;
+            color: #4b5563;
+          }
+          .section {
+            margin-bottom: 1.5em;
+          }
+          .section h2 {
+            font-size: 14pt;
+            color: #1e40af;
+            margin-bottom: 0.5em;
+            border-bottom: 1px solid #e5e7eb;
+            padding-bottom: 0.25em;
+          }
+          .info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1em;
+          }
+          .info-item {
+            margin-bottom: 0.5em;
+          }
+          .info-label {
+            font-weight: bold;
+            color: #374151;
+          }
+          .info-value {
+            color: #000;
+          }
+          .status-badge {
+            display: inline-block;
+            padding: 0.25em 0.75em;
+            border-radius: 4px;
+            font-weight: bold;
+            font-size: 11pt;
+          }
+          .status-open { background: #dcfce7; color: #166534; }
+          .status-closed { background: #f3f4f6; color: #374151; }
+          .status-awarded { background: #dbeafe; color: #1e40af; }
+          .status-cancelled { background: #fee2e2; color: #991b1b; }
+          .description {
+            text-align: justify;
+            margin: 1em 0;
+          }
+          .documents-list {
+            margin-top: 0.5em;
+          }
+          .document-item {
+            padding: 0.5em;
+            background: #f9fafb;
+            border: 1px solid #e5e7eb;
+            border-radius: 4px;
+            margin-bottom: 0.5em;
+          }
+          @media print {
+            body { padding: 0; margin: 0; }
+            .no-print { display: none !important; }
+          }
+        </style>
+      </head>
+      <body>
+        <div class="header">
+          <h1>Procurement Notice</h1>
+          <div class="subtitle">Sangguniang Bayan of San Francisco</div>
+        </div>
+
+        <div class="section">
+          <h2>${procurement.title}</h2>
+          <span class="status-badge status-${procurement.status.toLowerCase()}">${procurement.status}</span>
+          <span style="margin-left: 1em; color: #6b7280;">${procurement.category}</span>
+        </div>
+
+        <div class="section">
+          <div class="info-grid">
+            <div class="info-item">
+              <div class="info-label">Department:</div>
+              <div class="info-value">${procurement.department}</div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">Budget:</div>
+              <div class="info-value" style="color: #1e40af; font-weight: bold;">${formatCurrency(procurement.budget)}</div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">Date Posted:</div>
+              <div class="info-value">${formatDate(procurement.datePosted)}</div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">Deadline:</div>
+              <div class="info-value">${formatDate(procurement.deadline)}</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="section">
+          <h2>Description</h2>
+          <div class="description">${procurement.description}</div>
+        </div>
+
+        ${procurement.winningBidder ? `
+        <div class="section">
+          <h2>Award Information</h2>
+          <div class="info-item">
+            <div class="info-label">Winning Bidder:</div>
+            <div class="info-value">${procurement.winningBidder}</div>
+          </div>
+          <div class="info-item">
+            <div class="info-label">Winning Amount:</div>
+            <div class="info-value" style="color: #1e40af; font-weight: bold;">${formatCurrency(procurement.winningAmount || 0)}</div>
+          </div>
+        </div>
+        ` : ''}
+
+        ${procurement.documents && procurement.documents.length > 0 ? `
+        <div class="section">
+          <h2>Attached Documents</h2>
+          <div class="documents-list">
+            ${procurement.documents.map(doc => `<div class="document-item">${doc.name}</div>`).join('')}
+          </div>
+        </div>
+        ` : ''}
+
+        <div class="no-print" style="margin-top: 2em; text-align: center; padding: 2em; background: #f5f5f5; border-radius: 8px;">
+          <p style="margin-bottom: 1em; color: #666;">This is a preview. Click below to print this procurement notice.</p>
+          <button onclick="window.print()" style="padding: 12px 30px; font-size: 14px; cursor: pointer; background: #2563eb; color: white; border: none; border-radius: 6px; font-weight: bold;">
+            Print Document
+          </button>
+        </div>
+      </body>
+      </html>
+    `;
+
+    printWindow.document.write(printContent);
+    printWindow.document.close();
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Hero Section */}
@@ -278,15 +447,24 @@ const ProcurementsBudgetsPage: React.FC = () => {
             <div className="p-6 border-b">
               <div className="flex items-center justify-between">
                 <h2 className="text-xl font-bold text-gray-900">Procurement Details</h2>
-                <button
-                  onClick={() => setSelectedProcurement(null)}
-                  className="text-gray-400 hover:text-gray-600"
-                >
-                  <span className="sr-only">Close</span>
-                  <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                </button>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => selectedProcurement && handlePrintDocument(selectedProcurement)}
+                    className="px-4 py-2 text-purple-600 hover:bg-purple-50 rounded-lg transition-colors flex items-center gap-1"
+                  >
+                    <Printer className="h-4 w-4" />
+                    <span className="text-sm">Print</span>
+                  </button>
+                  <button
+                    onClick={() => setSelectedProcurement(null)}
+                    className="text-gray-400 hover:text-gray-600"
+                  >
+                    <span className="sr-only">Close</span>
+                    <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                </div>
               </div>
             </div>
             <div className="p-6">
