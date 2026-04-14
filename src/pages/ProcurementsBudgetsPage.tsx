@@ -11,7 +11,9 @@ import {
   Filter,
   ExternalLink,
   Loader2,
-  Printer
+  Printer,
+  Building,
+  Info
 } from 'lucide-react';
 
 // Types
@@ -27,7 +29,7 @@ interface ProcurementItem {
   category: string;
   department: string;
   budget: number;
-  status: 'Open' | 'Closed' | 'Awarded' | 'Cancelled';
+  status: 'Draft' | 'Pending' | 'Open' | 'Closed' | 'Awarded' | 'Cancelled' | 'Published';
   datePosted: string;
   deadline: string;
   description: string;
@@ -91,6 +93,18 @@ const viewFile = (fileUrl: string | undefined) => {
   }
 };
 
+// Bid Application Interface
+interface BidApplication {
+  companyName: string;
+  contactPerson: string;
+  email: string;
+  phone: string;
+  address: string;
+  bidAmount: number;
+  description: string;
+  file?: File;
+}
+
 const ProcurementsBudgetsPage: React.FC = () => {
   const [procurements, setProcurements] = useState<ProcurementItem[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
@@ -99,6 +113,21 @@ const ProcurementsBudgetsPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedProcurement, setSelectedProcurement] = useState<ProcurementItem | null>(null);
+
+  // Bid Application Modal State
+  const [bidModalOpen, setBidModalOpen] = useState(false);
+  const [bidFormData, setBidFormData] = useState<BidApplication>({
+    companyName: '',
+    contactPerson: '',
+    email: '',
+    phone: '',
+    address: '',
+    bidAmount: 0,
+    description: ''
+  });
+  const [bidFile, setBidFile] = useState<File | null>(null);
+  const [submittingBid, setSubmittingBid] = useState(false);
+  const [bidSuccess, setBidSuccess] = useState(false);
 
   useEffect(() => {
     loadProcurements();
@@ -135,8 +164,9 @@ const ProcurementsBudgetsPage: React.FC = () => {
     };
   }, [procurements]);
 
-  // Filter procurements
-  const filteredProcurements = procurements.filter(item => {
+  // Published/Open procurements (visible for bidding)
+  const publishedProcurements = procurements.filter(item => {
+    if (!['Open', 'Published'].includes(item.status)) return false;
     const matchesSearch = item.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          item.department.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          item.description.toLowerCase().includes(searchTerm.toLowerCase());
@@ -145,12 +175,23 @@ const ProcurementsBudgetsPage: React.FC = () => {
     return matchesSearch && matchesStatus && matchesCategory;
   });
 
+  // Awarded procurements (completed awards)
+  const awardedProcurements = procurements.filter(item => {
+    if (item.status !== 'Awarded') return false;
+    const matchesSearch = item.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         item.department.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         item.description.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesCategory = filterCategory === 'All' || item.category === filterCategory;
+    return matchesSearch && matchesCategory;
+  });
+
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'Open': return 'bg-green-100 text-green-800';
       case 'Closed': return 'bg-gray-100 text-gray-800';
       case 'Awarded': return 'bg-blue-100 text-blue-800';
       case 'Cancelled': return 'bg-red-100 text-red-800';
+      case 'Published': return 'bg-purple-100 text-purple-800';
       default: return 'bg-gray-100 text-gray-800';
     }
   };
@@ -170,6 +211,58 @@ const ProcurementsBudgetsPage: React.FC = () => {
       month: 'short',
       day: 'numeric'
     });
+  };
+
+  // Handle bid form submission
+  const handleBidSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedProcurement) return;
+
+    setSubmittingBid(true);
+    try {
+      const formData = new FormData();
+      formData.append('procurementId', selectedProcurement.id);
+      formData.append('companyName', bidFormData.companyName);
+      formData.append('contactPerson', bidFormData.contactPerson);
+      formData.append('email', bidFormData.email);
+      formData.append('phone', bidFormData.phone);
+      formData.append('address', bidFormData.address);
+      formData.append('bidAmount', bidFormData.bidAmount.toString());
+      formData.append('description', bidFormData.description);
+      if (bidFile) {
+        formData.append('bidDocument', bidFile);
+      }
+
+      const response = await fetch(`${API_BASE_URL}/procurements/${selectedProcurement.id}/bids`, {
+        method: 'POST',
+        body: formData
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to submit bid');
+      }
+
+      setBidSuccess(true);
+      setTimeout(() => {
+        setBidModalOpen(false);
+        setBidSuccess(false);
+        setBidFormData({
+          companyName: '',
+          contactPerson: '',
+          email: '',
+          phone: '',
+          address: '',
+          bidAmount: 0,
+          description: ''
+        });
+        setBidFile(null);
+      }, 2000);
+    } catch (error) {
+      console.error('Error submitting bid:', error);
+      alert('Failed to submit bid. Please try again.');
+    } finally {
+      setSubmittingBid(false);
+    }
   };
 
   // Print procurement details
@@ -355,48 +448,6 @@ const ProcurementsBudgetsPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Budget Summary Cards */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-8">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <div className="bg-white rounded-xl shadow-lg p-6 border-l-4 border-blue-500">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-600">Total Budget</p>
-                <p className="text-2xl font-bold text-blue-900">{formatCurrency(budgetSummary.totalBudget)}</p>
-              </div>
-              <DollarSign className="h-10 w-10 text-blue-500" />
-            </div>
-          </div>
-          <div className="bg-white rounded-xl shadow-lg p-6 border-l-4 border-green-500">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-600">Utilized</p>
-                <p className="text-2xl font-bold text-green-700">{formatCurrency(budgetSummary.utilizedBudget)}</p>
-              </div>
-              <FileText className="h-10 w-10 text-green-500" />
-            </div>
-          </div>
-          <div className="bg-white rounded-xl shadow-lg p-6 border-l-4 border-yellow-500">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-600">Remaining</p>
-                <p className="text-2xl font-bold text-yellow-700">{formatCurrency(budgetSummary.remainingBudget)}</p>
-              </div>
-              <Calendar className="h-10 w-10 text-yellow-500" />
-            </div>
-          </div>
-          <div className="bg-white rounded-xl shadow-lg p-6 border-l-4 border-purple-500">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-600">Active Biddings</p>
-                <p className="text-2xl font-bold text-purple-700">{budgetSummary.openCount}</p>
-              </div>
-              <ShoppingCart className="h-10 w-10 text-purple-500" />
-            </div>
-          </div>
-        </div>
-      </div>
-
       {/* Filters and Search */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-8">
         <div className="bg-white rounded-xl shadow-md p-6">
@@ -420,6 +471,7 @@ const ProcurementsBudgetsPage: React.FC = () => {
                 className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
               >
                 <option value="All">All Status</option>
+                <option value="Published">Published</option>
                 <option value="Open">Open</option>
                 <option value="Closed">Closed</option>
                 <option value="Awarded">Awarded</option>
@@ -533,10 +585,8 @@ const ProcurementsBudgetsPage: React.FC = () => {
         </div>
       )}
 
-      {/* Procurement List */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-8 pb-16">
-        <h2 className="text-2xl font-bold text-gray-900 mb-6">Active Procurements</h2>
-        
+      {/* Procurement Tables */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-8 pb-16 space-y-8">
         {loading ? (
           <div className="bg-white rounded-xl shadow-md p-12 text-center">
             <Loader2 className="h-12 w-12 text-blue-500 mx-auto mb-4 animate-spin" />
@@ -545,55 +595,265 @@ const ProcurementsBudgetsPage: React.FC = () => {
         ) : error ? (
           <div className="bg-white rounded-xl shadow-md p-12 text-center">
             <p className="text-red-500 text-lg">{error}</p>
-            <button 
-              onClick={loadProcurements}
-              className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-            >
-              Retry
-            </button>
-          </div>
-        ) : filteredProcurements.length === 0 ? (
-          <div className="bg-white rounded-xl shadow-md p-12 text-center">
-            <ShoppingCart className="h-16 w-16 text-gray-300 mx-auto mb-4" />
-            <p className="text-gray-500 text-lg">No procurements found matching your criteria.</p>
+            <button onClick={loadProcurements} className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Retry</button>
           </div>
         ) : (
-          <div className="space-y-4">
-            {filteredProcurements.map((item) => (
-              <div 
-                key={item.id} 
-                className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-shadow cursor-pointer"
-                onClick={() => setSelectedProcurement(item)}
-              >
-                <div className="p-6">
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-3 mb-2">
-                        <span className={`px-3 py-1 rounded-full text-xs font-semibold ${getStatusColor(item.status)}`}>
-                          {item.status}
-                        </span>
-                        <span className="text-sm text-gray-500">{item.category}</span>
-                      </div>
-                      <h3 className="text-lg font-bold text-gray-900 mb-2">{item.title}</h3>
-                      <div className="flex flex-wrap gap-4 text-sm text-gray-500">
-                        <div className="flex items-center gap-1">
-                          <Calendar className="h-4 w-4" />
-                          <span>{formatDate(item.datePosted)}</span>
+          <>
+            {/* Published/Open Procurements Table */}
+            {publishedProcurements.length > 0 && (
+              <div className="bg-white rounded-xl shadow overflow-hidden">
+                <div className="bg-green-50 px-6 py-3 border-b border-green-200">
+                  <h3 className="text-lg font-semibold text-green-800 flex items-center gap-2">
+                    <span className="w-3 h-3 rounded-full bg-green-500"></span>
+                    Published ({publishedProcurements.length})
+                  </h3>
+                </div>
+                <div className="divide-y divide-gray-200">
+                  {publishedProcurements.map((procurement) => (
+                    <div key={procurement.id} className="p-6 hover:bg-gray-50 transition-colors">
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-3 mb-2">
+                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                              {procurement.category}
+                            </span>
+                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                              procurement.status === 'Open' ? 'bg-emerald-100 text-emerald-800' :
+                              'bg-green-100 text-green-800'
+                            }`}>
+                              {procurement.status}
+                            </span>
+                          </div>
+                          <h3 className="text-lg font-medium text-gray-900 mb-2">
+                            {procurement.title}
+                          </h3>
+                          <div className="flex items-center gap-4 text-sm text-gray-500 mb-2">
+                            <div className="flex items-center">
+                              <Building className="h-4 w-4 mr-1" />
+                              {procurement.department}
+                            </div>
+                            <div className="flex items-center text-blue-600 font-semibold">
+                              <DollarSign className="h-4 w-4 mr-1" />
+                              {formatCurrency(procurement.budget)}
+                            </div>
+                            {procurement.deadline && (
+                              <div className="flex items-center">
+                                <Calendar className="h-4 w-4 mr-1" />
+                                Deadline: {formatDate(procurement.deadline)}
+                              </div>
+                            )}
+                          </div>
                         </div>
-                        <div className="flex items-center gap-1">
-                          <DollarSign className="h-4 w-4" />
-                          <span className="font-semibold text-blue-600">{formatCurrency(item.budget)}</span>
+                        <div className="flex flex-col gap-2 ml-4">
+                          {procurement.documents && procurement.documents.length > 0 && (
+                            <button
+                              onClick={() => {
+                                procurement.documents.forEach((doc, index) => {
+                                  setTimeout(() => {
+                                    const link = document.createElement('a');
+                                    link.href = `${API_BASE_URL}${doc.url}`;
+                                    link.download = doc.filename || doc.name;
+                                    document.body.appendChild(link);
+                                    link.click();
+                                    document.body.removeChild(link);
+                                  }, index * 500);
+                                });
+                              }}
+                              className="flex items-center px-3 py-2 bg-blue-600 text-white text-sm rounded-md hover:bg-blue-700 transition-colors"
+                            >
+                              <Download className="h-4 w-4 mr-2" />
+                              Download
+                            </button>
+                          )}
+                          <button
+                            onClick={() => setSelectedProcurement(procurement)}
+                            className="flex items-center px-3 py-2 bg-white border border-gray-300 text-gray-700 text-sm rounded-md hover:bg-gray-50 transition-colors"
+                          >
+                            <Info className="h-4 w-4 mr-2" />
+                            View Details
+                          </button>
+                          <button
+                            onClick={() => { setSelectedProcurement(procurement); setBidModalOpen(true); }}
+                            className="flex items-center px-3 py-2 bg-green-600 text-white text-sm rounded-md hover:bg-green-700 transition-colors"
+                          >
+                            <FileText className="h-4 w-4 mr-2" />
+                            Submit Bid
+                          </button>
                         </div>
                       </div>
                     </div>
-                    <ChevronRight className="h-5 w-5 text-gray-400 mt-1" />
-                  </div>
+                  ))}
                 </div>
               </div>
-            ))}
-          </div>
+            )}
+
+            {/* Awarded Procurements Table */}
+            {awardedProcurements.length > 0 && (
+              <div className="bg-white rounded-xl shadow overflow-hidden">
+                <div className="bg-blue-50 px-6 py-3 border-b border-blue-200">
+                  <h3 className="text-lg font-semibold text-blue-800 flex items-center gap-2">
+                    <span className="w-3 h-3 rounded-full bg-blue-500"></span>
+                    Awarded ({awardedProcurements.length})
+                  </h3>
+                </div>
+                <div className="divide-y divide-gray-200">
+                  {awardedProcurements.map((procurement) => (
+                    <div key={procurement.id} className="p-6 hover:bg-gray-50 transition-colors">
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-3 mb-2">
+                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                              {procurement.category}
+                            </span>
+                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                              Awarded
+                            </span>
+                            {procurement.winningBidder && (
+                              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                                Winner: {procurement.winningBidder}
+                              </span>
+                            )}
+                          </div>
+                          <h3 className="text-lg font-medium text-gray-900 mb-2">
+                            {procurement.title}
+                          </h3>
+                          <div className="flex items-center gap-4 text-sm text-gray-500 mb-2">
+                            <div className="flex items-center">
+                              <Building className="h-4 w-4 mr-1" />
+                              {procurement.department}
+                            </div>
+                            <div className="flex items-center text-blue-600 font-semibold">
+                              <DollarSign className="h-4 w-4 mr-1" />
+                              {formatCurrency(procurement.budget)}
+                            </div>
+                            {procurement.winningAmount && (
+                              <div className="flex items-center text-green-600 font-semibold">
+                                <DollarSign className="h-4 w-4 mr-1" />
+                                Awarded: {formatCurrency(procurement.winningAmount)}
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                        <div className="flex flex-col gap-2 ml-4">
+                          {procurement.documents && procurement.documents.length > 0 && (
+                            <button
+                              onClick={() => {
+                                procurement.documents.forEach((doc, index) => {
+                                  setTimeout(() => {
+                                    const link = document.createElement('a');
+                                    link.href = `${API_BASE_URL}${doc.url}`;
+                                    link.download = doc.filename || doc.name;
+                                    document.body.appendChild(link);
+                                    link.click();
+                                    document.body.removeChild(link);
+                                  }, index * 500);
+                                });
+                              }}
+                              className="flex items-center px-3 py-2 bg-blue-600 text-white text-sm rounded-md hover:bg-blue-700 transition-colors"
+                            >
+                              <Download className="h-4 w-4 mr-2" />
+                              Download
+                            </button>
+                          )}
+                          <button
+                            onClick={() => setSelectedProcurement(procurement)}
+                            className="flex items-center px-3 py-2 bg-white border border-gray-300 text-gray-700 text-sm rounded-md hover:bg-gray-50 transition-colors"
+                          >
+                            <Info className="h-4 w-4 mr-2" />
+                            View Details
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* No Results */}
+            {publishedProcurements.length === 0 && awardedProcurements.length === 0 && (
+              <div className="bg-white rounded-xl shadow p-8 text-center text-gray-500">
+                <ShoppingCart className="h-12 w-12 mx-auto mb-3 text-gray-300" />
+                <p>No procurements found</p>
+              </div>
+            )}
+          </>
         )}
       </div>
+
+      {/* Bid Application Modal */}
+      {bidModalOpen && selectedProcurement && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-6 border-b">
+              <div className="flex items-center justify-between">
+                <h2 className="text-xl font-bold text-gray-900">Submit Bid Application</h2>
+                <button onClick={() => setBidModalOpen(false)} className="text-gray-400 hover:text-gray-600">
+                  <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+              <p className="text-sm text-gray-500 mt-1">{selectedProcurement.title}</p>
+            </div>
+            <form onSubmit={handleBidSubmit} className="p-6 space-y-4">
+              {bidSuccess ? (
+                <div className="text-center py-8">
+                  <div className="text-green-500 text-5xl mb-4">✓</div>
+                  <h3 className="text-xl font-bold text-gray-900 mb-2">Bid Submitted Successfully!</h3>
+                  <p className="text-gray-600">We will review your application and contact you soon.</p>
+                </div>
+              ) : (
+                <>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Company Name *</label>
+                      <input required type="text" value={bidFormData.companyName} onChange={(e) => setBidFormData({...bidFormData, companyName: e.target.value})} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Contact Person *</label>
+                      <input required type="text" value={bidFormData.contactPerson} onChange={(e) => setBidFormData({...bidFormData, contactPerson: e.target.value})} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" />
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Email *</label>
+                      <input required type="email" value={bidFormData.email} onChange={(e) => setBidFormData({...bidFormData, email: e.target.value})} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Phone *</label>
+                      <input required type="tel" value={bidFormData.phone} onChange={(e) => setBidFormData({...bidFormData, phone: e.target.value})} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Company Address *</label>
+                    <textarea required rows={2} value={bidFormData.address} onChange={(e) => setBidFormData({...bidFormData, address: e.target.value})} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Bid Amount (PHP) *</label>
+                    <input required type="number" min="0" step="0.01" value={bidFormData.bidAmount || ''} onChange={(e) => setBidFormData({...bidFormData, bidAmount: parseFloat(e.target.value)})} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Bid Description/Proposal *</label>
+                    <textarea required rows={4} value={bidFormData.description} onChange={(e) => setBidFormData({...bidFormData, description: e.target.value})} placeholder="Describe your proposal, qualifications, and any other relevant details..." className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Bid Document (PDF/Word) *</label>
+                    <input required type="file" accept=".pdf,.doc,.docx" onChange={(e) => setBidFile(e.target.files?.[0] || null)} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" />
+                    <p className="text-xs text-gray-500 mt-1">Upload your formal bid proposal document</p>
+                  </div>
+                  <div className="flex justify-end gap-3 pt-4">
+                    <button type="button" onClick={() => setBidModalOpen(false)} className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200">Cancel</button>
+                    <button type="submit" disabled={submittingBid} className="px-4 py-2 text-white bg-blue-600 rounded-lg hover:bg-blue-700 disabled:opacity-50">
+                      {submittingBid ? 'Submitting...' : 'Submit Bid'}
+                    </button>
+                  </div>
+                </>
+              )}
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

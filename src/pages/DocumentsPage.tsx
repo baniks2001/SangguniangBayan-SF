@@ -13,6 +13,7 @@ interface Document {
   fileSize: string;
   downloadCount: number;
   isPublic: boolean;
+  status?: 'Draft' | 'Pending' | 'Published' | 'Archived';
   createdAt: string;
 }
 
@@ -48,7 +49,11 @@ const DocumentsPage: React.FC = () => {
         limit: 10
       });
       console.log('Documents API response:', response);
-      setDocuments(response.documents || []);
+      // Filter to only show published documents (not Draft or Pending)
+      const publishedDocs = (response.documents || []).filter(
+        (doc: Document) => doc.status === 'Published' || !doc.status
+      );
+      setDocuments(publishedDocs);
       setTotalPages(response.pagination?.total || 1);
     } catch (error) {
       console.error('Error loading documents:', error);
