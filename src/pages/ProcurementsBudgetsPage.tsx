@@ -248,7 +248,9 @@ const ProcurementsBudgetsPage: React.FC = () => {
       });
 
       if (!response.ok) {
-        throw new Error('Failed to submit bid');
+        const errorText = await response.text();
+        console.error('Bid submission error:', response.status, errorText);
+        throw new Error(`Failed to submit bid: ${response.status} ${errorText}`);
       }
 
       setBidSuccess(true);
