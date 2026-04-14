@@ -23,6 +23,13 @@ interface ProcurementDocument {
   filename: string;
 }
 
+interface ImageElement {
+  id: string;
+  url: string;
+  position: { x: number; y: number };
+  size: { width: number; height: number };
+}
+
 interface ProcurementItem {
   id: string;
   title: string;
@@ -37,6 +44,8 @@ interface ProcurementItem {
   isPublic: boolean;
   winningBidder?: string;
   winningAmount?: number;
+  content?: string;
+  imageElements?: ImageElement[];
 }
 
 // API Base URL for static files
@@ -529,7 +538,53 @@ const ProcurementsBudgetsPage: React.FC = () => {
               <h3 className="text-lg font-semibold text-gray-900 mb-4">
                 {selectedProcurement.title}
               </h3>
-              <p className="text-gray-600 mb-6">{selectedProcurement.description}</p>
+              
+              {/* Document Content - Like Resolution Builder */}
+              {selectedProcurement.content && (
+                <div className="mb-6 border rounded-lg overflow-hidden">
+                  <div className="bg-gray-50 px-4 py-2 border-b">
+                    <p className="text-sm font-medium text-gray-700">Document Content</p>
+                  </div>
+                  <div className="p-6 relative" style={{ minHeight: '300px' }}>
+                    <div
+                      className="prose prose-sm max-w-none"
+                      dangerouslySetInnerHTML={{ 
+                        __html: selectedProcurement.content 
+                          ? selectedProcurement.content.replace(
+                              /<img[^>]+>/g, 
+                              '<div class="image-placeholder bg-gray-100 border-2 border-dashed border-gray-300 rounded-lg p-4 text-center text-gray-500 my-2">[Image Placeholder]</div>'
+                            )
+                          : '<p class="text-gray-400 italic">No content available</p>'
+                      }}
+                    />
+                    {/* Render image elements if they exist */}
+                    {selectedProcurement.imageElements && selectedProcurement.imageElements.length > 0 && (
+                      <div className="absolute inset-0 pointer-events-none">
+                        {selectedProcurement.imageElements.map((img) => (
+                          <img
+                            key={img.id}
+                            src={img.url.startsWith('http') ? img.url : `${STATIC_BASE_URL}${img.url}`}
+                            alt="Document image"
+                            className="absolute pointer-events-auto shadow-lg rounded"
+                            style={{
+                              left: `${img.position.x}px`,
+                              top: `${img.position.y}px`,
+                              width: `${img.size.width}px`,
+                              height: `${img.size.height}px`,
+                              objectFit: 'contain',
+                            }}
+                          />
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* Description fallback if no content */}
+              {!selectedProcurement.content && selectedProcurement.description && (
+                <p className="text-gray-600 mb-6">{selectedProcurement.description}</p>
+              )}
               
               <div className="grid grid-cols-2 gap-4 mb-6 text-sm">
                 <div>
