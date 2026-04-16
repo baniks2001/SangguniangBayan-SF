@@ -127,6 +127,7 @@ const ProcurementsBudgetsPage: React.FC = () => {
 
   // Bid Application Modal State
   const [bidModalOpen, setBidModalOpen] = useState(false);
+  const [bidProcurement, setBidProcurement] = useState<ProcurementItem | null>(null);
   const [bidFormData, setBidFormData] = useState<BidApplication>({
     companyName: '',
     contactPerson: '',
@@ -237,12 +238,12 @@ const ProcurementsBudgetsPage: React.FC = () => {
   // Handle bid form submission
   const handleBidSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!selectedProcurement) return;
+    if (!bidProcurement) return;
 
     setSubmittingBid(true);
     try {
       const formData = new FormData();
-      formData.append('procurementId', selectedProcurement.id);
+      formData.append('procurementId', bidProcurement.id);
       formData.append('companyName', bidFormData.companyName);
       formData.append('contactPerson', bidFormData.contactPerson);
       formData.append('email', bidFormData.email);
@@ -250,11 +251,12 @@ const ProcurementsBudgetsPage: React.FC = () => {
       formData.append('address', bidFormData.address);
       formData.append('bidAmount', bidFormData.bidAmount.toString());
       formData.append('description', bidFormData.description);
+      
       if (bidFile) {
         formData.append('bidDocument', bidFile);
       }
 
-      const response = await fetch(`${API_BASE_URL}/procurements/${selectedProcurement.id}/bids`, {
+      const response = await fetch(`${API_BASE_URL}/procurements/${bidProcurement.id}/bids`, {
         method: 'POST',
         body: formData
       });
@@ -268,6 +270,7 @@ const ProcurementsBudgetsPage: React.FC = () => {
       setBidSuccess(true);
       setTimeout(() => {
         setBidModalOpen(false);
+        setBidProcurement(null);
         setBidSuccess(false);
         setBidFormData({
           companyName: '',
@@ -516,7 +519,7 @@ const ProcurementsBudgetsPage: React.FC = () => {
       </div>
 
       {/* Procurement Detail Modal */}
-      {selectedProcurement && !bidModalOpen && (
+      {selectedProcurement && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-lg shadow-xl max-w-3xl w-full max-h-[90vh] overflow-y-auto">
             <div className="p-6 border-b">
@@ -742,7 +745,7 @@ const ProcurementsBudgetsPage: React.FC = () => {
                             View Details
                           </button>
                           <button
-                            onClick={() => { setSelectedProcurement(procurement); setBidModalOpen(true); }}
+                            onClick={() => { setBidProcurement(procurement); setBidModalOpen(true); }}
                             className="flex items-center px-3 py-2 bg-green-600 text-white text-sm rounded-md hover:bg-green-700 transition-colors"
                           >
                             <FileText className="h-4 w-4 mr-2" />
@@ -905,19 +908,19 @@ const ProcurementsBudgetsPage: React.FC = () => {
       </div>
 
       {/* Bid Application Modal */}
-      {bidModalOpen && selectedProcurement && (
+      {bidModalOpen && bidProcurement && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
             <div className="p-6 border-b">
               <div className="flex items-center justify-between">
                 <h2 className="text-xl font-bold text-gray-900">Submit Bid Application</h2>
-                <button onClick={() => setBidModalOpen(false)} className="text-gray-400 hover:text-gray-600">
+                <button onClick={() => { setBidModalOpen(false); setBidProcurement(null); }} className="text-gray-400 hover:text-gray-600">
                   <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                   </svg>
                 </button>
               </div>
-              <p className="text-sm text-gray-500 mt-1">{selectedProcurement.title}</p>
+              <p className="text-sm text-gray-500 mt-1">{bidProcurement?.title}</p>
             </div>
             <form onSubmit={handleBidSubmit} className="p-6 space-y-4">
               {bidSuccess ? (
@@ -966,7 +969,7 @@ const ProcurementsBudgetsPage: React.FC = () => {
                     <p className="text-xs text-gray-500 mt-1">Upload your formal bid proposal document</p>
                   </div>
                   <div className="flex justify-end gap-3 pt-4">
-                    <button type="button" onClick={() => setBidModalOpen(false)} className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200">Cancel</button>
+                    <button type="button" onClick={() => { setBidModalOpen(false); setBidProcurement(null); }} className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200">Cancel</button>
                     <button type="submit" disabled={submittingBid} className="px-4 py-2 text-white bg-blue-600 rounded-lg hover:bg-blue-700 disabled:opacity-50">
                       {submittingBid ? 'Submitting...' : 'Submit Bid'}
                     </button>
