@@ -46,6 +46,7 @@ interface ProcurementItem {
   winningAmount?: number;
   content?: string;
   imageElements?: ImageElement[];
+  createdAt?: string;
 }
 
 // API Base URL for static files
