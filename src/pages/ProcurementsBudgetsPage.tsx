@@ -194,6 +194,16 @@ const ProcurementsBudgetsPage: React.FC = () => {
     return matchesSearch && matchesCategory;
   });
 
+  // Cancelled procurements
+  const cancelledProcurements = procurements.filter(item => {
+    if (item.status !== 'Cancelled') return false;
+    const matchesSearch = item.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         item.department.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         item.description.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesCategory = filterCategory === 'All' || item.category === filterCategory;
+    return matchesSearch && matchesCategory;
+  });
+
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'Open': return 'bg-green-100 text-green-800';
@@ -827,8 +837,62 @@ const ProcurementsBudgetsPage: React.FC = () => {
               </div>
             )}
 
+            {/* Cancelled Procurements Table */}
+            {cancelledProcurements.length > 0 && (
+              <div className="bg-white rounded-xl shadow overflow-hidden">
+                <div className="bg-red-50 px-6 py-3 border-b border-red-200">
+                  <h3 className="text-lg font-semibold text-red-800 flex items-center gap-2">
+                    <span className="w-3 h-3 rounded-full bg-red-500"></span>
+                    Cancelled ({cancelledProcurements.length})
+                  </h3>
+                </div>
+                <div className="divide-y divide-gray-200">
+                  {cancelledProcurements.map((procurement) => (
+                    <div key={procurement.id} className="p-6 hover:bg-gray-50 transition-colors">
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-3 mb-2">
+                            <span className="px-3 py-1 rounded-full text-xs font-semibold bg-red-100 text-red-800">
+                              Cancelled
+                            </span>
+                            <span className="text-sm text-gray-500">{procurement.category}</span>
+                          </div>
+                          <h3 className="text-xl font-semibold text-gray-900 mb-2">{procurement.title}</h3>
+                          <p className="text-gray-600 mb-3">{procurement.department}</p>
+                          <div className="flex flex-wrap gap-4 text-sm text-gray-500">
+                            <span className="flex items-center gap-1">
+                              <Calendar className="h-4 w-4" />
+                              Posted: {new Date(procurement.datePosted || procurement.createdAt || '').toLocaleDateString()}
+                            </span>
+                            {procurement.deadline && (
+                              <span className="flex items-center gap-1">
+                                <Clock className="h-4 w-4" />
+                                Deadline: {new Date(procurement.deadline).toLocaleDateString()}
+                              </span>
+                            )}
+                          </div>
+                          {procurement.description && (
+                            <p className="text-gray-600 mt-2 line-clamp-2">{procurement.description}</p>
+                          )}
+                        </div>
+                        <div className="flex flex-col gap-2 ml-4">
+                          <button
+                            onClick={() => openDetailsModal(procurement)}
+                            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2"
+                          >
+                            <FileText className="h-4 w-4" />
+                            View Details
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
             {/* No Results */}
-            {publishedProcurements.length === 0 && awardedProcurements.length === 0 && (
+            {publishedProcurements.length === 0 && awardedProcurements.length === 0 && cancelledProcurements.length === 0 && (
               <div className="bg-white rounded-xl shadow p-8 text-center text-gray-500">
                 <ShoppingCart className="h-12 w-12 mx-auto mb-3 text-gray-300" />
                 <p>No procurements found</p>
