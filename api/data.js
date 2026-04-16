@@ -178,12 +178,17 @@ async function handleOrganization(db, params, res) {
 }
 
 async function handleProcurements(db, params, res) {
-  const { category, year, page = '1', limit = '10' } = params;
+  const { category, year, page = '1', limit = '10', status } = params;
   
   // Admin-site saves with isPublic: true (not isActive)
-  let query = { isPublic: true };
+  // Show Open, Published, Awarded, and Cancelled procurements to the public
+  let query = { 
+    isPublic: true,
+    status: { $in: ['Open', 'Published', 'Awarded', 'Cancelled'] }
+  };
   if (category) query.category = category;
   if (year) query.year = year;
+  if (status) query.status = status;
   
   const skip = (parseInt(page) - 1) * parseInt(limit);
   
