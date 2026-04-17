@@ -683,7 +683,7 @@ const ProcurementsBudgetsPage: React.FC = () => {
                 <div className="divide-y divide-gray-200">
                   {publishedProcurements.map((procurement) => (
                     <div key={procurement.id} className="p-6 hover:bg-gray-50 transition-colors">
-                      <div className="flex items-start justify-between">
+                      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between">
                         <div className="flex-1">
                           <div className="flex items-center gap-3 mb-2">
                             <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
@@ -699,7 +699,7 @@ const ProcurementsBudgetsPage: React.FC = () => {
                           <h3 className="text-lg font-medium text-gray-900 mb-2">
                             {procurement.title}
                           </h3>
-                          <div className="flex items-center gap-4 text-sm text-gray-500 mb-2">
+                          <div className="flex flex-wrap items-center gap-4 text-sm text-gray-500 mb-2">
                             <div className="flex items-center">
                               <Building className="h-4 w-4 mr-1" />
                               {procurement.department}
@@ -716,7 +716,7 @@ const ProcurementsBudgetsPage: React.FC = () => {
                             )}
                           </div>
                         </div>
-                        <div className="flex flex-col gap-2 w-full sm:w-auto sm:ml-4 mt-3 sm:mt-0">
+                        <div className="flex flex-col gap-2 w-full sm:w-auto sm:ml-4 mt-4 sm:mt-0">
                           {procurement.documents && procurement.documents.length > 0 && (
                             <button
                               onClick={() => {
@@ -771,7 +771,7 @@ const ProcurementsBudgetsPage: React.FC = () => {
                 <div className="divide-y divide-gray-200">
                   {awardedProcurements.map((procurement) => (
                     <div key={procurement.id} className="p-6 hover:bg-gray-50 transition-colors">
-                      <div className="flex items-start justify-between">
+                      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between">
                         <div className="flex-1">
                           <div className="flex items-center gap-3 mb-2">
                             <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
@@ -789,7 +789,7 @@ const ProcurementsBudgetsPage: React.FC = () => {
                           <h3 className="text-lg font-medium text-gray-900 mb-2">
                             {procurement.title}
                           </h3>
-                          <div className="flex items-center gap-4 text-sm text-gray-500 mb-2">
+                          <div className="flex flex-wrap items-center gap-4 text-sm text-gray-500 mb-2">
                             <div className="flex items-center">
                               <Building className="h-4 w-4 mr-1" />
                               {procurement.department}
@@ -806,7 +806,7 @@ const ProcurementsBudgetsPage: React.FC = () => {
                             )}
                           </div>
                         </div>
-                        <div className="flex flex-col gap-2 w-full sm:w-auto sm:ml-4 mt-3 sm:mt-0">
+                        <div className="flex flex-col gap-2 w-full sm:w-auto sm:ml-4 mt-4 sm:mt-0">
                           {procurement.documents && procurement.documents.length > 0 && (
                             <button
                               onClick={() => {
@@ -854,7 +854,7 @@ const ProcurementsBudgetsPage: React.FC = () => {
                 <div className="divide-y divide-gray-200">
                   {cancelledProcurements.map((procurement) => (
                     <div key={procurement.id} className="p-6 hover:bg-gray-50 transition-colors">
-                      <div className="flex items-start justify-between">
+                      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between">
                         <div className="flex-1">
                           <div className="flex items-center gap-3 mb-2">
                             <span className="px-3 py-1 rounded-full text-xs font-semibold bg-red-100 text-red-800">
@@ -880,13 +880,13 @@ const ProcurementsBudgetsPage: React.FC = () => {
                             <p className="text-gray-600 mt-2 line-clamp-2">{procurement.description}</p>
                           )}
                         </div>
-                        <div className="flex flex-col gap-2 ml-4">
+                        <div className="flex flex-col gap-2 w-full sm:w-auto sm:ml-4 mt-4 sm:mt-0">
                           <button
                             onClick={() => setSelectedProcurement(procurement)}
-                            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2"
+                            className="flex items-center justify-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
                           >
-                            <FileText className="h-4 w-4" />
-                            View Details
+                            <FileText className="h-4 w-4 mr-2" />
+                            View Cancelled Procurement Details
                           </button>
                         </div>
                       </div>

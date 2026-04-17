@@ -315,7 +315,7 @@ const OrdinancesPage: React.FC = () => {
                 key={ordinance.id}
                 className="p-6 hover:bg-gray-50 transition-colors"
               >
-                <div className="flex items-start justify-between">
+                <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between">
                   <div className="flex-1">
                     <div className="flex items-center gap-3 mb-2">
                       <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
@@ -337,7 +337,7 @@ const OrdinancesPage: React.FC = () => {
                       {new Date(ordinance.createdAt).toLocaleDateString()}
                     </div>
                   </div>
-                  <div className="flex flex-col gap-2 w-full sm:w-auto sm:ml-4 mt-3 sm:mt-0">
+                  <div className="flex flex-col gap-2 w-full sm:w-auto sm:ml-4 mt-4 sm:mt-0">
                     <button
                       onClick={() => ordinancesApi.downloadPdf(ordinance.fileId || ordinance.pdfUrl, ordinance.ordinanceNumber, ordinance.series)}
                       className="flex items-center justify-center px-3 py-2 bg-green-600 text-white text-sm rounded-md hover:bg-green-700 transition-colors"

@@ -176,7 +176,7 @@ const DocumentsPage: React.FC = () => {
                     </span>
                   </div>
                 </div>
-                <div className="flex flex-col gap-2 w-full sm:w-auto">
+                <div className="flex flex-col gap-2 w-full sm:w-auto mt-4 sm:mt-0">
                   <button
                     onClick={() => setSelectedDocument(doc)}
                     className="flex items-center justify-center px-3 py-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors text-sm font-medium border border-blue-200"
