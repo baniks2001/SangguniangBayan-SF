@@ -176,20 +176,20 @@ const DocumentsPage: React.FC = () => {
                     </span>
                   </div>
                 </div>
-                <div className="flex flex-wrap gap-2">
+                <div className="flex flex-col gap-2 w-full sm:w-auto">
                   <button
                     onClick={() => setSelectedDocument(doc)}
-                    className="flex items-center px-3 py-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors text-sm font-medium"
+                    className="flex items-center justify-center px-3 py-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors text-sm font-medium border border-blue-200"
                   >
-                    <Eye className="h-4 w-4 mr-1.5" />
-                    <span className="hidden sm:inline">View</span>
+                    <Eye className="h-4 w-4 mr-2" />
+                    View Document Details
                   </button>
                   <button
                     onClick={() => filesApi.downloadFile(doc.fileId || doc.fileUrl, doc.fileName)}
-                    className="flex items-center px-3 sm:px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
+                    className="flex items-center justify-center px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
                   >
-                    <Download className="h-4 w-4 mr-1.5" />
-                    <span className="hidden sm:inline">Download</span>
+                    <Download className="h-4 w-4 mr-2" />
+                    Download Document
                   </button>
                 </div>
               </div>

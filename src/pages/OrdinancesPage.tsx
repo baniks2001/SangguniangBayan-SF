@@ -337,22 +337,20 @@ const OrdinancesPage: React.FC = () => {
                       {new Date(ordinance.createdAt).toLocaleDateString()}
                     </div>
                   </div>
-                  <div className="flex flex-row sm:flex-col gap-2 ml-0 sm:ml-4 mt-2 sm:mt-0">
+                  <div className="flex flex-col gap-2 w-full sm:w-auto sm:ml-4 mt-3 sm:mt-0">
                     <button
                       onClick={() => ordinancesApi.downloadPdf(ordinance.fileId || ordinance.pdfUrl, ordinance.ordinanceNumber, ordinance.series)}
-                      className="flex items-center px-3 py-2 bg-green-600 text-white text-sm rounded-md hover:bg-green-700 transition-colors"
-                      title="Download"
+                      className="flex items-center justify-center px-3 py-2 bg-green-600 text-white text-sm rounded-md hover:bg-green-700 transition-colors"
                     >
-                      <Download className="h-4 w-4 sm:mr-2" />
-                      <span className="hidden sm:inline">Download Approved File</span>
+                      <Download className="h-4 w-4 mr-2" />
+                      Download Ordinance
                     </button>
                     <button
                       onClick={() => setSelectedOrdinance(ordinance)}
-                      className="flex items-center px-3 py-2 bg-white border border-gray-300 text-gray-700 text-sm rounded-md hover:bg-gray-50 transition-colors"
-                      title="Details"
+                      className="flex items-center justify-center px-3 py-2 bg-white border border-gray-300 text-gray-700 text-sm rounded-md hover:bg-gray-50 transition-colors"
                     >
-                      <Info className="h-4 w-4 sm:mr-2" />
-                      <span className="hidden sm:inline">Ordinance Details</span>
+                      <Info className="h-4 w-4 mr-2" />
+                      View Ordinance Details
                     </button>
                   </div>
                 </div>

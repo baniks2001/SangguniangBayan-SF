@@ -462,8 +462,8 @@ const VacanciesPage: React.FC = () => {
                   onClick={() => handleApply(vacancy)}
                   className="w-full flex items-center justify-center px-4 py-2 bg-orange-600 text-white rounded-md hover:bg-orange-700 transition-colors"
                 >
-                  Apply Now
-                  <ChevronRight className="h-4 w-4 ml-1" />
+                  <FileText className="h-4 w-4 mr-2" />
+                  Apply for this Position
                 </button>
               </div>
             </div>
