@@ -124,12 +124,13 @@ const ContactPage: React.FC = () => {
         </div>
       </section>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+      {/* Contact Info & Form */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-16">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 sm:gap-12">
           {/* Contact Information */}
           <div className="space-y-6">
             {/* Office Info Card */}
-            <div className="bg-white rounded-xl shadow-lg p-6">
+            <div className="bg-white rounded-xl shadow-lg p-6 sm:p-8">
               <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center">
                 <Building2 className="h-6 w-6 mr-2 text-blue-600" />
                 Office Information
@@ -192,16 +193,16 @@ const ContactPage: React.FC = () => {
             </div>
 
             {/* Google Map */}
-            <div className="bg-white rounded-xl shadow-lg p-6">
-              <h2 className="text-2xl font-bold text-gray-900 mb-4 flex items-center">
-                <MapPin className="h-6 w-6 mr-2 text-red-600" />
+            <div className="bg-white rounded-xl shadow-lg p-4 sm:p-6">
+              <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4 flex items-center">
+                <MapPin className="h-5 w-5 sm:h-6 sm:w-6 mr-2 text-red-600" />
                 Location Map
               </h2>
               <div className="rounded-lg overflow-hidden border border-gray-200">
                 <iframe
                   src={GOOGLE_MAPS_URL}
                   width="100%"
-                  height="300"
+                  height="250"
                   style={{ border: 0 }}
                   allowFullScreen
                   loading="lazy"
@@ -217,16 +218,16 @@ const ContactPage: React.FC = () => {
           </div>
 
           {/* Contact Form */}
-          <div className="bg-white rounded-xl shadow-lg p-8">
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">Send us a Message</h2>
-            <p className="text-gray-600 mb-6">Fill out the form below and we'll get back to you as soon as possible.</p>
+          <div className="bg-white rounded-xl shadow-lg p-6 sm:p-8">
+            <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2">Send us a Message</h2>
+            <p className="text-gray-600 mb-6 text-sm sm:text-base">Fill out the form below and we'll get back to you as soon as possible.</p>
             
             {submitSuccess ? (
-              <div className="text-center py-12">
-                <div className="bg-green-100 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <CheckCircle className="h-10 w-10 text-green-600" />
+              <div className="text-center py-8 sm:py-12">
+                <div className="bg-green-100 w-16 h-16 sm:w-20 sm:h-20 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <CheckCircle className="h-8 w-8 sm:h-10 sm:w-10 text-green-600" />
                 </div>
-                <h3 className="text-2xl font-bold text-gray-900 mb-2">Message Sent!</h3>
+                <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2">Message Sent!</h3>
                 <p className="text-gray-600">Thank you for reaching out. We'll get back to you soon.</p>
               </div>
             ) : (
@@ -312,13 +313,13 @@ const ContactPage: React.FC = () => {
                       )}
                       
                       {imagePreviews.length > 0 && (
-                        <div className="grid grid-cols-3 gap-2">
+                        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                           {imagePreviews.map((preview, index) => (
                             <div key={index} className="relative">
                               <img
                                 src={preview}
                                 alt={`Preview ${index + 1}`}
-                                className="w-full h-24 object-cover rounded-lg"
+                                className="w-full h-20 sm:h-24 object-cover rounded-lg"
                               />
                               <button
                                 type="button"
@@ -377,9 +378,9 @@ const ContactPage: React.FC = () => {
       </div>
 
       {/* Additional Info Section */}
-      <section className="bg-blue-900 text-white py-12">
+      <section className="bg-blue-900 text-white py-8 sm:py-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 sm:gap-8 text-center">
             <div>
               <h3 className="text-lg font-semibold mb-2">Legislative Sessions</h3>
               <p className="text-blue-200">Every Monday at 9:00 AM</p>

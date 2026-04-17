@@ -294,3 +294,165 @@ export const filesApi = {
     throw new Error('Metadata endpoint not available in consolidated API');
   }
 };
+
+// NEW MICROSERVICES
+
+// Search API - Full-text search across content
+export const searchApi = {
+  search: async (params: {
+    q: string;
+    type?: 'ordinances' | 'resolutions' | 'documents' | 'news';
+    page?: number;
+    limit?: number;
+    sort?: 'relevance' | 'date' | 'title';
+    series?: string;
+    year?: string;
+    status?: string;
+  }) => {
+    const queryParams = new URLSearchParams();
+    queryParams.append('q', params.q);
+    if (params.type) queryParams.append('type', params.type);
+    if (params.page) queryParams.append('page', params.page.toString());
+    if (params.limit) queryParams.append('limit', params.limit.toString());
+    if (params.sort) queryParams.append('sort', params.sort);
+    if (params.series) queryParams.append('series', params.series);
+    if (params.year) queryParams.append('year', params.year);
+    if (params.status) queryParams.append('status', params.status);
+    
+    const response = await fetch(`/api/search?${queryParams}`);
+    return handleResponse(response);
+  }
+};
+
+// Analytics API - Track events and get stats
+export const analyticsApi = {
+  // Track a page view or download
+  track: async (data: {
+    type: 'pageview' | 'download' | 'search' | 'click';
+    page?: string;
+    contentType?: string;
+    contentId?: string;
+    contentTitle?: string;
+    metadata?: Record<string, any>;
+  }) => {
+    const response = await fetch('/api/analytics?action=track', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    });
+    return handleResponse(response);
+  },
+
+  // Get stats for content
+  getStats: async (params?: {
+    contentType?: string;
+    contentId?: string;
+    days?: number;
+    page?: string;
+    type?: 'pageview' | 'download';
+  }) => {
+    const queryParams = new URLSearchParams();
+    queryParams.append('action', 'stats');
+    if (params?.contentType) queryParams.append('contentType', params.contentType);
+    if (params?.contentId) queryParams.append('contentId', params.contentId);
+    if (params?.days) queryParams.append('days', params.days.toString());
+    if (params?.page) queryParams.append('page', params.page);
+    if (params?.type) queryParams.append('type', params.type);
+    
+    const response = await fetch(`/api/analytics?${queryParams}`);
+    return handleResponse(response);
+  },
+
+  // Get popular content
+  getPopular: async (params?: {
+    contentType?: string;
+    days?: number;
+    limit?: number;
+    metric?: 'views' | 'downloads';
+  }) => {
+    const queryParams = new URLSearchParams();
+    queryParams.append('action', 'popular');
+    if (params?.contentType) queryParams.append('contentType', params.contentType);
+    if (params?.days) queryParams.append('days', params.days.toString());
+    if (params?.limit) queryParams.append('limit', params.limit.toString());
+    if (params?.metric) queryParams.append('metric', params.metric);
+    
+    const response = await fetch(`/api/analytics?${queryParams}`);
+    return handleResponse(response);
+  },
+
+  // Get dashboard summary
+  getDashboard: async (days?: number) => {
+    const queryParams = new URLSearchParams();
+    queryParams.append('action', 'dashboard');
+    if (days) queryParams.append('days', days.toString());
+    
+    const response = await fetch(`/api/analytics?${queryParams}`);
+    return handleResponse(response);
+  }
+};
+
+// Rate Limit API - Check rate limits before submitting
+export const rateLimitApi = {
+  // Check rate limit status
+  check: async (action: 'contact' | 'apply' | 'search' | 'analytics') => {
+    const response = await fetch(`/api/rate-limit?action=${action}`);
+    return handleResponse(response);
+  },
+
+  // Check all rate limits
+  checkAll: async () => {
+    const response = await fetch('/api/rate-limit?check=true');
+    return handleResponse(response);
+  }
+};
+
+// Image Optimization API
+export const imageOptimizeApi = {
+  // Get optimized image URL
+  getUrl: (params: {
+    id: string;
+    w?: number;
+    h?: number;
+    q?: number;
+    f?: 'jpeg' | 'png' | 'webp';
+    fit?: 'cover' | 'contain' | 'fill';
+  }): string => {
+    const queryParams = new URLSearchParams();
+    queryParams.append('id', params.id);
+    if (params.w) queryParams.append('w', params.w.toString());
+    if (params.h) queryParams.append('h', params.h.toString());
+    if (params.q) queryParams.append('q', params.q.toString());
+    if (params.f) queryParams.append('f', params.f);
+    if (params.fit) queryParams.append('fit', params.fit);
+    
+    return `/api/image-optimize?${queryParams}`;
+  }
+};
+
+// PDF Preview API
+export const pdfPreviewApi = {
+  // Get PDF metadata
+  getMetadata: async (id: string) => {
+    const response = await fetch(`/api/pdf-preview?id=${id}&type=metadata`);
+    return handleResponse(response);
+  },
+
+  // Get PDF thumbnail URL
+  getThumbnailUrl: (id: string, format: 'svg' | 'png' = 'svg', width?: number, height?: number): string => {
+    const params = new URLSearchParams();
+    params.append('id', id);
+    params.append('type', 'thumbnail');
+    params.append('format', format);
+    if (width) params.append('w', width.toString());
+    if (height) params.append('h', height.toString());
+    
+    return `/api/pdf-preview?${params}`;
+  },
+
+  // Get full preview data
+  getPreview: async (id: string) => {
+    const response = await fetch(`/api/pdf-preview?id=${id}&type=preview`);
+    return handleResponse(response);
+  }
+};

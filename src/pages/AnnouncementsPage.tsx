@@ -78,12 +78,12 @@ const AnnouncementsPage: React.FC = () => {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       {/* Header */}
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 flex items-center">
-          <Bell className="h-8 w-8 mr-3 text-red-600" />
+      <div className="mb-6 sm:mb-8">
+        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 flex items-center">
+          <Bell className="h-6 w-6 sm:h-8 sm:w-8 mr-2 sm:mr-3 text-red-600" />
           Announcements
         </h1>
-        <p className="mt-2 text-gray-600">
+        <p className="mt-2 text-gray-600 text-sm sm:text-base">
           Stay informed with the latest announcements and advisories from the Sangguniang Bayan.
         </p>
       </div>
@@ -94,23 +94,23 @@ const AnnouncementsPage: React.FC = () => {
           {announcements.map((announcement) => (
             <div
               key={announcement.id}
-              className={`border-l-4 rounded-r-lg shadow p-6 ${getPriorityColor(announcement.priority)}`}
+              className={`border-l-4 rounded-r-lg shadow p-4 sm:p-6 ${getPriorityColor(announcement.priority)}`}
             >
-              <div className="flex items-start gap-4">
-                <div className="flex-shrink-0">
+              <div className="flex items-start gap-3 sm:gap-4">
+                <div className="flex-shrink-0 mt-1">
                   {getPriorityIcon(announcement.priority)}
                 </div>
-                <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-2">
-                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getPriorityBadge(announcement.priority)}`}>
+                <div className="flex-1 min-w-0">
+                  <div className="flex flex-wrap items-center gap-2 mb-2">
+                    <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${getPriorityBadge(announcement.priority)}`}>
                       {announcement.priority}
                     </span>
-                    <span className="text-sm text-gray-500 flex items-center">
-                      <Calendar className="h-4 w-4 mr-1" />
+                    <span className="text-xs sm:text-sm text-gray-500 flex items-center">
+                      <Calendar className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
                       {new Date(announcement.createdAt).toLocaleDateString()}
                     </span>
                   </div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">{announcement.title}</h3>
+                  <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-2">{announcement.title}</h3>
                   <div 
                     className="prose max-w-none text-gray-700 announcement-content"
                     dangerouslySetInnerHTML={{ 

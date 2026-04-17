@@ -176,20 +176,20 @@ const DocumentsPage: React.FC = () => {
                     </span>
                   </div>
                 </div>
-                <div className="flex gap-2">
+                <div className="flex flex-wrap gap-2">
                   <button
                     onClick={() => setSelectedDocument(doc)}
                     className="flex items-center px-3 py-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors text-sm font-medium"
                   >
                     <Eye className="h-4 w-4 mr-1.5" />
-                    View
+                    <span className="hidden sm:inline">View</span>
                   </button>
                   <button
                     onClick={() => filesApi.downloadFile(doc.fileId || doc.fileUrl, doc.fileName)}
-                    className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
+                    className="flex items-center px-3 sm:px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
                   >
                     <Download className="h-4 w-4 mr-1.5" />
-                    Download
+                    <span className="hidden sm:inline">Download</span>
                   </button>
                 </div>
               </div>
@@ -200,7 +200,7 @@ const DocumentsPage: React.FC = () => {
 
       {/* Pagination */}
       {totalPages > 1 && (
-        <div className="flex justify-center items-center gap-2 mt-8">
+        <div className="flex flex-wrap justify-center items-center gap-2 mt-8">
           <button
             onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
             disabled={currentPage === 1}
@@ -208,7 +208,7 @@ const DocumentsPage: React.FC = () => {
           >
             <ChevronLeft className="h-5 w-5" />
           </button>
-          <span className="text-sm text-gray-600">
+          <span className="text-sm text-gray-600 px-2">
             Page {currentPage} of {totalPages}
           </span>
           <button
@@ -246,7 +246,7 @@ const DocumentsPage: React.FC = () => {
                 <h3 className="text-sm font-medium text-gray-500 mb-1">Description</h3>
                 <p className="text-gray-900">{selectedDocument.description}</p>
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <h3 className="text-sm font-medium text-gray-500 mb-1">File Name</h3>
                   <p className="text-gray-900 flex items-center">
@@ -277,7 +277,7 @@ const DocumentsPage: React.FC = () => {
                   </p>
                 </div>
               </div>
-              <div className="flex gap-3 pt-4 border-t border-gray-200">
+              <div className="flex flex-col sm:flex-row gap-3 pt-4 border-t border-gray-200">
                 <button
                   onClick={() => {
                     filesApi.viewFile(selectedDocument.fileId || selectedDocument.fileUrl);

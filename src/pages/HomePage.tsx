@@ -175,7 +175,7 @@ const HomePage: React.FC = () => {
   return (
     <div className="space-y-0">
       {/* Hero Section with Image Carousel */}
-      <section className="relative h-[600px] overflow-hidden">
+      <section className="relative h-[400px] sm:h-[500px] md:h-[600px] overflow-hidden">
         {HERO_IMAGES.map((src, index) => (
           <div key={index} className={`absolute inset-0 transition-opacity duration-1000 ${index === currentSlide ? 'opacity-100' : 'opacity-0'}`}>
             <img src={src} alt={`Hero ${index + 1}`} className="w-full h-full object-cover" />
@@ -183,12 +183,12 @@ const HomePage: React.FC = () => {
           </div>
         ))}
         <div className="relative z-10 h-full flex flex-col items-center justify-center px-4">
-          <div className="mb-6 bg-white/10 backdrop-blur-sm p-4 rounded-full animate-fade-in-up">
-            <img src="/homepage-images/logo.png" alt="Logo" className="h-32 w-32 md:h-48 md:w-48 object-contain animate-pulse-slow" />
+          <div className="mb-4 sm:mb-6 bg-white/10 backdrop-blur-sm p-3 sm:p-4 rounded-full animate-fade-in-up">
+            <img src="/homepage-images/logo.png" alt="Logo" className="h-20 w-20 sm:h-32 sm:w-32 md:h-48 md:w-48 object-contain animate-pulse-slow" />
           </div>
-          <h1 className="text-4xl md:text-6xl font-bold text-white mb-4 text-center drop-shadow-lg animate-fade-in-up animate-pulse-glow delay-200">{WELCOME_TITLE}</h1>
-          <p className="text-xl md:text-3xl text-blue-100 mb-2 text-center drop-shadow-md animate-slide-in-left delay-400">{WELCOME_SUBTITLE}</p>
-          <p className="text-lg md:text-xl text-blue-200 text-center max-w-2xl drop-shadow-sm animate-slide-in-right delay-600">{WELCOME_MESSAGE}</p>
+          <h1 className="text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-2 sm:mb-4 text-center drop-shadow-lg animate-fade-in-up animate-pulse-glow delay-200 px-4">{WELCOME_TITLE}</h1>
+          <p className="text-base sm:text-xl md:text-2xl lg:text-3xl text-blue-100 mb-1 sm:mb-2 text-center drop-shadow-md animate-slide-in-left delay-400 px-4">{WELCOME_SUBTITLE}</p>
+          <p className="text-sm sm:text-lg md:text-xl text-blue-200 text-center max-w-2xl drop-shadow-sm animate-slide-in-right delay-600 px-4">{WELCOME_MESSAGE}</p>
         </div>
         <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-20 flex space-x-2">
           {HERO_IMAGES.map((_, index) => (
@@ -200,11 +200,11 @@ const HomePage: React.FC = () => {
       {/* Stats Section */}
       <section className="bg-blue-900 py-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-            <div className="text-center text-white animate-fade-in-up"><Scale className="h-10 w-10 mx-auto text-blue-300 mb-3 animate-bounce-slow" /><p className="text-4xl font-bold animate-count-up">{stats.resolutions}+</p><p className="text-blue-200 mt-1">Resolutions</p></div>
-            <div className="text-center text-white animate-fade-in-up delay-100"><FileText className="h-10 w-10 mx-auto text-green-300 mb-3 animate-bounce-slow" /><p className="text-4xl font-bold animate-count-up">{stats.ordinances}+</p><p className="text-blue-200 mt-1">Ordinances</p></div>
-            <div className="text-center text-white animate-fade-in-up delay-200"><Clock className="h-10 w-10 mx-auto text-yellow-300 mb-3 animate-bounce-slow" /><p className="text-4xl font-bold">{stats.yearsServing}</p><p className="text-blue-200 mt-1">Years Serving</p></div>
-            <div className="text-center text-white animate-fade-in-up delay-300"><Users className="h-10 w-10 mx-auto text-purple-300 mb-3 animate-bounce-slow" /><p className="text-4xl font-bold">{stats.population}</p><p className="text-blue-200 mt-1">Population Served</p></div>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6">
+            <div className="text-center text-white animate-fade-in-up"><Scale className="h-8 w-8 sm:h-10 sm:w-10 mx-auto text-blue-300 mb-2 sm:mb-3 animate-bounce-slow" /><p className="text-2xl sm:text-4xl font-bold animate-count-up">{stats.resolutions}+</p><p className="text-blue-200 mt-1 text-sm sm:text-base">Resolutions</p></div>
+            <div className="text-center text-white animate-fade-in-up delay-100"><FileText className="h-8 w-8 sm:h-10 sm:w-10 mx-auto text-green-300 mb-2 sm:mb-3 animate-bounce-slow" /><p className="text-2xl sm:text-4xl font-bold animate-count-up">{stats.ordinances}+</p><p className="text-blue-200 mt-1 text-sm sm:text-base">Ordinances</p></div>
+            <div className="text-center text-white animate-fade-in-up delay-200"><Clock className="h-8 w-8 sm:h-10 sm:w-10 mx-auto text-yellow-300 mb-2 sm:mb-3 animate-bounce-slow" /><p className="text-2xl sm:text-4xl font-bold">{stats.yearsServing}</p><p className="text-blue-200 mt-1 text-sm sm:text-base">Years Serving</p></div>
+            <div className="text-center text-white animate-fade-in-up delay-300"><Users className="h-8 w-8 sm:h-10 sm:w-10 mx-auto text-purple-300 mb-2 sm:mb-3 animate-bounce-slow" /><p className="text-2xl sm:text-4xl font-bold">{stats.population}</p><p className="text-blue-200 mt-1 text-sm sm:text-base">Population Served</p></div>
           </div>
         </div>
       </section>
@@ -234,30 +234,28 @@ const HomePage: React.FC = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
             {/* Left Side - Official Seal */}
-            <div className="flex flex-col items-center">
-              <div className="bg-white rounded-full shadow-2xl p-4 mb-6">
+            <div className="flex flex-col items-center order-1 md:order-1">
+              <div className="bg-white rounded-full shadow-2xl p-3 sm:p-4 mb-4 sm:mb-6">
                 <img 
                   src="/homepage-images/logo.png" 
                   alt="Official Seal of Sangguniang Bayan" 
-                  className="h-80 w-80 md:h-96 md:w-96 lg:h-[28rem] lg:w-[28rem] object-contain"
+                  className="h-48 w-48 sm:h-64 sm:w-64 md:h-80 md:w-80 lg:h-96 lg:w-96 object-contain"
                 />
               </div>
             </div>    
             
             {/* Right Side - Seal Information */}
-            <div className="space-y-6">
+            <div className="space-y-4 sm:space-y-6 order-2 md:order-2">
               <div>
-                <h3 className="text-3xl font-bold text-gray-900 mb-4">The Official Seal of the Sangguniang Bayan</h3>
-                <div className="w-24 h-1 bg-blue-600 mb-6"></div>
+                <h3 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 mb-3 sm:mb-4">The Official Seal of the Sangguniang Bayan</h3>
+                <div className="w-16 sm:w-24 h-1 bg-blue-600 mb-4 sm:mb-6"></div>
               </div>
-              <div className="space-y-4 text-gray-600 leading-relaxed">
+              <div className="space-y-3 sm:space-y-4 text-gray-600 leading-relaxed text-sm sm:text-base">
                 <p>
                   <strong>Symbolism of the Official Seal:</strong>
                   <strong> Sangguniang Bayan of San Francisco, Southern Leyte</strong>
                 </p>
-                <p> 
-                </p>
-                <div className="bg-blue-50 rounded-lg p-6 border-l-4 border-blue-600">
+                <div className="bg-blue-50 rounded-lg p-4 sm:p-6 border-l-4 border-blue-600">
                   <ul className="space-y-1 text-blue-800 text-sm">
                     <li className="flex items-start">
                       <span className="mr-2"></span>
@@ -337,7 +335,7 @@ const HomePage: React.FC = () => {
             <p className="text-gray-600 max-w-2xl mx-auto">Meet the dedicated officials serving the people of San Francisco, Southern Leyte</p>
             <div className="w-24 h-1 bg-blue-600 mx-auto mt-4"></div>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
             {ORGANIZATION_CATEGORIES.map((category) => (
               <OrganizationCarousel key={category.id} category={category} />
             ))}

@@ -206,20 +206,20 @@ const ResolutionsPage: React.FC = () => {
 
       {/* Resolution Detail Modal - matches print view style */}
       {selectedResolution && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-2 sm:p-4">
           <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[95vh] overflow-y-auto">
-            <div className="p-4 border-b bg-gray-50">
-              <div className="flex items-center justify-between">
-                <h2 className="text-xl font-bold text-gray-900">
+            <div className="p-3 sm:p-4 border-b bg-gray-50">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                <h2 className="text-lg sm:text-xl font-bold text-gray-900">
                   Resolution No. {selectedResolution.resolutionNumber} - Series {selectedResolution.series}
                 </h2>
                 <div className="flex items-center gap-2">
                   <button
                     onClick={() => selectedResolution && handlePrintDocument(selectedResolution)}
-                    className="px-4 py-2 text-purple-600 hover:bg-purple-50 rounded-lg transition-colors flex items-center gap-1"
+                    className="px-3 sm:px-4 py-2 text-purple-600 hover:bg-purple-50 rounded-lg transition-colors flex items-center gap-1 text-sm"
                   >
                     <Printer className="h-4 w-4" />
-                    <span className="text-sm">Print</span>
+                    <span className="hidden sm:inline">Print</span>
                   </button>
                   <button
                     onClick={() => setSelectedResolution(null)}
@@ -232,14 +232,15 @@ const ResolutionsPage: React.FC = () => {
                 </div>
               </div>
             </div>
-            <div className="p-8 bg-gray-100 flex justify-center">
+            <div className="p-2 sm:p-8 bg-gray-100 flex justify-center overflow-x-auto">
               {/* Resolution Page - matches document builder layout */}
               <div
                 className="relative bg-white mx-auto"
                 style={{
-                  width: '816px',
+                  width: '100%',
+                  maxWidth: '816px',
                   minHeight: '1056px',
-                  padding: '72px',
+                  padding: '24px',
                   boxShadow: '0 0 0 1px #d1d5db',
                   fontFamily: "'Times New Roman', Times, serif",
                   fontSize: '12pt',
@@ -338,20 +339,22 @@ const ResolutionsPage: React.FC = () => {
                       {new Date(resolution.createdAt).toLocaleDateString()}
                     </div>
                   </div>
-                  <div className="flex flex-col gap-2 ml-4">
+                  <div className="flex flex-row sm:flex-col gap-2 ml-0 sm:ml-4 mt-2 sm:mt-0">
                     <button
                       onClick={() => resolutionsApi.downloadPdf(resolution.fileId || resolution.pdfUrl, resolution.resolutionNumber, resolution.series)}
                       className="flex items-center px-3 py-2 bg-blue-600 text-white text-sm rounded-md hover:bg-blue-700 transition-colors"
+                      title="Download"
                     >
-                      <Download className="h-4 w-4 mr-2" />
-                      Download Approved File
+                      <Download className="h-4 w-4 sm:mr-2" />
+                      <span className="hidden sm:inline">Download Approved File</span>
                     </button>
                     <button
                       onClick={() => setSelectedResolution(resolution)}
                       className="flex items-center px-3 py-2 bg-white border border-gray-300 text-gray-700 text-sm rounded-md hover:bg-gray-50 transition-colors"
+                      title="Details"
                     >
-                      <Info className="h-4 w-4 mr-2" />
-                      Resolution Details
+                      <Info className="h-4 w-4 sm:mr-2" />
+                      <span className="hidden sm:inline">Resolution Details</span>
                     </button>
                   </div>
                 </div>
@@ -371,25 +374,25 @@ const ResolutionsPage: React.FC = () => {
 
       {/* Pagination */}
       {totalPages > 1 && (
-        <div className="mt-6 flex items-center justify-between">
+        <div className="mt-6 flex flex-wrap items-center justify-between gap-2">
           <button
             onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
             disabled={currentPage === 1}
-            className="flex items-center px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex items-center px-3 sm:px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            <ChevronLeft className="h-4 w-4 mr-2" />
-            Previous
+            <ChevronLeft className="h-4 w-4 mr-1 sm:mr-2" />
+            <span className="hidden sm:inline">Previous</span>
           </button>
-          <span className="text-sm text-gray-700">
+          <span className="text-sm text-gray-700 px-2">
             Page {currentPage} of {totalPages}
           </span>
           <button
             onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
             disabled={currentPage === totalPages}
-            className="flex items-center px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex items-center px-3 sm:px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            Next
-            <ChevronRight className="h-4 w-4 ml-2" />
+            <span className="hidden sm:inline">Next</span>
+            <ChevronRight className="h-4 w-4 ml-1 sm:ml-2" />
           </button>
         </div>
       )}

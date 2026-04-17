@@ -6,52 +6,36 @@
   "framework": "create-react-app",
   "rewrites": [
     {
-      "source": "/api/resolutions",
-      "destination": "/api/resolutions.js"
+      "source": "/api/data",
+      "destination": "/api/data.js"
     },
     {
-      "source": "/api/ordinances",
-      "destination": "/api/ordinances.js"
-    },
-    {
-      "source": "/api/procurements",
-      "destination": "/api/procurements.js"
-    },
-    {
-      "source": "/api/vacancies",
-      "destination": "/api/vacancies.js"
-    },
-    {
-      "source": "/api/announcements",
-      "destination": "/api/announcements.js"
-    },
-    {
-      "source": "/api/news",
-      "destination": "/api/news.js"
-    },
-    {
-      "source": "/api/contact",
-      "destination": "/api/contact.js"
-    },
-    {
-      "source": "/api/apply",
-      "destination": "/api/apply.js"
-    },
-    {
-      "source": "/api/organization",
-      "destination": "/api/organization.js"
-    },
-    {
-      "source": "/api/calendar",
-      "destination": "/api/calendar.js"
-    },
-    {
-      "source": "/api/documents",
-      "destination": "/api/documents.js"
+      "source": "/api/submit",
+      "destination": "/api/submit.js"
     },
     {
       "source": "/api/file",
       "destination": "/api/file.js"
+    },
+    {
+      "source": "/api/search",
+      "destination": "/api/search.js"
+    },
+    {
+      "source": "/api/analytics",
+      "destination": "/api/analytics.js"
+    },
+    {
+      "source": "/api/rate-limit",
+      "destination": "/api/rate-limit.js"
+    },
+    {
+      "source": "/api/image-optimize",
+      "destination": "/api/image-optimize.js"
+    },
+    {
+      "source": "/api/pdf-preview",
+      "destination": "/api/pdf-preview.js"
     },
     {
       "source": "/(.*)",

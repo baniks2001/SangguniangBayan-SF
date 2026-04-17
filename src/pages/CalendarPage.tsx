@@ -159,39 +159,40 @@ const CalendarPage: React.FC = () => {
             <p className="mt-4 text-gray-600">Loading calendar...</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8">
             {/* Calendar View */}
-            <div className="lg:col-span-2 bg-white rounded-xl shadow-lg p-6">
+            <div className="lg:col-span-2 bg-white rounded-xl shadow-lg p-3 sm:p-6 overflow-x-auto">
               {/* Calendar Header */}
-              <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center justify-between mb-4 sm:mb-6">
                 <button
                   onClick={prevMonth}
-                  className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
+                  className="p-1 sm:p-2 rounded-lg hover:bg-gray-100 transition-colors"
                 >
-                  <ChevronLeft className="h-6 w-6 text-gray-600" />
+                  <ChevronLeft className="h-5 w-5 sm:h-6 sm:w-6 text-gray-600" />
                 </button>
-                <h2 className="text-xl font-semibold text-gray-900">
+                <h2 className="text-lg sm:text-xl font-semibold text-gray-900">
                   {monthNames[currentMonth]} {currentYear}
                 </h2>
                 <button
                   onClick={nextMonth}
-                  className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
+                  className="p-1 sm:p-2 rounded-lg hover:bg-gray-100 transition-colors"
                 >
-                  <ChevronRight className="h-6 w-6 text-gray-600" />
+                  <ChevronRight className="h-5 w-5 sm:h-6 sm:w-6 text-gray-600" />
                 </button>
               </div>
 
               {/* Calendar Grid */}
-              <div className="grid grid-cols-7 gap-1">
-                {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
-                  <div key={day} className="text-center text-sm font-semibold text-gray-600 py-2">
-                    {day}
+              <div className="grid grid-cols-7 gap-px sm:gap-1 min-w-[300px]">
+                {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((day, idx) => (
+                  <div key={day + idx} className="text-center text-xs sm:text-sm font-semibold text-gray-600 py-1 sm:py-2">
+                    <span className="hidden sm:inline">{['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][idx]}</span>
+                    <span className="sm:hidden">{day}</span>
                   </div>
                 ))}
                 
                 {/* Empty cells for days before the first day of the month */}
                 {Array.from({ length: firstDay }).map((_, index) => (
-                  <div key={`empty-${index}`} className="h-24 border border-gray-100"></div>
+                  <div key={`empty-${index}`} className="h-16 sm:h-24 border border-gray-100"></div>
                 ))}
 
                 {/* Days of the month */}
@@ -205,26 +206,27 @@ const CalendarPage: React.FC = () => {
                   return (
                     <div
                       key={day}
-                      className={`h-24 border border-gray-100 p-1 transition-colors hover:bg-gray-50 ${
+                      className={`h-16 sm:h-24 border border-gray-100 p-1 transition-colors hover:bg-gray-50 ${
                         isToday ? 'bg-blue-50 border-blue-200' : ''
                       }`}
                     >
-                      <div className={`text-sm font-medium mb-1 ${isToday ? 'text-blue-600' : 'text-gray-700'}`}>
+                      <div className={`text-xs sm:text-sm font-medium mb-1 ${isToday ? 'text-blue-600' : 'text-gray-700'}`}>
                         {day}
                       </div>
-                      <div className="space-y-1">
-                        {dayEvents.slice(0, 2).map(event => (
+                      <div className="space-y-0.5 sm:space-y-1">
+                        {dayEvents.slice(0, 1).map(event => (
                           <button
                             key={event.id}
                             onClick={() => setSelectedEvent(event)}
-                            className={`w-full text-left text-xs px-2 py-1 rounded border truncate ${eventTypeColors[event.eventType]}`}
+                            className={`w-full text-left text-[10px] sm:text-xs px-1 sm:px-2 py-0.5 sm:py-1 rounded border truncate ${eventTypeColors[event.eventType]}`}
                           >
-                            {event.title}
+                            <span className="hidden sm:inline">{event.title}</span>
+                            <span className="sm:hidden">•</span>
                           </button>
                         ))}
-                        {dayEvents.length > 2 && (
-                          <div className="text-xs text-gray-500 text-center">
-                            +{dayEvents.length - 2} more
+                        {dayEvents.length > 1 && (
+                          <div className="text-[10px] sm:text-xs text-gray-500 text-center">
+                            +{dayEvents.length - 1} more
                           </div>
                         )}
                       </div>
@@ -235,9 +237,9 @@ const CalendarPage: React.FC = () => {
             </div>
 
             {/* Events List */}
-            <div className="bg-white rounded-xl shadow-lg p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Events This Month</h3>
-              <div className="space-y-4 max-h-[600px] overflow-y-auto">
+            <div className="bg-white rounded-xl shadow-lg p-4 sm:p-6">
+              <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-3 sm:mb-4">Events This Month</h3>
+              <div className="space-y-3 sm:space-y-4 max-h-[400px] sm:max-h-[600px] overflow-y-auto">
                 {events.length === 0 ? (
                   <p className="text-gray-500 text-center py-8">No events scheduled</p>
                 ) : (
@@ -278,9 +280,9 @@ const CalendarPage: React.FC = () => {
         )}
 
         {/* Event Type Legend */}
-        <div className="mt-8 bg-white rounded-xl shadow-lg p-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Event Types</h3>
-          <div className="flex flex-wrap gap-4">
+        <div className="mt-6 sm:mt-8 bg-white rounded-xl shadow-lg p-4 sm:p-6">
+          <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-3 sm:mb-4">Event Types</h3>
+          <div className="flex flex-wrap gap-3 sm:gap-4">
             {Object.entries(eventTypeLabels).map(([type, label]) => (
               <div key={type} className="flex items-center gap-2">
                 <div className={`w-4 h-4 rounded ${eventTypeColors[type].split(' ')[0]}`}></div>
@@ -293,8 +295,8 @@ const CalendarPage: React.FC = () => {
 
       {/* Event Detail Modal */}
       {selectedEvent && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-xl shadow-2xl max-w-lg w-full p-6">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-2 sm:p-4 z-50">
+          <div className="bg-white rounded-xl shadow-2xl max-w-lg w-full p-4 sm:p-6 max-h-[90vh] overflow-y-auto">
             <div className="flex justify-between items-start mb-4">
               <div>
                 <span className={`inline-block px-3 py-1 rounded-full text-sm font-medium ${eventTypeColors[selectedEvent.eventType]}`}>

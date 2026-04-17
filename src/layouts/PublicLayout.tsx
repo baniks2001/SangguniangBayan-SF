@@ -93,37 +93,38 @@ const PublicLayout: React.FC = () => {
           {/* Top Row: Logo and System Name */}
           <div className="flex items-center justify-between h-16">
             {/* 3 Logos with System Name */}
-            <Link to="/" className="flex items-center space-x-1">
+            <Link to="/" className="flex items-center space-x-1 sm:space-x-2">
               {/* Logo 1 - Left (Municipality) */}
               <img 
                 src="/homepage-images/municipality-logo.png"
                 alt="Municipality Logo"
-                className="h-12 w-12 object-contain"
+                className="h-8 w-8 sm:h-10 sm:w-10 lg:h-12 lg:w-12 object-contain"
               />
               
               {/* Logo 2 - Center (Sangguniang Bayan) */}
               <img 
                 src="/homepage-images/logo.png"
                 alt="Sangguniang Bayan Logo"
-                className="h-12 w-12 object-contain"
+                className="h-8 w-8 sm:h-10 sm:w-10 lg:h-12 lg:w-12 object-contain"
               />
               
               {/* Logo 3 - Right (Bagong Pilipinas) */}
               <img 
                 src="/homepage-images/bagongpilipinas.png"
                 alt="Bagong Pilipinas Logo"
-                className="h-12 w-12 object-contain hidden sm:block"
+                className="h-8 w-8 sm:h-10 sm:w-10 lg:h-12 lg:w-12 object-contain hidden sm:block"
               />
               
               {/* Vertical Line - Between 3rd logo and system name */}
-              <div className="hidden sm:block w-px h-10 bg-gray-800"></div>
+              <div className="hidden sm:block w-px h-8 lg:h-10 bg-gray-800 ml-2"></div>
               
               {/* System Name */}
-              <div className="min-w-0 ml-3">
-                <h1 className="text-sm sm:text-base font-bold text-blue-900 whitespace-nowrap">
-                  {SYSTEM_NAME_FULL}
+              <div className="min-w-0 ml-2 sm:ml-3">
+                <h1 className="text-xs sm:text-sm lg:text-base font-bold text-blue-900 leading-tight">
+                  <span className="hidden xs:inline sm:hidden">{SYSTEM_NAME_SHORT}</span>
+                  <span className="xs:hidden sm:inline">{SYSTEM_NAME_FULL}</span>
                 </h1>
-                <p className="text-xs text-gray-600 whitespace-nowrap hidden sm:block">
+                <p className="text-xs text-gray-600 whitespace-nowrap hidden lg:block">
                   {MUNICIPALITY}, {PROVINCE}
                 </p>
               </div>
@@ -166,8 +167,8 @@ const PublicLayout: React.FC = () => {
 
       {/* Hardcoded Footer */}
       <footer className="bg-blue-900 text-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
             {/* About */}
             <div className="md:col-span-1">
               <div className="flex items-center space-x-3 mb-4">
