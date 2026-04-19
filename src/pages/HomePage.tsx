@@ -64,7 +64,7 @@ const ORGANIZATION_CATEGORIES = [
     id: 'legislative_staff',
     name: 'Legislative Staff',
     description: 'Support Staff',
-    images: ['/homepage-images/staff-1.jpg', '/homepage-images/staff-2.jpg', '/homepage-images/staff-3.jpg', '/homepage-images/staff-4.jpg', '/homepage-images/staff-5.jpg', '/homepage-images/staff-6.jpg', '/homepage-images/staff-7.jpg', '/homepage-images/staff-8.jpg', '/homepage-images/staff-9.jpg', '/homepage-images/staff-10.jpg']
+    images: ['/homepage-images/staff-1.jpg', '/homepage-images/staff-2.jpg', '/homepage-images/staff-3.jpg', '/homepage-images/staff-4.jpg', '/homepage-images/staff-5.jpg', '/homepage-images/staff-6.jpg', '/homepage-images/staff-7.jpg', '/homepage-images/staff-8.jpg', '/homepage-images/staff-9.jpg', '/homepage-images/staff-10.jpg', '/homepage-images/staff-11.jpg']
   }
 ];
 
