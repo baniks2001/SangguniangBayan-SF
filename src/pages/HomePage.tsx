@@ -133,10 +133,15 @@ const HomePage: React.FC = () => {
 
     useEffect(() => {
       if (images.length > 1) {
-        const timer = setInterval(() => setCurrentImage((prev) => (prev + 1) % images.length), 3000);
+        const timer = setInterval(() => {
+          setCurrentImage((prev) => {
+            const nextIndex = (prev + 1) % images.length;
+            return nextIndex;
+          });
+        }, 3000);
         return () => clearInterval(timer);
       }
-    }, [images.length]);
+    }, [images]);
 
     return (
       <div className="bg-white rounded-xl shadow-lg overflow-hidden">
