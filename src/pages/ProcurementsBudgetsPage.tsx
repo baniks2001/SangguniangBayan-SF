@@ -16,12 +16,14 @@ import {
   Info,
   Clock
 } from 'lucide-react';
+import { analyticsApi } from '../services/api';
 
 // Types
 interface ProcurementDocument {
   name: string;
   url: string;
   filename: string;
+  downloadCount?: number;
 }
 
 interface ImageElement {
@@ -157,6 +159,105 @@ const ProcurementsBudgetsPage: React.FC = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleDownloadDocument = async (doc: ProcurementDocument, procurementTitle: string) => {
+    try {
+      // Track the download event
+      await analyticsApi.track({
+        type: 'download',
+        contentType: 'procurement',
+        contentId: doc.url,
+        contentTitle: `${procurementTitle} - ${doc.name}`,
+        metadata: {
+          documentName: doc.name,
+          fileName: doc.filename,
+          procurementTitle: procurementTitle
+        }
+      });
+    } catch (error) {
+      console.error('Error tracking download:', error);
+    }
+
+    // Perform the download
+    const fullUrl = getFileUrl(doc.url);
+    if (!fullUrl) {
+      console.error('No file URL available');
+      return;
+    }
+    const link = document.createElement('a');
+    link.href = fullUrl;
+    link.download = doc.name || doc.filename || 'document';
+    link.target = '_blank';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    // Update the download count in the UI
+    setProcurements(prevProcurements => 
+      prevProcurements.map(procurement => ({
+        ...procurement,
+        documents: procurement.documents.map(d => 
+          d.url === doc.url 
+            ? { ...d, downloadCount: (d.downloadCount || 0) + 1 }
+            : d
+        )
+      }))
+    );
+  };
+
+  const handleBulkDownload = async (procurement: ProcurementItem) => {
+    if (!procurement.documents || procurement.documents.length === 0) return;
+
+    // Track downloads for all documents
+    for (const doc of procurement.documents) {
+      try {
+        await analyticsApi.track({
+          type: 'download',
+          contentType: 'procurement',
+          contentId: doc.url,
+          contentTitle: `${procurement.title} - ${doc.name}`,
+          metadata: {
+            documentName: doc.name,
+            fileName: doc.filename,
+            procurementTitle: procurement.title,
+            bulkDownload: true
+          }
+        });
+      } catch (error) {
+        console.error('Error tracking download:', error);
+      }
+    }
+
+    // Download all documents
+    procurement.documents.forEach((doc, index) => {
+      setTimeout(() => {
+        const fullUrl = getFileUrl(doc.url);
+        if (!fullUrl) return;
+        const link = document.createElement('a');
+        link.href = fullUrl;
+        link.download = doc.filename || doc.name;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      }, index * 500);
+    });
+
+    // Update download counts in UI
+    setProcurements(prevProcurements => 
+      prevProcurements.map(p => 
+        p.id === procurement.id 
+          ? {
+              ...p,
+              documents: p.documents.map(d => 
+                procurement.documents.some(pd => pd.url === d.url)
+                  ? { ...d, downloadCount: (d.downloadCount || 0) + 1 }
+                  : d
+              )
+            }
+          : p
+      )
+    );
   };
 
   // Calculate budget summary from procurement data
@@ -638,10 +739,13 @@ const ProcurementsBudgetsPage: React.FC = () => {
                             <FileText className="h-4 w-4 flex-shrink-0" />
                             <span className="truncate">{doc.name}</span>
                           </span>
+                          <span className="text-xs text-gray-500">
+                            {doc.downloadCount || 0} downloads
+                          </span>
                           <ExternalLink className="h-4 w-4 flex-shrink-0" />
                         </button>
                         <button
-                          onClick={() => downloadFile(doc.url, doc.name || doc.filename || 'document')}
+                          onClick={() => handleDownloadDocument(doc, selectedProcurement.title)}
                           className="px-3 py-2 bg-blue-100 hover:bg-blue-200 rounded-lg text-blue-700 transition-colors"
                           title="Download document"
                         >
@@ -719,18 +823,7 @@ const ProcurementsBudgetsPage: React.FC = () => {
                         <div className="flex flex-col gap-2 w-full sm:w-auto sm:ml-4 mt-4 sm:mt-0">
                           {procurement.documents && procurement.documents.length > 0 && (
                             <button
-                              onClick={() => {
-                                procurement.documents.forEach((doc, index) => {
-                                  setTimeout(() => {
-                                    const link = document.createElement('a');
-                                    link.href = `${API_BASE_URL}${doc.url}`;
-                                    link.download = doc.filename || doc.name;
-                                    document.body.appendChild(link);
-                                    link.click();
-                                    document.body.removeChild(link);
-                                  }, index * 500);
-                                });
-                              }}
+                              onClick={() => handleBulkDownload(procurement)}
                               className="flex items-center justify-center px-3 py-2 bg-blue-600 text-white text-sm rounded-md hover:bg-blue-700 transition-colors"
                             >
                               <Download className="h-4 w-4 mr-2" />
@@ -809,18 +902,7 @@ const ProcurementsBudgetsPage: React.FC = () => {
                         <div className="flex flex-col gap-2 w-full sm:w-auto sm:ml-4 mt-4 sm:mt-0">
                           {procurement.documents && procurement.documents.length > 0 && (
                             <button
-                              onClick={() => {
-                                procurement.documents.forEach((doc, index) => {
-                                  setTimeout(() => {
-                                    const link = document.createElement('a');
-                                    link.href = `${API_BASE_URL}${doc.url}`;
-                                    link.download = doc.filename || doc.name;
-                                    document.body.appendChild(link);
-                                    link.click();
-                                    document.body.removeChild(link);
-                                  }, index * 500);
-                                });
-                              }}
+                              onClick={() => handleBulkDownload(procurement)}
                               className="flex items-center justify-center px-3 py-2 bg-blue-600 text-white text-sm rounded-md hover:bg-blue-700 transition-colors"
                             >
                               <Download className="h-4 w-4 mr-2" />

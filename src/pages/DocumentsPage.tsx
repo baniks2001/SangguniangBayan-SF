@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { documentsApi, filesApi } from '../services/api';
+import { documentsApi, filesApi, analyticsApi } from '../services/api';
 import { FileArchive, Search, ChevronLeft, ChevronRight, FileText, Calendar, Download, FolderOpen } from 'lucide-react';
 
 interface Document {
@@ -65,6 +65,39 @@ const DocumentsPage: React.FC = () => {
     e.preventDefault();
     setCurrentPage(1);
     loadDocuments();
+  };
+
+  const handleDownload = async (document: Document) => {
+    try {
+      // Track the download event
+      await analyticsApi.track({
+        type: 'download',
+        contentType: 'document',
+        contentId: document.id,
+        contentTitle: document.title,
+        metadata: {
+          fileName: document.fileName,
+          category: document.category,
+          fileSize: document.fileSize
+        }
+      });
+
+      // Perform the download
+      filesApi.downloadFile(document.fileId || document.fileUrl, document.fileName);
+
+      // Update the download count in the UI
+      setDocuments(prevDocuments => 
+        prevDocuments.map(doc => 
+          doc.id === document.id 
+            ? { ...doc, downloadCount: doc.downloadCount + 1 }
+            : doc
+        )
+      );
+    } catch (error) {
+      console.error('Error tracking download:', error);
+      // Still perform download even if tracking fails
+      filesApi.downloadFile(document.fileId || document.fileUrl, document.fileName);
+    }
   };
 
   const getCategoryColor = (category: string) => {
@@ -174,7 +207,7 @@ const DocumentsPage: React.FC = () => {
                   </div>
                   <div className="flex flex-col gap-2 w-full sm:w-auto sm:ml-4 mt-4 sm:mt-0">
                     <button
-                      onClick={() => filesApi.downloadFile(doc.fileId || doc.fileUrl, doc.fileName)}
+                      onClick={() => handleDownload(doc)}
                       className="flex items-center justify-center px-3 py-2 bg-blue-600 text-white text-sm rounded-md hover:bg-blue-700 transition-colors"
                     >
                       <Download className="h-4 w-4 mr-2" />

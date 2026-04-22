@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ordinancesApi } from '../services/api';
+import { ordinancesApi, analyticsApi } from '../services/api';
 import { FileText, Search, ChevronLeft, ChevronRight, Calendar, Scroll, Download, Info, Printer } from 'lucide-react';
 
 interface Ordinance {
@@ -14,6 +14,7 @@ interface Ordinance {
   createdAt: string;
   pdfUrl?: string;
   fileId?: string;
+  downloadCount?: number;
   imageElements?: Array<{
     id: string;
     src: string;
@@ -155,6 +156,40 @@ const OrdinancesPage: React.FC = () => {
 
     printWindow.document.write(printContent);
     printWindow.document.close();
+  };
+
+  const handleDownload = async (ordinance: Ordinance) => {
+    try {
+      // Track the download event
+      await analyticsApi.track({
+        type: 'download',
+        contentType: 'ordinance',
+        contentId: ordinance.id,
+        contentTitle: `Ordinance ${ordinance.ordinanceNumber} - Series ${ordinance.series}`,
+        metadata: {
+          ordinanceNumber: ordinance.ordinanceNumber,
+          series: ordinance.series,
+          title: ordinance.title,
+          author: ordinance.author
+        }
+      });
+
+      // Perform the download
+      ordinancesApi.downloadPdf(ordinance.fileId || ordinance.pdfUrl, ordinance.ordinanceNumber, ordinance.series);
+
+      // Update the download count in the UI
+      setOrdinances(prevOrdinances => 
+        prevOrdinances.map(ord => 
+          ord.id === ordinance.id 
+            ? { ...ord, downloadCount: (ord.downloadCount || 0) + 1 }
+            : ord
+        )
+      );
+    } catch (error) {
+      console.error('Error tracking download:', error);
+      // Still perform download even if tracking fails
+      ordinancesApi.downloadPdf(ordinance.fileId || ordinance.pdfUrl, ordinance.ordinanceNumber, ordinance.series);
+    }
   };
 
   if (loading && ordinances.length === 0) {
@@ -336,10 +371,14 @@ const OrdinancesPage: React.FC = () => {
                       <Calendar className="h-4 w-4 mr-1" />
                       {new Date(ordinance.createdAt).toLocaleDateString()}
                     </div>
+                    <div className="flex items-center text-sm text-gray-400 mt-1">
+                      <Download className="h-4 w-4 mr-1" />
+                      {ordinance.downloadCount || 0} downloads
+                    </div>
                   </div>
                   <div className="flex flex-col gap-2 w-full sm:w-auto sm:ml-4 mt-4 sm:mt-0">
                     <button
-                      onClick={() => ordinancesApi.downloadPdf(ordinance.fileId || ordinance.pdfUrl, ordinance.ordinanceNumber, ordinance.series)}
+                      onClick={() => handleDownload(ordinance)}
                       className="flex items-center justify-center px-3 py-2 bg-green-600 text-white text-sm rounded-md hover:bg-green-700 transition-colors"
                     >
                       <Download className="h-4 w-4 mr-2" />
