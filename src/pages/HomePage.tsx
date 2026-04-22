@@ -44,7 +44,7 @@ const HERO_IMAGES = [
 const ORGANIZATION_CATEGORIES = [
   {
     id: 'vice_mayor',
-    name: 'Vice Mayor',
+    name: 'Municipal Vice Mayor',
     description: 'Presiding Officer',
     images: ['/homepage-images/vice-mayor.jpg']
   },
@@ -64,7 +64,7 @@ const ORGANIZATION_CATEGORIES = [
     id: 'legislative_staff',
     name: 'Legislative Staff',
     description: 'Support Staff',
-    images: ['/homepage-images/staff-1.jpg', '/homepage-images/staff-2.jpg', '/homepage-images/staff-3.jpg', '/homepage-images/staff-4.jpg', '/homepage-images/staff-5.jpg', '/homepage-images/staff-6.jpg', '/homepage-images/staff-7.jpg', '/homepage-images/staff-8.jpg', '/homepage-images/staff-9.jpg', '/homepage-images/staff-10.jpg', '/homepage-images/staff-11.jpg']
+    images: ['/homepage-images/staff-1.jpg', '/homepage-images/staff-2.jpg', '/homepage-images/staff-3.jpg', '/homepage-images/staff-4.jpg', '/homepage-images/staff-5.jpg', '/homepage-images/staff-6.jpg', '/homepage-images/staff-7.jpg', '/homepage-images/staff-8.jpg', '/homepage-images/staff-9.jpg', '/homepage-images/staff-10.jpg', '/homepage-images/staff-11.jpg', '/homepage-images/staff-12.jpg']
   }
 ];
 
@@ -126,7 +126,7 @@ const HomePage: React.FC = () => {
   };
 
 
-  // Organization Image Carousel Component
+  // Organization Image Carousel Component (Single Image)
   const OrganizationCarousel = ({ category }: { category: typeof ORGANIZATION_CATEGORIES[0] }) => {
     const [currentImage, setCurrentImage] = useState(0);
     const images = category.images;
@@ -170,6 +170,36 @@ const HomePage: React.FC = () => {
         <div className="p-4 text-center bg-gradient-to-b from-white to-gray-50">
           <h4 className="font-bold text-gray-900 text-lg">{category.name}</h4>
           <p className="text-blue-600 font-medium text-sm">{category.description}</p>
+        </div>
+      </div>
+    );
+  };
+
+  // Multi-Image Carousel Component for Staff (shows all images in horizontal scroll)
+  const StaffImageGallery = ({ category }: { category: typeof ORGANIZATION_CATEGORIES[0] }) => {
+    const images = category.images;
+    
+    return (
+      <div className="bg-white rounded-xl shadow-lg overflow-hidden">
+        <div className="p-4">
+          <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
+            {images.map((src, index) => (
+              <div key={index} className="flex-shrink-0 w-48 sm:w-56 lg:w-64">
+                <div className="aspect-[3/4] rounded-lg overflow-hidden bg-gray-100 shadow-md">
+                  <img 
+                    src={src} 
+                    alt={`${category.name} - ${index + 1}`}
+                    className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+                  />
+                </div>
+                <p className="text-center text-sm text-gray-600 mt-2 font-medium">Staff {index + 1}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+        <div className="p-4 text-center bg-gradient-to-b from-white to-gray-50 border-t">
+          <h4 className="font-bold text-gray-900 text-lg">{category.name}</h4>
+          <p className="text-blue-600 font-medium text-sm">{category.description} ({images.length} staff)</p>
         </div>
       </div>
     );
@@ -340,11 +370,17 @@ const HomePage: React.FC = () => {
             <p className="text-gray-600 max-w-2xl mx-auto">Meet the dedicated officials serving the people of San Francisco, Southern Leyte</p>
             <div className="w-24 h-1 bg-blue-600 mx-auto mt-4"></div>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
-            {ORGANIZATION_CATEGORIES.map((category) => (
+          {/* Top row: Vice Mayor, SB Members, SB Secretary (carousel) */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 mb-8">
+            {ORGANIZATION_CATEGORIES.filter(cat => cat.id !== 'legislative_staff').map((category) => (
               <OrganizationCarousel key={category.id} category={category} />
             ))}
           </div>
+          {/* Bottom row: Legislative Staff (full-width gallery showing all 12 images) */}
+          {(() => {
+            const staffCategory = ORGANIZATION_CATEGORIES.find(cat => cat.id === 'legislative_staff');
+            return staffCategory ? <StaffImageGallery category={staffCategory} /> : null;
+          })()}
         </div>
       </section>
 
