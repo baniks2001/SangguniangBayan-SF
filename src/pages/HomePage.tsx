@@ -190,8 +190,6 @@ const HomePage: React.FC = () => {
               <p className="text-sm font-semibold text-gray-600">SAN FRANCISCO, SOUTHERN LEYTE</p>
               <div className="flex items-center justify-center space-x-2 mt-2">
                 <span className="text-xs text-gray-500">1951</span>
-                <span className="text-xs text-gray-400">-</span>
-                <span className="text-xs text-gray-500">1951</span>
               </div>
             </div>
           </div>
