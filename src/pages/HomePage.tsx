@@ -186,10 +186,14 @@ const HomePage: React.FC = () => {
                   className="h-64 w-64 lg:h-80 lg:w-80 object-contain"
                 />
               </div>
-              <div className="mt-6 text-center">
-                <p className="text-sm text-gray-500 font-medium">SANGGUNIANG BAYAN</p>
-                <p className="text-sm text-gray-500 font-medium">SAN FRANCISCO, SOUTHERN LEYTE</p>
-                <p className="text-xs text-gray-400 mt-1">Est. 1951</p>
+              <div className="mt-8 text-center space-y-1">
+                <p className="text-base font-bold text-gray-700 tracking-wider">SANGGUNIANG BAYAN</p>
+                <p className="text-sm font-semibold text-gray-600">SAN FRANCISCO, SOUTHERN LEYTE</p>
+                <div className="flex items-center justify-center space-x-2 mt-2">
+                  <span className="text-xs text-gray-500">1951</span>
+                  <span className="text-xs text-gray-400">•</span>
+                  <span className="text-xs text-gray-500">1951</span>
+                </div>
               </div>
             </div>
 
