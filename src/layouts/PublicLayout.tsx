@@ -13,7 +13,8 @@ import {
   Building2,
   ShoppingCart,
   FileArchive,
-  Calendar
+  Calendar,
+  Users
 } from 'lucide-react';
 
 // Hardcoded system information
@@ -40,6 +41,7 @@ const PublicLayout: React.FC = () => {
     { path: '/ordinances', label: 'Ordinances', icon: FileText },
     { path: '/procurements', label: 'Procurements', icon: ShoppingCart },
     { path: '/documents', label: 'Documents', icon: FileArchive },
+    { path: '/organization', label: 'Organization', icon: Users },
     { path: '/vacancies', label: 'Vacancies', icon: Briefcase },
     { path: '/announcements', label: 'Announcements', icon: Bell },
     { path: '/news', label: 'News', icon: Newspaper },

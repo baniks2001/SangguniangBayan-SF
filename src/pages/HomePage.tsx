@@ -40,34 +40,6 @@ const HERO_IMAGES = [
   '/homepage-images/hero-bg3.jpg'
 ];
 
-// Organization categories with descriptive image names
-const ORGANIZATION_CATEGORIES = [
-  {
-    id: 'vice_mayor',
-    name: 'Municipal Vice Mayor',
-    description: 'Presiding Officer',
-    images: ['/homepage-images/vice-mayor.jpg']
-  },
-  {
-    id: 'sb_members',
-    name: 'SB Members',
-    description: 'Sangguniang Bayan Members',
-    images: ['/homepage-images/sb-member-1.jpg', '/homepage-images/sb-member-2.jpg', '/homepage-images/sb-member-3.jpg','/homepage-images/sb-member-4.jpg', '/homepage-images/sb-member-5.jpg', '/homepage-images/sb-member-7.jpg', '/homepage-images/sb-member-8.jpg']
-  },
-  {
-    id: 'sb_secretary',
-    name: 'SB Secretary',
-    description: 'Secretary to the SB',
-    images: ['/homepage-images/sb-secretary.jpg']
-  },
-  {
-    id: 'legislative_staff',
-    name: 'Legislative Staff',
-    description: 'Support Staff',
-    images: ['/homepage-images/staff-1.jpg', '/homepage-images/staff-2.jpg', '/homepage-images/staff-3.jpg', '/homepage-images/staff-4.jpg', '/homepage-images/staff-5.jpg', '/homepage-images/staff-6.jpg', '/homepage-images/staff-7.jpg', '/homepage-images/staff-8.jpg', '/homepage-images/staff-9.jpg', '/homepage-images/staff-10.jpg', '/homepage-images/staff-11.jpg', '/homepage-images/staff-12.jpg']
-  }
-];
-
 // Hardcoded statistics - default values
 const DEFAULT_STATS = { resolutions: 0, ordinances: 0, yearsServing: 76, population: '12,900+' };
 
@@ -123,86 +95,6 @@ const HomePage: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  };
-
-
-  // Organization Image Carousel Component (Single Image)
-  const OrganizationCarousel = ({ category }: { category: typeof ORGANIZATION_CATEGORIES[0] }) => {
-    const [currentImage, setCurrentImage] = useState(0);
-    const images = category.images;
-
-    useEffect(() => {
-      if (images.length > 1) {
-        const timer = setInterval(() => {
-          setCurrentImage((prev) => {
-            const nextIndex = (prev + 1) % images.length;
-            return nextIndex;
-          });
-        }, 3000);
-        return () => clearInterval(timer);
-      }
-    }, [images]);
-
-    return (
-      <div className="bg-white rounded-xl shadow-lg overflow-hidden">
-        <div className="relative aspect-[4/5] w-full bg-gray-100">
-          {images.map((src, index) => (
-            <img key={index} src={src} alt={`${category.name} - ${index + 1}`}
-              className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-500 ${index === currentImage ? 'opacity-100' : 'opacity-0'}`}
-            />
-          ))}
-          {images.length > 1 && (
-            <>
-              <button onClick={() => setCurrentImage((prev) => (prev - 1 + images.length) % images.length)} className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/50 text-white p-2 rounded-full hover:bg-black/70 transition">
-                <ChevronLeft className="h-4 w-4" />
-              </button>
-              <button onClick={() => setCurrentImage((prev) => (prev + 1) % images.length)} className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/50 text-white p-2 rounded-full hover:bg-black/70 transition">
-                <ChevronRight className="h-4 w-4" />
-              </button>
-              <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex space-x-1">
-                {images.map((_, index) => (
-                  <button key={index} onClick={() => setCurrentImage(index)} className={`w-2 h-2 rounded-full transition ${index === currentImage ? 'bg-white' : 'bg-white/50'}`} />
-                ))}
-              </div>
-            </>
-          )}
-        </div>
-        <div className="p-4 text-center bg-gradient-to-b from-white to-gray-50">
-          <h4 className="font-bold text-gray-900 text-lg">{category.name}</h4>
-          <p className="text-blue-600 font-medium text-sm">{category.description}</p>
-        </div>
-      </div>
-    );
-  };
-
-  // Multi-Image Carousel Component for Staff (shows all images in horizontal scroll)
-  const StaffImageGallery = ({ category }: { category: typeof ORGANIZATION_CATEGORIES[0] }) => {
-    const images = category.images;
-    
-    return (
-      <div className="bg-white rounded-xl shadow-lg overflow-hidden">
-        <div className="p-4">
-          <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
-            {images.map((src, index) => (
-              <div key={index} className="flex-shrink-0 w-48 sm:w-56 lg:w-64">
-                <div className="aspect-[3/4] rounded-lg overflow-hidden bg-gray-100 shadow-md">
-                  <img 
-                    src={src} 
-                    alt={`${category.name} - ${index + 1}`}
-                    className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
-                  />
-                </div>
-                <p className="text-center text-sm text-gray-600 mt-2 font-medium">Staff {index + 1}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-        <div className="p-4 text-center bg-gradient-to-b from-white to-gray-50 border-t">
-          <h4 className="font-bold text-gray-900 text-lg">{category.name}</h4>
-          <p className="text-blue-600 font-medium text-sm">{category.description} ({images.length} staff)</p>
-        </div>
-      </div>
-    );
   };
 
   if (loading) return <div className="min-h-screen flex items-center justify-center bg-gray-50"><div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div></div>;
@@ -359,28 +251,6 @@ const HomePage: React.FC = () => {
               </div>
             </div>
           </div>
-        </div>
-      </section>
-
-      {/* Organization Chart Section */}
-      <section className="bg-gray-100 py-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">Legislative Organization</h2>
-            <p className="text-gray-600 max-w-2xl mx-auto">Meet the dedicated officials serving the people of San Francisco, Southern Leyte</p>
-            <div className="w-24 h-1 bg-blue-600 mx-auto mt-4"></div>
-          </div>
-          {/* Top row: Vice Mayor, SB Members, SB Secretary (carousel) */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 mb-8">
-            {ORGANIZATION_CATEGORIES.filter(cat => cat.id !== 'legislative_staff').map((category) => (
-              <OrganizationCarousel key={category.id} category={category} />
-            ))}
-          </div>
-          {/* Bottom row: Legislative Staff (full-width gallery showing all 12 images) */}
-          {(() => {
-            const staffCategory = ORGANIZATION_CATEGORIES.find(cat => cat.id === 'legislative_staff');
-            return staffCategory ? <StaffImageGallery category={staffCategory} /> : null;
-          })()}
         </div>
       </section>
 
