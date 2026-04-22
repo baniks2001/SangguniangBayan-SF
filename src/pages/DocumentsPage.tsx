@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { documentsApi, filesApi, pdfPreviewApi } from '../services/api';
-import { FileArchive, Search, ChevronLeft, ChevronRight, FileText, Calendar, Eye, Download, FolderOpen, Printer, Loader2 } from 'lucide-react';
+import { documentsApi, filesApi } from '../services/api';
+import { FileArchive, Search, ChevronLeft, ChevronRight, FileText, Calendar, Download, FolderOpen } from 'lucide-react';
 
 interface Document {
   id: string;
@@ -33,9 +33,6 @@ const DocumentsPage: React.FC = () => {
   const [selectedCategory, setSelectedCategory] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const [selectedDocument, setSelectedDocument] = useState<Document | null>(null);
-  const [documentContent, setDocumentContent] = useState<string>('');
-  const [loadingContent, setLoadingContent] = useState(false);
 
   useEffect(() => {
     loadDocuments();
@@ -68,58 +65,6 @@ const DocumentsPage: React.FC = () => {
     e.preventDefault();
     setCurrentPage(1);
     loadDocuments();
-  };
-
-  const loadDocumentContent = async (document: Document) => {
-    if (!document.fileId) {
-      console.warn('No fileId available for document:', document.title);
-      setDocumentContent('<p>No document file available for preview.</p>');
-      return;
-    }
-    
-    try {
-      setLoadingContent(true);
-      console.log('Attempting to load content for fileId:', document.fileId);
-      
-      // For documents, try to view the file directly first
-      const fileUrl = filesApi.getFileUrl(document.fileId);
-      if (fileUrl) {
-        console.log('File URL available:', fileUrl);
-        // For documents, we'll show a message that the file can be viewed
-        setDocumentContent(`
-          <div class="text-center py-8">
-            <p class="text-lg font-semibold mb-4">Document Available for Viewing</p>
-            <p class="mb-4">This document is available as a file that can be opened directly.</p>
-            <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
-              <p class="text-sm text-blue-800">
-                <strong>File Name:</strong> ${document.fileName}<br>
-                <strong>Category:</strong> ${document.category}<br>
-                <strong>Size:</strong> ${document.fileSize}<br>
-                <strong>Upload Date:</strong> ${new Date(document.createdAt).toLocaleDateString('en-US', {
-                  year: 'numeric',
-                  month: 'long',
-                  day: 'numeric'
-                })}
-              </p>
-            </div>
-            <p class="text-sm text-gray-600 mt-4">Use the "View File" button below to open this document.</p>
-          </div>
-        `);
-      }
-    } catch (error) {
-      console.error('Error loading document content:', error);
-      setDocumentContent('<p>Error loading document content.</p>');
-    } finally {
-      setLoadingContent(false);
-    }
-  };
-
-  const handleViewDocument = (document: Document) => {
-    setSelectedDocument(document);
-    setDocumentContent('');
-    if (document.fileId) {
-      loadDocumentContent(document);
-    }
   };
 
   const getCategoryColor = (category: string) => {
@@ -235,13 +180,6 @@ const DocumentsPage: React.FC = () => {
                       <Download className="h-4 w-4 mr-2" />
                       Download Document
                     </button>
-                    <button
-                      onClick={() => handleViewDocument(doc)}
-                      className="flex items-center justify-center px-3 py-2 bg-white border border-gray-300 text-gray-700 text-sm rounded-md hover:bg-gray-50 transition-colors"
-                    >
-                      <Eye className="h-4 w-4 mr-2" />
-                      View Document Details
-                    </button>
                   </div>
                 </div>
               </div>
@@ -276,210 +214,6 @@ const DocumentsPage: React.FC = () => {
           >
             <ChevronRight className="h-5 w-5" />
           </button>
-        </div>
-      )}
-
-      {/* Document Detail Modal - matches resolution details style */}
-      {selectedDocument && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-2 sm:p-4">
-          <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[95vh] overflow-y-auto">
-            <div className="p-3 sm:p-4 border-b bg-gray-50">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                <h2 className="text-lg sm:text-xl font-bold text-gray-900">
-                  {selectedDocument.title}
-                </h2>
-                <div className="flex items-center gap-2">
-                  <button
-                    onClick={() => {
-                      const fileUrl = filesApi.getFileUrl(selectedDocument.fileId || selectedDocument.fileUrl);
-                      if (fileUrl) {
-                        const printWindow = window.open(fileUrl, '_blank');
-                        if (printWindow) {
-                          printWindow.addEventListener('load', () => {
-                            setTimeout(() => printWindow.print(), 500);
-                          });
-                        }
-                      }
-                    }}
-                    className="px-3 sm:px-4 py-2 text-purple-600 hover:bg-purple-50 rounded-lg transition-colors flex items-center gap-1 text-sm"
-                  >
-                    <Printer className="h-4 w-4" />
-                    <span className="hidden sm:inline">Print</span>
-                  </button>
-                  <button
-                    onClick={() => setSelectedDocument(null)}
-                    className="p-2 hover:bg-gray-200 rounded"
-                  >
-                    <svg className="h-5 w-5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                  </button>
-                </div>
-              </div>
-            </div>
-            
-            {/* Document Information Section */}
-            <div className="p-4 sm:p-6 border-b bg-gray-50">
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                <div className="bg-white p-3 rounded-lg border">
-                  <h3 className="text-xs font-medium text-gray-500 mb-1">Category</h3>
-                  <span className={`inline-block px-2 py-1 rounded-full text-xs font-medium ${getCategoryColor(selectedDocument.category)}`}>
-                    {selectedDocument.category}
-                  </span>
-                </div>
-                <div className="bg-white p-3 rounded-lg border">
-                  <h3 className="text-xs font-medium text-gray-500 mb-1">File Name</h3>
-                  <p className="text-sm text-gray-900 flex items-center">
-                    <FileText className="h-4 w-4 mr-1 text-gray-400" />
-                    {selectedDocument.fileName}
-                  </p>
-                </div>
-                <div className="bg-white p-3 rounded-lg border">
-                  <h3 className="text-xs font-medium text-gray-500 mb-1">File Size</h3>
-                  <p className="text-sm text-gray-900">{selectedDocument.fileSize}</p>
-                </div>
-                <div className="bg-white p-3 rounded-lg border">
-                  <h3 className="text-xs font-medium text-gray-500 mb-1">Downloads</h3>
-                  <p className="text-sm text-gray-900 flex items-center">
-                    <Download className="h-4 w-4 mr-1 text-gray-400" />
-                    {selectedDocument.downloadCount} times
-                  </p>
-                </div>
-              </div>
-              <div className="mt-4 bg-white p-3 rounded-lg border">
-                <h3 className="text-xs font-medium text-gray-500 mb-1">Description</h3>
-                <p className="text-sm text-gray-900">{selectedDocument.description}</p>
-              </div>
-              <div className="mt-4 bg-white p-3 rounded-lg border">
-                <h3 className="text-xs font-medium text-gray-500 mb-1">Upload Date</h3>
-                <p className="text-sm text-gray-900 flex items-center">
-                  <Calendar className="h-4 w-4 mr-1 text-gray-400" />
-                  {new Date(selectedDocument.createdAt).toLocaleDateString('en-US', {
-                    year: 'numeric',
-                    month: 'long',
-                    day: 'numeric'
-                  })}
-                </p>
-              </div>
-            </div>
-
-            {/* Document Preview Section */}
-            <div className="p-2 sm:p-8 bg-gray-100 flex justify-center overflow-x-auto">
-              {loadingContent ? (
-                <div className="flex items-center justify-center h-96">
-                  <div className="flex flex-col items-center">
-                    <Loader2 className="h-8 w-8 animate-spin text-blue-600 mb-2" />
-                    <p className="text-gray-600">Loading document content...</p>
-                  </div>
-                </div>
-              ) : (
-                <div
-                  className="relative bg-white mx-auto"
-                  style={{
-                    width: '100%',
-                    maxWidth: '816px',
-                    minHeight: '1056px',
-                    padding: '48px',
-                    boxShadow: '0 0 0 1px #d1d5db',
-                    fontFamily: "'Times New Roman', Times, serif",
-                    fontSize: '12pt',
-                    lineHeight: 1.6,
-                    color: '#000'
-                  }}
-                >
-                  {/* Document Header */}
-                  <div className="text-center mb-8">
-                    <div className="flex justify-center items-center gap-4 mb-4">
-                      <img 
-                        src="/homepage-images/municipality-logo.png" 
-                        alt="Municipality Logo" 
-                        className="h-12 object-contain"
-                      />
-                      <div className="text-center">
-                        <h2 className="text-lg font-bold">PROVINCE OF SOUTHERN LEYTE</h2>
-                        <h1 className="text-xl font-bold">MUNICIPALITY OF SAN FRANCISCO</h1>
-                        <p className="text-sm font-semibold mt-1">OFFICE OF THE SANGGUNIANG BAYAN</p>
-                      </div>
-                      <img 
-                        src="/homepage-images/bagongpilipinas.png" 
-                        alt="Bagong Pilipinas" 
-                        className="h-12 object-contain"
-                      />
-                    </div>
-                    <div className="w-32 h-1 bg-blue-600 mx-auto mb-4"></div>
-                    <h3 className="text-lg font-bold mb-2">{selectedDocument.title}</h3>
-                    <span className={`inline-block px-3 py-1 rounded-full text-sm font-medium ${getCategoryColor(selectedDocument.category)}`}>
-                      {selectedDocument.category}
-                    </span>
-                  </div>
-
-                  {/* Document Content */}
-                  <div
-                    className="text-justify"
-                    style={{
-                      fontFamily: "'Times New Roman', Times, serif",
-                      fontSize: '12pt',
-                      lineHeight: 1.6
-                    }}
-                    dangerouslySetInnerHTML={{
-                      __html: documentContent || `<p>${selectedDocument.description}</p><p class="text-center mt-8 text-gray-600">[Document content will be displayed here when available]</p>`
-                    }}
-                  />
-
-                  {/* Document Footer */}
-                  <div className="mt-8 pt-8 border-t text-center">
-                    <p className="text-sm text-gray-600">
-                      Sangguniang Bayan of San Francisco, Southern Leyte
-                    </p>
-                    <p className="text-xs text-gray-500 mt-1">
-                      Municipal Compound, San Francisco, Southern Leyte, Philippines
-                    </p>
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {/* Action Buttons */}
-            <div className="p-4 border-t bg-gray-50">
-              <div className="flex flex-col sm:flex-row gap-3">
-                <button
-                  onClick={() => {
-                    filesApi.viewFile(selectedDocument.fileId || selectedDocument.fileUrl);
-                  }}
-                  className="flex-1 flex items-center justify-center px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors font-medium"
-                >
-                  <Eye className="h-4 w-4 mr-2" />
-                  Open Document
-                </button>
-                <button
-                  onClick={() => {
-                    const fileUrl = filesApi.getFileUrl(selectedDocument.fileId || selectedDocument.fileUrl);
-                    if (fileUrl) {
-                      const printWindow = window.open(fileUrl, '_blank');
-                      if (printWindow) {
-                        printWindow.addEventListener('load', () => {
-                          setTimeout(() => printWindow.print(), 500);
-                        });
-                      }
-                    }
-                  }}
-                  className="flex-1 flex items-center justify-center px-4 py-2 border border-purple-300 text-purple-700 rounded-lg hover:bg-purple-50 transition-colors font-medium"
-                >
-                  <Printer className="h-4 w-4 mr-2" />
-                  Print
-                </button>
-                <button
-                  onClick={() => {
-                    filesApi.downloadFile(selectedDocument.fileId || selectedDocument.fileUrl, selectedDocument.fileName);
-                  }}
-                  className="flex-1 flex items-center justify-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
-                >
-                  <Download className="h-4 w-4 mr-2" />
-                  Download
-                </button>
-              </div>
-            </div>
-          </div>
         </div>
       )}
     </div>
