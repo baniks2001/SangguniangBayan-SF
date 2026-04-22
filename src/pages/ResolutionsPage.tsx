@@ -14,7 +14,6 @@ interface Resolution {
   createdAt: string;
   pdfUrl?: string;
   fileId?: string;
-  downloadCount?: number;
   signatories?: any[];
   imageElements?: Array<{
     id: string;
@@ -176,20 +175,8 @@ const ResolutionsPage: React.FC = () => {
         }
       });
 
-      // Increment download count in database
-      await resolutionsApi.incrementDownloadCount(resolution.id);
-
       // Perform the download
       resolutionsApi.downloadPdf(resolution.fileId || resolution.pdfUrl, resolution.resolutionNumber, resolution.series);
-
-      // Update the download count in the UI
-      setResolutions(prevResolutions => 
-        prevResolutions.map(res => 
-          res.id === resolution.id 
-            ? { ...res, downloadCount: (res.downloadCount || 0) + 1 }
-            : res
-        )
-      );
     } catch (error) {
       console.error('Error tracking download:', error);
       // Still perform download even if tracking fails
@@ -375,10 +362,6 @@ const ResolutionsPage: React.FC = () => {
                     <div className="flex items-center text-sm text-gray-400">
                       <Calendar className="h-4 w-4 mr-1" />
                       {new Date(resolution.createdAt).toLocaleDateString()}
-                    </div>
-                    <div className="flex items-center text-sm text-gray-400 mt-1">
-                      <Download className="h-4 w-4 mr-1" />
-                      {resolution.downloadCount || 0} downloads
                     </div>
                   </div>
                   <div className="flex flex-col gap-2 w-full sm:w-auto sm:ml-4 mt-4 sm:mt-0">

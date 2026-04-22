@@ -11,7 +11,6 @@ interface Document {
   fileUrl?: string;
   fileName: string;
   fileSize: string;
-  downloadCount: number;
   isPublic: boolean;
   status?: 'Draft' | 'Pending' | 'Published' | 'Archived';
   createdAt: string;
@@ -82,20 +81,8 @@ const DocumentsPage: React.FC = () => {
         }
       });
 
-      // Increment download count in database
-      await documentsApi.incrementDownloadCount(document.id);
-
       // Perform the download
       filesApi.downloadFile(document.fileId || document.fileUrl, document.fileName);
-
-      // Update the download count in the UI
-      setDocuments(prevDocuments => 
-        prevDocuments.map(doc => 
-          doc.id === document.id 
-            ? { ...doc, downloadCount: doc.downloadCount + 1 }
-            : doc
-        )
-      );
     } catch (error) {
       console.error('Error tracking download:', error);
       // Still perform download even if tracking fails
@@ -202,10 +189,6 @@ const DocumentsPage: React.FC = () => {
                         {doc.fileName}
                       </span>
                       <span>{doc.fileSize}</span>
-                      <span className="flex items-center">
-                        <Download className="h-4 w-4 mr-1" />
-                        {doc.downloadCount} downloads
-                      </span>
                     </div>
                   </div>
                   <div className="flex flex-col gap-2 w-full sm:w-auto sm:ml-4 mt-4 sm:mt-0">

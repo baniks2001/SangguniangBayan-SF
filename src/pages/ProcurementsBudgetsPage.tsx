@@ -16,14 +16,13 @@ import {
   Info,
   Clock
 } from 'lucide-react';
-import { analyticsApi, incrementDownloadCount } from '../services/api';
+import { analyticsApi } from '../services/api';
 
 // Types
 interface ProcurementDocument {
   name: string;
   url: string;
   filename: string;
-  downloadCount?: number;
 }
 
 interface ImageElement {
@@ -175,9 +174,6 @@ const ProcurementsBudgetsPage: React.FC = () => {
           procurementTitle: procurementTitle
         }
       });
-
-      // Increment download count in database
-      await incrementDownloadCount('procurement', doc.url);
     } catch (error) {
       console.error('Error tracking download:', error);
     }
@@ -195,18 +191,6 @@ const ProcurementsBudgetsPage: React.FC = () => {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
-
-    // Update the download count in the UI
-    setProcurements(prevProcurements => 
-      prevProcurements.map(procurement => ({
-        ...procurement,
-        documents: procurement.documents.map(d => 
-          d.url === doc.url 
-            ? { ...d, downloadCount: (d.downloadCount || 0) + 1 }
-            : d
-        )
-      }))
-    );
   };
 
   const handleBulkDownload = async (procurement: ProcurementItem) => {
@@ -227,9 +211,6 @@ const ProcurementsBudgetsPage: React.FC = () => {
             bulkDownload: true
           }
         });
-
-        // Increment download count in database
-        await incrementDownloadCount('procurement', doc.url);
       } catch (error) {
         console.error('Error tracking download:', error);
       }
@@ -248,22 +229,6 @@ const ProcurementsBudgetsPage: React.FC = () => {
         document.body.removeChild(link);
       }, index * 500);
     });
-
-    // Update download counts in UI
-    setProcurements(prevProcurements => 
-      prevProcurements.map(p => 
-        p.id === procurement.id 
-          ? {
-              ...p,
-              documents: p.documents.map(d => 
-                procurement.documents.some(pd => pd.url === d.url)
-                  ? { ...d, downloadCount: (d.downloadCount || 0) + 1 }
-                  : d
-              )
-            }
-          : p
-      )
-    );
   };
 
   // Calculate budget summary from procurement data
@@ -744,9 +709,6 @@ const ProcurementsBudgetsPage: React.FC = () => {
                           <span className="flex items-center gap-2 truncate">
                             <FileText className="h-4 w-4 flex-shrink-0" />
                             <span className="truncate">{doc.name}</span>
-                          </span>
-                          <span className="text-xs text-gray-500">
-                            {doc.downloadCount || 0} downloads
                           </span>
                           <ExternalLink className="h-4 w-4 flex-shrink-0" />
                         </button>
