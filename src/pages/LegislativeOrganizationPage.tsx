@@ -95,23 +95,19 @@ const LegislativeOrganizationPage: React.FC = () => {
           <div className="w-24 h-1 bg-blue-600 mx-auto mt-4"></div>
         </div>
 
-        {/* Organization Grid Layout - All categories in grid style */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        {/* Organization Grid Layout - Vertical stack order */}
+        <div className="space-y-8">
           {/* Vice Mayor */}
           <CategoryGrid category={ORGANIZATION_CATEGORIES[0]} />
+          
+          {/* SB Members */}
+          <CategoryGrid category={ORGANIZATION_CATEGORIES[1]} />
           
           {/* SB Secretary */}
           <CategoryGrid category={ORGANIZATION_CATEGORIES[2]} />
           
-          {/* SB Members - Full width on large screens */}
-          <div className="lg:col-span-2">
-            <CategoryGrid category={ORGANIZATION_CATEGORIES[1]} />
-          </div>
-          
-          {/* Legislative Staff - Full width on large screens */}
-          <div className="lg:col-span-2">
-            <CategoryGrid category={ORGANIZATION_CATEGORIES[3]} />
-          </div>
+          {/* Legislative Staff */}
+          <CategoryGrid category={ORGANIZATION_CATEGORIES[3]} />
         </div>
 
         {/* Organization Info Section */}
