@@ -69,11 +69,11 @@ const HomePage: React.FC = () => {
     try {
       setLoading(true);
       const [resolutionsRes, ordinancesRes, vacanciesRes, announcementsRes, newsRes, allResolutions, allOrdinances, calendarRes] = await Promise.all([
-        resolutionsApi.getAll({ limit: 3, status: 'Approved', isPublic: true }).catch(() => ({ resolutions: [], pagination: { totalItems: 0 } })),
-        ordinancesApi.getAll({ limit: 3, status: 'Approved', isPublic: true }).catch(() => ({ ordinances: [], pagination: { totalItems: 0 } })),
+        resolutionsApi.getAll({ limit: 5, status: 'Approved', isPublic: true }).catch(() => ({ resolutions: [], pagination: { totalItems: 0 } })),
+        ordinancesApi.getAll({ limit: 5, status: 'Approved', isPublic: true }).catch(() => ({ ordinances: [], pagination: { totalItems: 0 } })),
         vacanciesApi.getAll().catch(() => ({ vacancies: [] })),
         announcementsApi.getAll().catch(() => ({ announcements: [] })),
-        newsApi.getAll({ limit: 3 }).catch(() => ({ news: [] })),
+        newsApi.getAll({ limit: 5 }).catch(() => ({ news: [] })),
         resolutionsApi.getAll({ status: 'Approved', isPublic: true, limit: 1 }).catch(() => ({ pagination: { totalItems: 0 } })),
         ordinancesApi.getAll({ status: 'Approved', isPublic: true, limit: 1 }).catch(() => ({ pagination: { totalItems: 0 } })),
         calendarApi.getPublic({ upcoming: true, limit: 5 }).catch(() => ({ events: [] }))
@@ -137,21 +137,32 @@ const HomePage: React.FC = () => {
       </section>
 
       {/* About Section */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        <div className="text-center mb-12">
-          <h2 className="text-3xl font-bold text-gray-900 mb-4">About Sangguniang Bayan</h2>
-          <div className="w-24 h-1 bg-blue-600 mx-auto"></div>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-6xl mx-auto">
-          <div className="bg-white rounded-xl shadow-lg p-8 hover:shadow-xl transition-shadow">
-            <div className="bg-blue-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4"><Target className="h-8 w-8 text-blue-600" /></div>
-            <h3 className="text-xl font-bold text-center mb-3">Our Mission</h3>
-            <p className="text-gray-600 text-center leading-relaxed">"TO ENACT QUALITY LEGISLATION AND EXERCISE EFFECTIVE OVERSIGHT THAT PROMOTES SOCIAL JUSTICE, ECONOMIC GROWTH, AND ENVIRONMENTAL SUSTAINABILITY THROUGH INCLUSIVE, TRANSPARENT, AND PARTICIPATORY GOVERNANCE"</p>
+      <section className="bg-gradient-to-br from-blue-50 via-white to-green-50 py-20">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">About Sangguniang Bayan</h2>
+            <div className="w-32 h-1.5 bg-gradient-to-r from-blue-600 to-green-600 mx-auto rounded-full"></div>
+            <p className="mt-6 text-lg text-gray-600 max-w-3xl mx-auto">Dedicated to serving the people of San Francisco, Southern Leyte with transparency and excellence</p>
           </div>
-          <div className="bg-white rounded-xl shadow-lg p-8 hover:shadow-xl transition-shadow">
-            <div className="bg-green-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4"><Heart className="h-8 w-8 text-green-600" /></div>
-            <h3 className="text-xl font-bold text-center mb-3">Our Vision</h3>
-            <p className="text-gray-600 text-center leading-relaxed">"A PREMIER AND PROACTIVE LEGISLATIVE BODY IN SOUTHERN LEYTE, ENACTING RESPONSIVE AND INNOVATIVE POLICIES THAT EMPOWER A RESILIENT, GOD-LOVING, AND PROSPEROUS SAN FRANCISCO</p>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 max-w-6xl mx-auto">
+            <div className="group">
+              <div className="bg-white rounded-2xl shadow-xl p-8 hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 border border-gray-100">
+                <div className="bg-gradient-to-br from-blue-500 to-blue-600 w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300 shadow-lg">
+                  <Target className="h-10 w-10 text-white" />
+                </div>
+                <h3 className="text-2xl font-bold text-center mb-4 text-gray-900">Our Mission</h3>
+                <p className="text-gray-600 text-center leading-relaxed text-lg font-medium">"TO ENACT QUALITY LEGISLATION AND EXERCISE EFFECTIVE OVERSIGHT THAT PROMOTES SOCIAL JUSTICE, ECONOMIC GROWTH, AND ENVIRONMENTAL SUSTAINABILITY THROUGH INCLUSIVE, TRANSPARENT, AND PARTICIPATORY GOVERNANCE"</p>
+              </div>
+            </div>
+            <div className="group">
+              <div className="bg-white rounded-2xl shadow-xl p-8 hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 border border-gray-100">
+                <div className="bg-gradient-to-br from-green-500 to-green-600 w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300 shadow-lg">
+                  <Heart className="h-10 w-10 text-white" />
+                </div>
+                <h3 className="text-2xl font-bold text-center mb-4 text-gray-900">Our Vision</h3>
+                <p className="text-gray-600 text-center leading-relaxed text-lg font-medium">"A PREMIER AND PROACTIVE LEGISLATIVE BODY IN SOUTHERN LEYTE, ENACTING RESPONSIVE AND INNOVATIVE POLICIES THAT EMPOWER A RESILIENT, GOD-LOVING, AND PROSPEROUS SAN FRANCISCO"</p>
+              </div>
+            </div>
           </div>
         </div>
       </section>
@@ -256,7 +267,7 @@ const HomePage: React.FC = () => {
 
       {/* Recent Documents Section */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <div className="space-y-8">
           <div className="bg-white rounded-xl shadow-lg p-6">
             <div className="flex items-center justify-between mb-6">
               <h3 className="text-xl font-bold text-gray-900 flex items-center"><Scale className="h-6 w-6 mr-2 text-blue-600" />Recent Resolutions</h3>
@@ -296,8 +307,8 @@ const HomePage: React.FC = () => {
               <h2 className="text-2xl font-bold text-white flex items-center"><Briefcase className="h-7 w-7 mr-3" />Job Opportunities</h2>
               <Link to="/vacancies" className="text-white/90 hover:text-white flex items-center text-sm font-medium bg-white/20 px-4 py-2 rounded-lg">View All <ChevronRight className="h-4 w-4 ml-1" /></Link>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {vacancies.slice(0, 3).map((vac) => (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
+              {vacancies.slice(0, 5).map((vac) => (
                 <div key={vac.id} className="bg-white/10 backdrop-blur rounded-xl p-6 hover:bg-white/20 transition-colors border border-white/20">
                   <p className="font-bold text-white text-lg">{vac.jobTitle}</p>
                   <p className="text-orange-100 mt-1">{vac.position}</p>
@@ -338,7 +349,7 @@ const HomePage: React.FC = () => {
       {/* News & Announcements */}
       <section className="bg-gray-50 py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+          <div className="space-y-12">
             <div>
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-2xl font-bold text-gray-900 flex items-center"><Newspaper className="h-7 w-7 mr-3 text-purple-600" />Latest News</h2>
@@ -360,7 +371,7 @@ const HomePage: React.FC = () => {
                 <Link to="/announcements" className="text-red-600 hover:text-red-800 flex items-center text-sm font-medium">View All <ChevronRight className="h-4 w-4 ml-1" /></Link>
               </div>
               <div className="space-y-4">
-                {announcements.length > 0 ? announcements.slice(0, 3).map((ann) => (
+                {announcements.length > 0 ? announcements.slice(0, 5).map((ann) => (
                   <div key={ann.id} className={`rounded-lg p-5 border-l-4 ${ann.priority === 'Urgent' ? 'bg-red-50 border-red-500' : ann.priority === 'High' ? 'bg-orange-50 border-orange-500' : 'bg-blue-50 border-blue-500'}`}>
                     <span className={`inline-block px-2 py-1 text-xs rounded mb-1 ${ann.priority === 'Urgent' ? 'bg-red-100 text-red-800' : ann.priority === 'High' ? 'bg-orange-100 text-orange-800' : 'bg-blue-100 text-blue-800'}`}>{ann.priority}</span>
                     <h3 className="font-bold text-gray-900">{ann.title}</h3>

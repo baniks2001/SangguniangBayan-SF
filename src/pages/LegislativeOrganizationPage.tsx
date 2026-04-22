@@ -1,5 +1,4 @@
 import React from 'react';
-import { Users, Building2 } from 'lucide-react';
 
 // Organization categories with descriptive image names
 const ORGANIZATION_CATEGORIES = [
@@ -13,7 +12,7 @@ const ORGANIZATION_CATEGORIES = [
     id: 'sb_members',
     name: 'SB Members',
     description: 'Sangguniang Bayan Members',
-    images: ['/homepage-images/sb-member-1.jpg', '/homepage-images/sb-member-2.jpg', '/homepage-images/sb-member-3.jpg','/homepage-images/sb-member-4.jpg', '/homepage-images/sb-member-5.jpg', '/homepage-images/sb-member-7.jpg', '/homepage-images/sb-member-8.jpg']
+    images: ['/homepage-images/sb-member-1.jpg', '/homepage-images/sb-member-2.jpg', '/homepage-images/sb-member-3.jpg','/homepage-images/sb-member-4.jpg', '/homepage-images/sb-member-5.jpg', '/homepage-images/sb-member-6.jpg', '/homepage-images/sb-member-7.jpg', '/homepage-images/sb-member-8.jpg']
   },
   {
     id: 'sb_secretary',
@@ -83,8 +82,11 @@ const LegislativeOrganizationPage: React.FC = () => {
         {/* Header */}
         <div className="text-center mb-12">
           <div className="flex items-center justify-center mb-4">
-            <Users className="h-10 w-10 text-blue-600 mr-3" />
-            <Building2 className="h-10 w-10 text-blue-600" />
+            <img 
+              src="/homepage-images/logo.png" 
+              alt="Sangguniang Bayan Logo" 
+              className="h-16 w-16 sm:h-20 sm:w-20 object-contain"
+            />
           </div>
           <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">
             Legislative Organization
