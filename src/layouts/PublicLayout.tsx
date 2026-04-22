@@ -37,11 +37,11 @@ const PublicLayout: React.FC = () => {
 
   const navItems = [
     { path: '/', label: 'Home', icon: Home },
+    { path: '/organization', label: 'Organization', icon: Users },
     { path: '/resolutions', label: 'Resolutions', icon: Scale },
     { path: '/ordinances', label: 'Ordinances', icon: FileText },
     { path: '/procurements', label: 'Procurements', icon: ShoppingCart },
     { path: '/documents', label: 'Documents', icon: FileArchive },
-    { path: '/organization', label: 'Organization', icon: Users },
     { path: '/vacancies', label: 'Vacancies', icon: Briefcase },
     { path: '/announcements', label: 'Announcements', icon: Bell },
     { path: '/news', label: 'News', icon: Newspaper },
