@@ -16,7 +16,7 @@ import {
   Info,
   Clock
 } from 'lucide-react';
-import { analyticsApi } from '../services/api';
+import { analyticsApi, incrementDownloadCount } from '../services/api';
 
 // Types
 interface ProcurementDocument {
@@ -175,6 +175,9 @@ const ProcurementsBudgetsPage: React.FC = () => {
           procurementTitle: procurementTitle
         }
       });
+
+      // Increment download count in database
+      await incrementDownloadCount('procurement', doc.url);
     } catch (error) {
       console.error('Error tracking download:', error);
     }
@@ -224,6 +227,9 @@ const ProcurementsBudgetsPage: React.FC = () => {
             bulkDownload: true
           }
         });
+
+        // Increment download count in database
+        await incrementDownloadCount('procurement', doc.url);
       } catch (error) {
         console.error('Error tracking download:', error);
       }

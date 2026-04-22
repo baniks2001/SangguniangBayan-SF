@@ -176,6 +176,9 @@ const ResolutionsPage: React.FC = () => {
         }
       });
 
+      // Increment download count in database
+      await resolutionsApi.incrementDownloadCount(resolution.id);
+
       // Perform the download
       resolutionsApi.downloadPdf(resolution.fileId || resolution.pdfUrl, resolution.resolutionNumber, resolution.series);
 

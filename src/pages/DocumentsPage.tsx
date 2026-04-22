@@ -82,6 +82,9 @@ const DocumentsPage: React.FC = () => {
         }
       });
 
+      // Increment download count in database
+      await documentsApi.incrementDownloadCount(document.id);
+
       // Perform the download
       filesApi.downloadFile(document.fileId || document.fileUrl, document.fileName);
 

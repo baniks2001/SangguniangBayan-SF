@@ -174,6 +174,9 @@ const OrdinancesPage: React.FC = () => {
         }
       });
 
+      // Increment download count in database
+      await ordinancesApi.incrementDownloadCount(ordinance.id);
+
       // Perform the download
       ordinancesApi.downloadPdf(ordinance.fileId || ordinance.pdfUrl, ordinance.ordinanceNumber, ordinance.series);
 

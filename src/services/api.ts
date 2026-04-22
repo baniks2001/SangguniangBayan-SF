@@ -68,6 +68,18 @@ export const resolutionsApi = {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+  },
+  // Increment download count
+  incrementDownloadCount: async (resolutionId: string) => {
+    const response = await fetch('/api/download/increment', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ 
+        type: 'resolution',
+        contentId: resolutionId 
+      })
+    });
+    return handleResponse(response);
   }
 };
 
@@ -120,6 +132,18 @@ export const ordinancesApi = {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+  },
+  // Increment download count
+  incrementDownloadCount: async (ordinanceId: string) => {
+    const response = await fetch('/api/download/increment', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ 
+        type: 'ordinance',
+        contentId: ordinanceId 
+      })
+    });
+    return handleResponse(response);
   }
 };
 
@@ -167,7 +191,32 @@ export const documentsApi = {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+  },
+  // Increment download count
+  incrementDownloadCount: async (documentId: string) => {
+    const response = await fetch('/api/download/increment', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ 
+        type: 'document',
+        contentId: documentId 
+      })
+    });
+    return handleResponse(response);
   }
+};
+
+// Increment download count for procurement documents
+export const incrementDownloadCount = async (type: string, contentId: string) => {
+  const response = await fetch('/api/download/increment', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ 
+      type,
+      contentId 
+    })
+  });
+  return handleResponse(response);
 };
 
 // Public API for Vacancies - uses local serverless function
