@@ -168,96 +168,86 @@ const HomePage: React.FC = () => {
       </section>
 
       {/* Official Seal Section */}
-      <section className="bg-gradient-to-b from-white to-gray-50 py-16">
+      <section className="bg-gradient-to-br from-purple-50 via-white to-indigo-50 py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">The Official Seal</h2>
+            <div className="w-32 h-1.5 bg-gradient-to-r from-purple-600 to-indigo-600 mx-auto rounded-full"></div>
+            <p className="mt-6 text-lg text-gray-600 max-w-3xl mx-auto">Symbolism of the Official Seal: Sangguniang Bayan of San Francisco, Southern Leyte</p>
+          </div>
+          
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-start">
             {/* Left Side - Official Seal */}
-            <div className="flex flex-col items-center order-1 md:order-1">
-              <div className="bg-white rounded-full shadow-2xl p-3 sm:p-4 mb-4 sm:mb-6">
+            <div className="flex flex-col items-center">
+              <div className="bg-white rounded-full shadow-2xl p-8 transition-all duration-300 hover:shadow-3xl hover:scale-105">
                 <img 
                   src="/homepage-images/logo.png" 
                   alt="Official Seal of Sangguniang Bayan" 
-                  className="h-48 w-48 sm:h-64 sm:w-64 md:h-80 md:w-80 lg:h-96 lg:w-96 object-contain"
+                  className="h-64 w-64 lg:h-80 lg:w-80 object-contain"
                 />
               </div>
-            </div>    
-            
-            {/* Right Side - Seal Information */}
-            <div className="space-y-4 sm:space-y-6 order-2 md:order-2">
-              <div>
-                <h3 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 mb-3 sm:mb-4">The Official Seal of the Sangguniang Bayan</h3>
-                <div className="w-16 sm:w-24 h-1 bg-blue-600 mb-4 sm:mb-6"></div>
+              <div className="mt-6 text-center">
+                <p className="text-sm text-gray-500 font-medium">SANGGUNIANG BAYAN</p>
+                <p className="text-sm text-gray-500 font-medium">SAN FRANCISCO, SOUTHERN LEYTE</p>
+                <p className="text-xs text-gray-400 mt-1">Est. 1951</p>
               </div>
-              <div className="space-y-3 sm:space-y-4 text-gray-600 leading-relaxed text-sm sm:text-base">
-                <p>
-                  <strong>Symbolism of the Official Seal:</strong>
-                  <strong> Sangguniang Bayan of San Francisco, Southern Leyte</strong>
-                </p>
-                <div className="bg-blue-50 rounded-lg p-4 sm:p-6 border-l-4 border-blue-600">
-                  <ul className="space-y-1 text-blue-800 text-sm">
-                    <li className="flex items-start">
-                      <span className="mr-2"></span>
-                      <span><strong>The Scale and the Quil (The Legislative Mandate)</strong></span>
-                      <span className="mr-2"></span>
-                    </li>
-                    <li className="flex items-start">
-                      <span className="mr-2"></span>
-                      <span>  The Scale Represents the unwavering commitment of the Council to social justice and equality,
-                        signifying that every ordinance is weighed with fairness. The Quill represents the power of legislation and the
-                        intellectual labor of the members in crafting laws that protect the welfare of the people.
-                      </span>
-                    </li>
-                    <p></p>
-                    <li className="flex items-start">
-                      <span className="mr-2"></span>
-                      <span><strong>The Sun and the Gear (Progress and Unity)</strong></span>
-                      <span className="mr-2"></span>
-                    </li>
-                    <li className="flex items-start">
-                      <span className="mr-2"></span>
-                      <span>The Sun symbolizes the distinct barangays of San Francisco, unified under a single version of hope and transarency. The integrated
-                        Gear reflects the Council's role as the engine of progress, driving the municipality toward modernization and economic growth.
-                      </span>
-                    </li>
-                    <li className="flex items-start">
-                      <span className="mr-2"></span>
-                      <span><strong>The Coconut Fronds and Waves (Geography and Heritage)</strong></span>
-                      <span className="mr-2"></span>
-                    </li>
-                    <li className="flex items-start">
-                      <span className="mr-2"></span>
-                      <span>The Coconut Fronds pay homage to the "Tree of Life." representing the agricultural
-                        roots and the resilience of the San Franciscanos people. The Waves signify the town's coastal
-                        identity and the life giving waters of Sogod Bay, reminding the leadership to remain constant and steadfast.
-                      </span>
-                    </li>
-                    <li className="flex items-start">
-                      <span className="mr-2"></span>
-                      <span><strong>The Open Book (Transparency and Law)</strong></span>
-                      <span className="mr-2"></span>
-                    </li>
-                    <li className="flex items-start">
-                      <span className="mr-2"></span>
-                      <span>The Open Book at the base represents the Local Government Code and the Constitution. It serves as a reminder
-                        that all legislative actions are rooted in the rule of law and remain open to the public, ensuring a clean and proactive administration.
-                      </span>
-                    </li>
-                    <li className="flex items-start">
-                      <span className="mr-2"></span>
-                      <span><strong>The Navy and Gold Palette (Authority and Excellence)</strong></span>
-                      <span className="mr-2"></span>
-                    </li>
-                    <li className="flex items-start">
-                      <span className="mr-2"></span>
-                      <span>* Deep Navy Blue: Signifies the depth of commitment, stability, and the formal authority of the institution.
-                      </span>
-                    </li>
-                    <li className="flex items-start">
-                      <span className="mr-2"></span>
-                      <span>* Gold: Represents the "Premier" status of the council, symbolizing excellence, prosperity, and the high standard of public service.
-                      </span>
-                    </li>
-                  </ul>
+            </div>
+
+            {/* Right Side - Seal Information */}
+            <div className="space-y-6">
+              <div className="bg-white rounded-2xl shadow-lg p-8 border border-gray-100">
+                <h3 className="text-2xl font-bold text-gray-900 mb-6 flex items-center">
+                  <div className="bg-gradient-to-br from-purple-500 to-indigo-600 w-10 h-10 rounded-lg flex items-center justify-center mr-3">
+                    <Gavel className="h-6 w-6 text-white" />
+                  </div>
+                  The Scale and the Quill
+                </h3>
+                <p className="text-sm font-semibold text-purple-600 mb-2">The Legislative Mandate</p>
+                <p className="text-gray-600 leading-relaxed">The Scale represents the unwavering commitment of the Council to social justice and equality, signifying that every ordinance is weighed with fairness. The Quill represents the power of legislation and the intellectual labor of the members in crafting laws that protect the welfare of the people.</p>
+              </div>
+
+              <div className="bg-white rounded-2xl shadow-lg p-8 border border-gray-100">
+                <h3 className="text-2xl font-bold text-gray-900 mb-6 flex items-center">
+                  <div className="bg-gradient-to-br from-yellow-500 to-orange-600 w-10 h-10 rounded-lg flex items-center justify-center mr-3">
+                    <Target className="h-6 w-6 text-white" />
+                  </div>
+                  The Sun and the Gear
+                </h3>
+                <p className="text-sm font-semibold text-orange-600 mb-2">Progress and Unity</p>
+                <p className="text-gray-600 leading-relaxed">The Sun symbolizes the distinct barangays of San Francisco, unified under a single vision of hope and transparency. The integrated Gear reflects the Council's role as the engine of progress, driving the municipality toward modernization and economic growth.</p>
+              </div>
+
+              <div className="bg-white rounded-2xl shadow-lg p-8 border border-gray-100">
+                <h3 className="text-2xl font-bold text-gray-900 mb-6 flex items-center">
+                  <div className="bg-gradient-to-br from-green-500 to-teal-600 w-10 h-10 rounded-lg flex items-center justify-center mr-3">
+                    <Heart className="h-6 w-6 text-white" />
+                  </div>
+                  The Coconut Fronds and Waves
+                </h3>
+                <p className="text-sm font-semibold text-green-600 mb-2">Geography and Heritage</p>
+                <p className="text-gray-600 leading-relaxed">The Coconut Fronds pay homage to the "Tree of Life," representing the agricultural roots and the resilience of the San Franciscanos people. The Waves signify the town's coastal identity and the life-giving waters of Sogod Bay.</p>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-6 border border-blue-200">
+                  <h4 className="text-lg font-bold text-gray-900 mb-3 flex items-center">
+                    <FileText className="h-5 w-5 text-blue-600 mr-2" />
+                    The Open Book
+                  </h4>
+                  <p className="text-sm font-semibold text-blue-600 mb-2">Transparency and Law</p>
+                  <p className="text-gray-600 text-sm leading-relaxed">Represents the Local Government Code and the Constitution, ensuring all legislative actions are rooted in the rule of law and remain open to the public.</p>
+                </div>
+
+                <div className="bg-gradient-to-br from-purple-50 to-pink-50 rounded-xl p-6 border border-purple-200">
+                  <h4 className="text-lg font-bold text-gray-900 mb-3 flex items-center">
+                    <Scale className="h-5 w-5 text-purple-600 mr-2" />
+                    Navy and Gold Palette
+                  </h4>
+                  <p className="text-sm font-semibold text-purple-600 mb-2">Authority and Excellence</p>
+                  <p className="text-gray-600 text-sm leading-relaxed">
+                    <span className="block mb-1"><strong>Navy Blue:</strong> Commitment, stability, and formal authority</span>
+                    <span><strong>Gold:</strong> Excellence, prosperity, and premier status</span>
+                  </p>
                 </div>
               </div>
             </div>
