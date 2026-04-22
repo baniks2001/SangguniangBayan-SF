@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { documentsApi, filesApi } from '../services/api';
-import { FileArchive, Search, ChevronLeft, ChevronRight, FileText, Calendar, Eye, Download, FolderOpen, Printer } from 'lucide-react';
+import { documentsApi, filesApi, pdfPreviewApi } from '../services/api';
+import { FileArchive, Search, ChevronLeft, ChevronRight, FileText, Calendar, Eye, Download, FolderOpen, Printer, Loader2 } from 'lucide-react';
 
 interface Document {
   id: string;
@@ -34,6 +34,8 @@ const DocumentsPage: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [selectedDocument, setSelectedDocument] = useState<Document | null>(null);
+  const [documentContent, setDocumentContent] = useState<string>('');
+  const [loadingContent, setLoadingContent] = useState(false);
 
   useEffect(() => {
     loadDocuments();
@@ -66,6 +68,29 @@ const DocumentsPage: React.FC = () => {
     e.preventDefault();
     setCurrentPage(1);
     loadDocuments();
+  };
+
+  const loadDocumentContent = async (document: Document) => {
+    if (!document.fileId) return;
+    
+    try {
+      setLoadingContent(true);
+      const preview = await pdfPreviewApi.getPreview(document.fileId);
+      setDocumentContent(preview.content || '');
+    } catch (error) {
+      console.error('Error loading document content:', error);
+      setDocumentContent('<p>Document content not available</p>');
+    } finally {
+      setLoadingContent(false);
+    }
+  };
+
+  const handleViewDocument = (document: Document) => {
+    setSelectedDocument(document);
+    setDocumentContent('');
+    if (document.fileId) {
+      loadDocumentContent(document);
+    }
   };
 
   const getCategoryColor = (category: string) => {
@@ -182,7 +207,7 @@ const DocumentsPage: React.FC = () => {
                       Download Document
                     </button>
                     <button
-                      onClick={() => setSelectedDocument(doc)}
+                      onClick={() => handleViewDocument(doc)}
                       className="flex items-center justify-center px-3 py-2 bg-white border border-gray-300 text-gray-700 text-sm rounded-md hover:bg-gray-50 transition-colors"
                     >
                       <Eye className="h-4 w-4 mr-2" />
@@ -311,77 +336,78 @@ const DocumentsPage: React.FC = () => {
 
             {/* Document Preview Section */}
             <div className="p-2 sm:p-8 bg-gray-100 flex justify-center overflow-x-auto">
-              <div
-                className="relative bg-white mx-auto"
-                style={{
-                  width: '100%',
-                  maxWidth: '816px',
-                  minHeight: '1056px',
-                  padding: '48px',
-                  boxShadow: '0 0 0 1px #d1d5db',
-                  fontFamily: "'Times New Roman', Times, serif",
-                  fontSize: '12pt',
-                  lineHeight: 1.6,
-                  color: '#000',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                  justifyContent: 'center'
-                }}
-              >
-                {/* Document Header */}
-                <div className="text-center mb-8">
-                  <h1 className="text-2xl font-bold mb-4">{selectedDocument.title}</h1>
-                  <div className="w-32 h-1 bg-blue-600 mx-auto mb-4"></div>
-                  <span className={`inline-block px-3 py-1 rounded-full text-sm font-medium ${getCategoryColor(selectedDocument.category)}`}>
-                    {selectedDocument.category}
-                  </span>
-                </div>
-
-                {/* Document Content */}
-                <div className="text-justify mb-8">
-                  <p className="mb-4">{selectedDocument.description}</p>
-                  <div className="space-y-4">
-                    <div className="border-t pt-4">
-                      <h3 className="font-semibold mb-2">Document Information:</h3>
-                      <div className="grid grid-cols-2 gap-4 text-sm">
-                        <div>
-                          <strong>File Name:</strong> {selectedDocument.fileName}
-                        </div>
-                        <div>
-                          <strong>File Size:</strong> {selectedDocument.fileSize}
-                        </div>
-                        <div>
-                          <strong>Category:</strong> {selectedDocument.category}
-                        </div>
-                        <div>
-                          <strong>Upload Date:</strong> {new Date(selectedDocument.createdAt).toLocaleDateString('en-US', {
-                            year: 'numeric',
-                            month: 'long',
-                            day: 'numeric'
-                          })}
-                        </div>
-                        <div>
-                          <strong>Downloads:</strong> {selectedDocument.downloadCount}
-                        </div>
-                        <div>
-                          <strong>Status:</strong> Published
-                        </div>
-                      </div>
-                    </div>
+              {loadingContent ? (
+                <div className="flex items-center justify-center h-96">
+                  <div className="flex flex-col items-center">
+                    <Loader2 className="h-8 w-8 animate-spin text-blue-600 mb-2" />
+                    <p className="text-gray-600">Loading document content...</p>
                   </div>
                 </div>
+              ) : (
+                <div
+                  className="relative bg-white mx-auto"
+                  style={{
+                    width: '100%',
+                    maxWidth: '816px',
+                    minHeight: '1056px',
+                    padding: '48px',
+                    boxShadow: '0 0 0 1px #d1d5db',
+                    fontFamily: "'Times New Roman', Times, serif",
+                    fontSize: '12pt',
+                    lineHeight: 1.6,
+                    color: '#000'
+                  }}
+                >
+                  {/* Document Header */}
+                  <div className="text-center mb-8">
+                    <div className="flex justify-center items-center gap-4 mb-4">
+                      <img 
+                        src="/homepage-images/municipality-logo.png" 
+                        alt="Municipality Logo" 
+                        className="h-12 object-contain"
+                      />
+                      <div className="text-center">
+                        <h2 className="text-lg font-bold">PROVINCE OF SOUTHERN LEYTE</h2>
+                        <h1 className="text-xl font-bold">MUNICIPALITY OF SAN FRANCISCO</h1>
+                        <p className="text-sm font-semibold mt-1">OFFICE OF THE SANGGUNIANG BAYAN</p>
+                      </div>
+                      <img 
+                        src="/homepage-images/bagongpilipinas.png" 
+                        alt="Bagong Pilipinas" 
+                        className="h-12 object-contain"
+                      />
+                    </div>
+                    <div className="w-32 h-1 bg-blue-600 mx-auto mb-4"></div>
+                    <h3 className="text-lg font-bold mb-2">{selectedDocument.title}</h3>
+                    <span className={`inline-block px-3 py-1 rounded-full text-sm font-medium ${getCategoryColor(selectedDocument.category)}`}>
+                      {selectedDocument.category}
+                    </span>
+                  </div>
 
-                {/* Document Footer */}
-                <div className="mt-auto pt-8 border-t text-center">
-                  <p className="text-sm text-gray-600">
-                    Sangguniang Bayan of San Francisco, Southern Leyte
-                  </p>
-                  <p className="text-xs text-gray-500 mt-1">
-                    Municipal Compound, San Francisco, Southern Leyte, Philippines
-                  </p>
+                  {/* Document Content */}
+                  <div
+                    className="text-justify"
+                    style={{
+                      fontFamily: "'Times New Roman', Times, serif",
+                      fontSize: '12pt',
+                      lineHeight: 1.6
+                    }}
+                    dangerouslySetInnerHTML={{
+                      __html: documentContent || `<p>${selectedDocument.description}</p><p class="text-center mt-8 text-gray-600">[Document content will be displayed here when available]</p>`
+                    }}
+                  />
+
+                  {/* Document Footer */}
+                  <div className="mt-8 pt-8 border-t text-center">
+                    <p className="text-sm text-gray-600">
+                      Sangguniang Bayan of San Francisco, Southern Leyte
+                    </p>
+                    <p className="text-xs text-gray-500 mt-1">
+                      Municipal Compound, San Francisco, Southern Leyte, Philippines
+                    </p>
+                  </div>
                 </div>
-              </div>
+              )}
             </div>
 
             {/* Action Buttons */}
