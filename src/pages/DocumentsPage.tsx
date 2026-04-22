@@ -71,15 +71,44 @@ const DocumentsPage: React.FC = () => {
   };
 
   const loadDocumentContent = async (document: Document) => {
-    if (!document.fileId) return;
+    if (!document.fileId) {
+      console.warn('No fileId available for document:', document.title);
+      setDocumentContent('<p>No document file available for preview.</p>');
+      return;
+    }
     
     try {
       setLoadingContent(true);
-      const preview = await pdfPreviewApi.getPreview(document.fileId);
-      setDocumentContent(preview.content || '');
+      console.log('Attempting to load content for fileId:', document.fileId);
+      
+      // For documents, try to view the file directly first
+      const fileUrl = filesApi.getFileUrl(document.fileId);
+      if (fileUrl) {
+        console.log('File URL available:', fileUrl);
+        // For documents, we'll show a message that the file can be viewed
+        setDocumentContent(`
+          <div class="text-center py-8">
+            <p class="text-lg font-semibold mb-4">Document Available for Viewing</p>
+            <p class="mb-4">This document is available as a file that can be opened directly.</p>
+            <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+              <p class="text-sm text-blue-800">
+                <strong>File Name:</strong> ${document.fileName}<br>
+                <strong>Category:</strong> ${document.category}<br>
+                <strong>Size:</strong> ${document.fileSize}<br>
+                <strong>Upload Date:</strong> ${new Date(document.createdAt).toLocaleDateString('en-US', {
+                  year: 'numeric',
+                  month: 'long',
+                  day: 'numeric'
+                })}
+              </p>
+            </div>
+            <p class="text-sm text-gray-600 mt-4">Use the "View File" button below to open this document.</p>
+          </div>
+        `);
+      }
     } catch (error) {
       console.error('Error loading document content:', error);
-      setDocumentContent('<p>Document content not available</p>');
+      setDocumentContent('<p>Error loading document content.</p>');
     } finally {
       setLoadingContent(false);
     }
@@ -420,7 +449,7 @@ const DocumentsPage: React.FC = () => {
                   className="flex-1 flex items-center justify-center px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors font-medium"
                 >
                   <Eye className="h-4 w-4 mr-2" />
-                  View File
+                  Open Document
                 </button>
                 <button
                   onClick={() => {
