@@ -171,7 +171,7 @@ const HomePage: React.FC = () => {
       <section className="bg-gradient-to-br from-purple-50 via-white to-indigo-50 py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
-            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">The Official Seal</h2>
+            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">The Official Seal of Sangguniang Bayan</h2>
             <div className="w-32 h-1.5 bg-gradient-to-r from-purple-600 to-indigo-600 mx-auto rounded-full"></div>
             <p className="mt-6 text-lg text-gray-600 max-w-3xl mx-auto">Symbolism of the Official Seal: Sangguniang Bayan of San Francisco, Southern Leyte</p>
           </div>
