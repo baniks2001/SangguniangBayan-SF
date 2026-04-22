@@ -109,42 +109,6 @@ const LegislativeOrganizationPage: React.FC = () => {
           {/* Legislative Staff */}
           <CategoryGrid category={ORGANIZATION_CATEGORIES[3]} />
         </div>
-
-        {/* Organization Info Section */}
-        <div className="mt-12 bg-white rounded-xl shadow-lg p-6 sm:p-8">
-          <h2 className="text-2xl font-bold text-gray-900 mb-6 text-center">
-            About the Sangguniang Bayan
-          </h2>
-          <div className="prose max-w-none text-gray-600">
-            <p className="mb-4">
-              The <strong>Sangguniang Bayan</strong> (Municipal Council) is the local legislative body of San Francisco, Southern Leyte. 
-              It is composed of the Municipal Vice Mayor as the Presiding Officer, eight (8) Sangguniang Bayan Members, 
-              the Secretary to the Sangguniang Bayan, and the Legislative Staff who provide administrative and technical support.
-            </p>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
-              <div className="bg-blue-50 rounded-lg p-4">
-                <h3 className="font-bold text-blue-900 mb-2">Powers and Functions</h3>
-                <ul className="list-disc list-inside text-sm space-y-1">
-                  <li>Enact ordinances and approve resolutions</li>
-                  <li>Approve local development plans and budgets</li>
-                  <li>Conduct legislative inquiries and investigations</li>
-                  <li>Approve contracts and franchises</li>
-                  <li>Oversee municipal projects and programs</li>
-                </ul>
-              </div>
-              <div className="bg-green-50 rounded-lg p-4">
-                <h3 className="font-bold text-green-900 mb-2">Qualifications</h3>
-                <ul className="list-disc list-inside text-sm space-y-1">
-                  <li>Natural-born Filipino citizen</li>
-                  <li>At least 18 years old</li>
-                  <li>Registered voter of the municipality</li>
-                  <li>Resident for at least 1 year prior to election</li>
-                  <li>Able to read and write</li>
-                </ul>
-              </div>
-            </div>
-          </div>
-        </div>
       </div>
     </div>
   );
