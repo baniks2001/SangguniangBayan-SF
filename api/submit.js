@@ -7,6 +7,7 @@ const { connectDB, getDB } = require('./database');
 const { ObjectId } = require('mongodb');
 const fs = require('fs');
 const path = require('path');
+const { uploadToGridFS } = require('./gridfs-upload');
 
 // Parse multipart form data manually for serverless
 const parseFormData = (req) => {
@@ -119,68 +120,74 @@ async function handleApply(req, res) {
     const buffer = await parseFormData(req);
     const parts = parseMultipart(buffer, boundary);
     
-    // Ensure uploads directory exists
-    const uploadDir = path.join('/tmp', 'uploads', 'applications');
-    if (!fs.existsSync(uploadDir)) {
-      fs.mkdirSync(uploadDir, { recursive: true });
-    }
-    
     for (const part of parts) {
       if (part.isFile && part.content.length > 0) {
-        // Save file
-        const uniqueName = `${Date.now()}-${Math.round(Math.random() * 1E9)}-${part.filename}`;
-        const filePath = path.join(uploadDir, uniqueName);
-        fs.writeFileSync(filePath, part.content);
-        
-        // Store file URL
-        const fileUrl = `/uploads/applications/${uniqueName}`;
-        
-        // Handle multiple file field names
-        switch (part.name) {
-          case 'resume':
-          case 'cv':
-            resumeUrl = fileUrl;
-            break;
-          case 'certificates':
-          case 'certificate':
-            certificateUrls.push(fileUrl);
-            break;
-          case 'governmentId':
-          case 'validId':
-          case 'id':
-            governmentIdUrl = fileUrl;
-            break;
-          case 'diploma':
-          case 'degree':
-            diplomaUrl = fileUrl;
-            break;
-          case 'transcript':
-          case 'tor':
-            transcriptUrl = fileUrl;
-            break;
-          case 'nbiClearance':
-            nbiClearanceUrl = fileUrl;
-            break;
-          case 'policeClearance':
-            policeClearanceUrl = fileUrl;
-            break;
-          case 'barangayClearance':
-            barangayClearanceUrl = fileUrl;
-            break;
-          case 'medicalCertificate':
-            medicalCertificateUrl = fileUrl;
-            break;
-          case 'otherDocuments':
-          case 'others':
-            otherDocumentUrls.push(fileUrl);
-            break;
-          default:
-            // Handle dynamic requirement files (requirement_${id})
-            if (part.name && part.name.startsWith('requirement_')) {
-              const reqId = part.name.replace('requirement_', '');
-              requirementFiles[reqId] = fileUrl;
+        try {
+          // Upload to GridFS instead of local storage
+          const uploadResult = await uploadToGridFS(
+            part.content,
+            part.filename,
+            'application/pdf', // Default to PDF, can be enhanced to detect actual content type
+            {
+              uploadedBy: 'public-site',
+              applicationId: 'pending', // Will be updated after application is created
+              fieldName: part.name
             }
-            break;
+          );
+          
+          // Store GridFS URL instead of local file URL
+          const fileUrl = uploadResult.url; // This will be gridfs://fileId
+          
+          // Handle multiple file field names
+          switch (part.name) {
+            case 'resume':
+            case 'cv':
+              resumeUrl = fileUrl;
+              break;
+            case 'certificates':
+            case 'certificate':
+              certificateUrls.push(fileUrl);
+              break;
+            case 'governmentId':
+            case 'validId':
+            case 'id':
+              governmentIdUrl = fileUrl;
+              break;
+            case 'diploma':
+            case 'degree':
+              diplomaUrl = fileUrl;
+              break;
+            case 'transcript':
+            case 'tor':
+              transcriptUrl = fileUrl;
+              break;
+            case 'nbiClearance':
+              nbiClearanceUrl = fileUrl;
+              break;
+            case 'policeClearance':
+              policeClearanceUrl = fileUrl;
+              break;
+            case 'barangayClearance':
+              barangayClearanceUrl = fileUrl;
+              break;
+            case 'medicalCertificate':
+              medicalCertificateUrl = fileUrl;
+              break;
+            case 'otherDocuments':
+            case 'others':
+              otherDocumentUrls.push(fileUrl);
+              break;
+            default:
+              // Handle dynamic requirement files (requirement_${id})
+              if (part.name && part.name.startsWith('requirement_')) {
+                const reqId = part.name.replace('requirement_', '');
+                requirementFiles[reqId] = fileUrl;
+              }
+              break;
+          }
+        } catch (uploadError) {
+          console.error('Failed to upload file to GridFS:', uploadError);
+          // Continue with other files even if one fails
         }
       } else if (part.name && !part.isFile) {
         // Form field
